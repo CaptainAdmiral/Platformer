@@ -41,6 +41,7 @@ var hook : Area2D = null
 var jumpSquat = 0
 var jumpBoost = 0
 var grappleWindup = 0
+var slideFrames = 0
 
 var isRunning=false
 
@@ -54,6 +55,7 @@ func _ready():
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
+	var isRunning = Input.is_action_pressed("run")
 	var runMultiplier = 2 if Input.is_action_pressed("run") else 1
 	
 	inputBuffer.nextFrame()
@@ -106,6 +108,16 @@ func _physics_process(_delta):
 			
 		if abs(motion.x) > RUN_SPEED*runMultiplier:
 			motion.x*=0.9
+			
+	if isRunning and inputBuffer.hasAction(inputBuffer.DOWN_PRESS) and !slideFrames:
+		slideFrames = 60
+	
+	if slideFrames:
+		if slideFrames == 60:
+			motion.x*=2
+		motion*=0.95
+			
+		slideFrames-=1
 			
 			
 # warning-ignore:integer_division
