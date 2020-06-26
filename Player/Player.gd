@@ -42,6 +42,8 @@ var jumpSquat = 0
 var jumpBoost = 0
 var grappleWindup = 0
 
+var isRunning=false
+
 var canLeftWallJump = 0
 var canRightWallJump = 0
 
