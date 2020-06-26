@@ -139,8 +139,6 @@ points = PoolVector2Array( 0, 64, 0, 0, 64, 64 )
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
 
-[node name="Walls" type="Node" parent="."]
-
 [node name="TileMap" type="TileMap" parent="."]
 tile_set = SubResource( 13 )
 format = 1
