@@ -3,7 +3,7 @@ extends KinematicBody2D
 const UP = Vector2(0, -1)
 const SNAP_VECTOR = Vector2(0, 64)
 
-const RUN_SPEED = 1000/1.5
+const RUN_SPEED = 1000
 const RUN_ACCELERATION_FRAMES = 40
 const GROUND_FRICTION = 0.8
 const FALL_SPEED = 30
@@ -41,9 +41,6 @@ var hook : Area2D = null
 var jumpSquat = 0
 var jumpBoost = 0
 var grappleWindup = 0
-var slideFrames = 0
-
-var isRunning=false
 
 var canLeftWallJump = 0
 var canRightWallJump = 0
@@ -55,8 +52,6 @@ func _ready():
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
-	var isRunning = Input.is_action_pressed("run")
-	var runMultiplier = 2 if Input.is_action_pressed("run") else 1
 	
 	inputBuffer.nextFrame()
 	
@@ -93,31 +88,18 @@ func _physics_process(_delta):
 			if motion.x < 0:
 				motion.x *= GROUND_FRICTION
 				motion.x+= RUN_ACCELERATION
-			if motion.x < RUN_SPEED*runMultiplier:
-				motion.x = min(motion.x + RUN_ACCELERATION, RUN_SPEED*runMultiplier)
+			if motion.x < RUN_SPEED:
+				motion.x = min(motion.x + RUN_ACCELERATION, RUN_SPEED)
 				
 		elif Input.is_action_pressed("ui_left"):
 			if motion.x > 0:
 				motion.x *= GROUND_FRICTION
 				motion.x-= RUN_ACCELERATION
-			if -motion.x < RUN_SPEED*runMultiplier:
-				motion.x = -min(-motion.x + RUN_ACCELERATION, RUN_SPEED*runMultiplier)
+			if -motion.x < RUN_SPEED:
+				motion.x = -min(-motion.x + RUN_ACCELERATION, RUN_SPEED)
 				
 		else:
 			motion.x *= GROUND_FRICTION
-			
-		if abs(motion.x) > RUN_SPEED*runMultiplier:
-			motion.x*=0.9
-			
-	if isRunning and inputBuffer.hasAction(inputBuffer.DOWN_PRESS) and !slideFrames:
-		slideFrames = 60
-	
-	if slideFrames:
-		if slideFrames == 60:
-			motion.x*=2
-		motion*=0.95
-			
-		slideFrames-=1
 			
 			
 # warning-ignore:integer_division
