@@ -3,10 +3,10 @@ extends KinematicBody2D
 const UP = Vector2(0, -1)
 const SNAP_VECTOR = Vector2(0, 64)
 
-const RUN_SPEED = 1000/1.5
-const RUN_ACCELERATION_FRAMES = 40
+const RUN_SPEED = 1500
+const RUN_ACCELERATION_FRAMES = 120
 const GROUND_FRICTION = 0.8
-const FALL_SPEED = 30
+const FALL_SPEED = 40
 const AIR_FRICTION = 0.98 #Only used for horizontal momentum decay in air
 
 const FULL_HOP_VELOCITY = 900
@@ -43,11 +43,10 @@ var jumpBoost = 0
 var grappleWindup = 0
 var slideFrames = 0
 
-var isRunning=false
-
 var canLeftWallJump = 0
 var canRightWallJump = 0
 
+var storedMotion = Vector2(0,0)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -55,10 +54,16 @@ func _ready():
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
-	var isRunning = Input.is_action_pressed("run")
-	var runMultiplier = 2 if Input.is_action_pressed("run") else 1
 	
 	inputBuffer.nextFrame()
+	
+	#Momentum Transfer
+	if Input.is_action_just_pressed("momentum"):
+		var m = motion
+		motion = storedMotion
+		storedMotion = m
+		shouldStick = false
+		
 	
 	#Grappling Hook Stuff
 	if Input.is_action_just_released("hook") and hook != null:
@@ -93,29 +98,29 @@ func _physics_process(_delta):
 			if motion.x < 0:
 				motion.x *= GROUND_FRICTION
 				motion.x+= RUN_ACCELERATION
-			if motion.x < RUN_SPEED*runMultiplier:
-				motion.x = min(motion.x + RUN_ACCELERATION, RUN_SPEED*runMultiplier)
+			if motion.x < RUN_SPEED:
+				motion.x = min(motion.x + RUN_ACCELERATION, RUN_SPEED)
 				
 		elif Input.is_action_pressed("ui_left"):
 			if motion.x > 0:
 				motion.x *= GROUND_FRICTION
 				motion.x-= RUN_ACCELERATION
-			if -motion.x < RUN_SPEED*runMultiplier:
-				motion.x = -min(-motion.x + RUN_ACCELERATION, RUN_SPEED*runMultiplier)
+			if -motion.x < RUN_SPEED:
+				motion.x = -min(-motion.x + RUN_ACCELERATION, RUN_SPEED)
 				
 		else:
 			motion.x *= GROUND_FRICTION
 			
-		if abs(motion.x) > RUN_SPEED*runMultiplier:
+		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.9
 			
-	if isRunning and inputBuffer.hasAction(inputBuffer.DOWN_PRESS) and !slideFrames:
-		slideFrames = 60
+	if !slideFrames and inputBuffer.hasAction(inputBuffer.DOWN_PRESS):
+		slideFrames = 90
 	
 	if slideFrames:
-		if slideFrames == 60:
-			motion.x*=2
-		motion*=0.95
+		if slideFrames == 90:
+			motion.x*=1.5
+		motion*=0.975
 			
 		slideFrames-=1
 			
@@ -204,6 +209,7 @@ func _physics_process(_delta):
 #				motion.y-=SHORT_HOP_VELOCITY
 #
 #		jumpSquat-=1
+		
 		
 	motion = move_and_slide_with_snap(motion, SNAP_VECTOR if shouldStick else Vector2(), UP)
 		
