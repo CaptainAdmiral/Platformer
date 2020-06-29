@@ -18,7 +18,7 @@ const WALL_SLIDE_SPEED = 240
 const WALL_JUMP_GRACE_FRAMES=10
 
 const HOOK_SPEED = 50
-const GRAPPLED_AIR_ACCELERATION = 0.5
+const GRAPPLED_AIR_ACCELERATION = 0.1
 
 #calculated values
 const AIR_SPEED = RUN_SPEED / 1.5
@@ -107,19 +107,15 @@ func _physics_process(_delta):
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.9
 			
-	if !slideFrames and inputBuffer.hasAction("down"):
-		slideFrames = 90
-	
-	if slideFrames:
-		if slideFrames == 90:
-			motion.x*=1.5
-		motion*=0.975
-			
-		slideFrames-=1
-			
-			
-# warning-ignore:integer_division
-		motion.y += FALL_SPEED/2
+		if !slideFrames and inputBuffer.hasAction("down"):
+			slideFrames = 90
+		
+		if slideFrames:
+			if slideFrames == 90:
+				motion.x*=1.5
+			motion*=0.975
+				
+			slideFrames-=1
 		
 	else:
 		if jumpBoost:
