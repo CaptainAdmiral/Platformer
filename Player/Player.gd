@@ -30,8 +30,7 @@ const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED / 3, FULL_HOP_VELOCITY)
 
 var motion = Vector2()
 
-var InputBuffer = load("res://Player/InputBuffer.gd")
-var inputBuffer = InputBuffer.new()
+onready var inputBuffer = $InputBuffer
 
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
 var hook : Area2D = null
@@ -48,16 +47,10 @@ var storedMotion = Vector2(0,0)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
-
-func _input(event:InputEvent) -> void:
-	inputBuffer.addInput(event)
-			
+	pass # Replace with function body.		
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
-	
-	inputBuffer.nextFrame()
 	
 	#Momentum Transfer
 	if Input.is_action_just_pressed("momentum"):
@@ -102,7 +95,7 @@ func _physics_process(_delta):
 #			jumpSquat = JUMP_SQUAT_FRAMES
 
 		#Jump
-		if inputBuffer.hasAction(inputBuffer.UP_PRESS, 10):
+		if inputBuffer.hasAction("up", false, 10):
 			shouldStick = false
 			motion.y -= SHORT_HOP_VELOCITY
 			jumpBoost = JUMP_BOOST_FRAMES
@@ -127,7 +120,7 @@ func _physics_process(_delta):
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.9
 			
-	if !slideFrames and inputBuffer.hasAction(inputBuffer.DOWN_PRESS):
+	if !slideFrames and inputBuffer.hasAction("down"):
 		slideFrames = 90
 	
 	if slideFrames:
@@ -192,7 +185,7 @@ func _physics_process(_delta):
 	#Wall Jump Movement
 	if canLeftWallJump != 0:
 		canLeftWallJump-=1
-		if inputBuffer.hasAction(inputBuffer.UP_PRESS, 6) and inputBuffer.hasAction(inputBuffer.RIGHT_PRESS, 6):
+		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("right", false, 6):
 			if motion.y < WALL_SLIDE_SPEED+10:
 				motion.y = WALL_SLIDE_SPEED
 			motion.y-=WALL_JUMP_VELOCITY.y
@@ -202,7 +195,7 @@ func _physics_process(_delta):
 		
 	if canRightWallJump != 0:
 		canRightWallJump-=1
-		if inputBuffer.hasAction(inputBuffer.UP_PRESS, 6) and inputBuffer.hasAction(inputBuffer.LEFT_PRESS, 6):
+		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("left", false, 6):
 			if motion.y < WALL_SLIDE_SPEED+10:
 				motion.y = WALL_SLIDE_SPEED
 			motion.y-=WALL_JUMP_VELOCITY.y
