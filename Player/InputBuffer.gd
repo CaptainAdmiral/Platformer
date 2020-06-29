@@ -24,21 +24,21 @@ func nextFrame():
 #Used for adding input to the buffer on event. add() should be used for
 #adding individual acitons to the buffer
 func addInput(event):
-	if event.is_action_pressed("ui_up"):
+	if event.is_action_pressed("up"):
 		add(UP_PRESS)
-	if event.is_action_released("ui_up"):
+	if event.is_action_released("up"):
 		add(UP_RELEASE)
-	if event.is_action_pressed("ui_down"):
+	if event.is_action_pressed("down"):
 		add(DOWN_PRESS)
-	if event.is_action_released("ui_down"):
+	if event.is_action_released("down"):
 		add(DOWN_RELEASE)	
-	if event.is_action_pressed("ui_left"):
+	if event.is_action_pressed("left"):
 		add(LEFT_PRESS)
-	if event.is_action_released("ui_left"):
+	if event.is_action_released("left"):
 		add(LEFT_RELEASE)
-	if event.is_action_pressed("ui_right"):
+	if event.is_action_pressed("right"):
 		add(RIGHT_PRESS)
-	if event.is_action_released("ui_right"):
+	if event.is_action_released("right"):
 		add(RIGHT_RELEASE)	
 	if event.is_action_pressed("jump"):
 		add(JUMP_PRESS)	

@@ -52,21 +52,7 @@ func _ready():
 
 func _input(event:InputEvent) -> void:
 	inputBuffer.addInput(event)
-	if event is InputEventMouseButton:
-		if event.pressed:
-			hook = Hook.instance()
-			hook.setShooter(self)
-			get_parent().add_child(hook)
-#			print(event.position)
-#			print(get_global_mouse_position())
-#			print(position)
-			var direction = Vector2(get_global_mouse_position() - position).normalized()
 			
-			hook.position = position
-			hook.motion = direction*HOOK_SPEED
-		else:
-			hook.queue_free()
-			hook = null
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
@@ -90,11 +76,22 @@ func _physics_process(_delta):
 		hook = Hook.instance()
 		hook.setShooter(self)
 		get_parent().add_child(hook)
-		
-		var direction = getDirectionFromInput()
+#			print(event.position)
+#			print(get_global_mouse_position())
+#			print(position)
+		var direction = (get_global_mouse_position() - position).normalized()
 		
 		hook.position = position
 		hook.motion = direction*HOOK_SPEED
+
+#		hook = Hook.instance()
+#		hook.setShooter(self)
+#		get_parent().add_child(hook)
+#
+#		var direction = getDirectionFromInput()
+#
+#		hook.position = position
+#		hook.motion = direction*HOOK_SPEED
 		
 	if hook != null:
 		hook.releaseTension = Input.is_action_pressed("tension")
@@ -105,19 +102,19 @@ func _physics_process(_delta):
 #			jumpSquat = JUMP_SQUAT_FRAMES
 
 		#Jump
-		if inputBuffer.hasAction(inputBuffer.JUMP_PRESS, 10):
+		if inputBuffer.hasAction(inputBuffer.UP_PRESS, 10):
 			shouldStick = false
 			motion.y -= SHORT_HOP_VELOCITY
 			jumpBoost = JUMP_BOOST_FRAMES
 		
-		if Input.is_action_pressed("ui_right"):
+		if Input.is_action_pressed("right"):
 			if motion.x < 0:
 				motion.x *= GROUND_FRICTION
 				motion.x+= RUN_ACCELERATION
 			if motion.x < RUN_SPEED:
 				motion.x = min(motion.x + RUN_ACCELERATION, RUN_SPEED)
 				
-		elif Input.is_action_pressed("ui_left"):
+		elif Input.is_action_pressed("left"):
 			if motion.x > 0:
 				motion.x *= GROUND_FRICTION
 				motion.x-= RUN_ACCELERATION
@@ -146,7 +143,7 @@ func _physics_process(_delta):
 		
 	else:
 		if jumpBoost:
-			if Input.is_action_pressed("jump"):
+			if Input.is_action_pressed("up"):
 				motion.y-=JUMP_BOOST_SPEED
 			jumpBoost-=1
 		
@@ -169,7 +166,7 @@ func _physics_process(_delta):
 			
 		
 		#Air Movement
-		if Input.is_action_pressed("ui_right"):
+		if Input.is_action_pressed("right"):
 			if motion.x < 0:
 				motion.x *= AIR_FRICTION
 			if motion.x < AIR_SPEED:
@@ -178,7 +175,7 @@ func _physics_process(_delta):
 				else:
 					motion.x = min(motion.x + AIR_ACCELERATION, AIR_SPEED)
 				
-		elif Input.is_action_pressed("ui_left"):
+		elif Input.is_action_pressed("left"):
 			if motion.x > 0:
 				motion.x *= AIR_FRICTION
 			if -motion.x < AIR_SPEED:
@@ -195,7 +192,7 @@ func _physics_process(_delta):
 	#Wall Jump Movement
 	if canLeftWallJump != 0:
 		canLeftWallJump-=1
-		if inputBuffer.hasAction(inputBuffer.JUMP_PRESS, 6) and inputBuffer.hasAction(inputBuffer.RIGHT_PRESS, 6):
+		if inputBuffer.hasAction(inputBuffer.UP_PRESS, 6) and inputBuffer.hasAction(inputBuffer.RIGHT_PRESS, 6):
 			if motion.y < WALL_SLIDE_SPEED+10:
 				motion.y = WALL_SLIDE_SPEED
 			motion.y-=WALL_JUMP_VELOCITY.y
@@ -205,7 +202,7 @@ func _physics_process(_delta):
 		
 	if canRightWallJump != 0:
 		canRightWallJump-=1
-		if inputBuffer.hasAction(inputBuffer.JUMP_PRESS, 6) and inputBuffer.hasAction(inputBuffer.LEFT_PRESS, 6):
+		if inputBuffer.hasAction(inputBuffer.UP_PRESS, 6) and inputBuffer.hasAction(inputBuffer.LEFT_PRESS, 6):
 			if motion.y < WALL_SLIDE_SPEED+10:
 				motion.y = WALL_SLIDE_SPEED
 			motion.y-=WALL_JUMP_VELOCITY.y
