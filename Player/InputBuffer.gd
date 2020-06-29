@@ -49,4 +49,3 @@ func hasAction(action:String, release:bool = false, frames:int = size):
 				if input.is_action_released(action):
 					return true
 	return false
-		
