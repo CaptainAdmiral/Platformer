@@ -32,9 +32,7 @@ var motion = Vector2()
 
 var InputBuffer = load("res://Player/InputBuffer.gd")
 var inputBuffer = InputBuffer.new()
-func _input(event):
-	inputBuffer.addInput(event)
-	
+
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
 var hook : Area2D = null
 
@@ -51,6 +49,24 @@ var storedMotion = Vector2(0,0)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
+
+func _input(event:InputEvent) -> void:
+	inputBuffer.addInput(event)
+	if event is InputEventMouseButton:
+		if event.pressed:
+			hook = Hook.instance()
+			hook.setShooter(self)
+			get_parent().add_child(hook)
+#			print(event.position)
+#			print(get_global_mouse_position())
+#			print(position)
+			var direction = Vector2(get_global_mouse_position() - position).normalized()
+			
+			hook.position = position
+			hook.motion = direction*HOOK_SPEED
+		else:
+			hook.queue_free()
+			hook = null
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
