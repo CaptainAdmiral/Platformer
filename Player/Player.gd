@@ -6,15 +6,14 @@ const SNAP_VECTOR = Vector2(0, 64)
 const RUN_SPEED = 1500
 const RUN_ACCELERATION_FRAMES = 120
 const GROUND_FRICTION = 0.8
-const FALL_SPEED = 30
+const FALL_SPEED = 40
 const AIR_FRICTION = 0.98 #Only used for horizontal momentum decay in air
 
-const FULL_HOP_VELOCITY = 900
-const SHORT_HOP_VELOCITY = 550
-const JUMP_SQUAT_FRAMES = 6
+const JUMP_VELOCITY = 600
 const JUMP_BOOST_FRAMES = 12
-const JUMP_BOOST_SPEED = SHORT_HOP_VELOCITY / JUMP_BOOST_FRAMES * 0.85
+const JUMP_BOOST_SPEED = JUMP_VELOCITY / JUMP_BOOST_FRAMES * 0.85
 
+const WALL_JUMP_VELOCITY = Vector2(500, 1000)
 const WALL_SLIDE_SPEED = 240
 const WALL_JUMP_GRACE_FRAMES=10
 
@@ -26,7 +25,7 @@ const AIR_SPEED = RUN_SPEED / 1.5
 const AIR_ACCELERATION_FRAMES = RUN_ACCELERATION_FRAMES
 const AIR_ACCELERATION = AIR_SPEED / AIR_ACCELERATION_FRAMES
 const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
-const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED / 3, FULL_HOP_VELOCITY)
+
 
 var motion = Vector2()
 
@@ -69,22 +68,10 @@ func _physics_process(_delta):
 		hook = Hook.instance()
 		hook.setShooter(self)
 		get_parent().add_child(hook)
-#			print(event.position)
-#			print(get_global_mouse_position())
-#			print(position)
 		var direction = (get_global_mouse_position() - position).normalized()
 		
 		hook.position = position
 		hook.motion = direction*HOOK_SPEED
-
-#		hook = Hook.instance()
-#		hook.setShooter(self)
-#		get_parent().add_child(hook)
-#
-#		var direction = getDirectionFromInput()
-#
-#		hook.position = position
-#		hook.motion = direction*HOOK_SPEED
 		
 	if hook != null:
 		hook.releaseTension = Input.is_action_pressed("tension")
@@ -97,7 +84,7 @@ func _physics_process(_delta):
 		#Jump
 		if inputBuffer.hasAction("up", false, 10):
 			shouldStick = false
-			motion.y -= SHORT_HOP_VELOCITY
+			motion.y -= JUMP_VELOCITY
 			jumpBoost = JUMP_BOOST_FRAMES
 		
 		if Input.is_action_pressed("right"):
@@ -155,8 +142,6 @@ func _physics_process(_delta):
 				elif collision.normal.x < 0:
 					#right wall walljump
 					canRightWallJump = WALL_JUMP_GRACE_FRAMES
-
-			
 		
 		#Air Movement
 		if Input.is_action_pressed("right"):
@@ -201,20 +186,6 @@ func _physics_process(_delta):
 			motion.y-=WALL_JUMP_VELOCITY.y
 			motion.x -= WALL_JUMP_VELOCITY.x
 			canRightWallJump = 0
-		
-		
-	#Jump
-#	if jumpSquat:
-#		if(!Input.is_action_pressed("jump")):
-#			jumpSquat = 1
-#		if jumpSquat == 1:
-#			shouldStick = false
-#			if Input.is_action_pressed("jump"):
-#				motion.y-=FULL_HOP_VELOCITY
-#			else:
-#				motion.y-=SHORT_HOP_VELOCITY
-#
-#		jumpSquat-=1
 		
 		
 	motion = move_and_slide_with_snap(motion, SNAP_VECTOR if shouldStick else Vector2(), UP)
