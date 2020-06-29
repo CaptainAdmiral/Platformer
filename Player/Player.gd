@@ -6,7 +6,7 @@ const SNAP_VECTOR = Vector2(0, 64)
 const RUN_SPEED = 1500
 const RUN_ACCELERATION_FRAMES = 120
 const GROUND_FRICTION = 0.8
-const FALL_SPEED = 40
+const FALL_SPEED = 30
 const AIR_FRICTION = 0.98 #Only used for horizontal momentum decay in air
 
 const FULL_HOP_VELOCITY = 900
