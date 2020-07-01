@@ -17,4 +17,4 @@ func _process(delta):
 	#the following can probably be optimized by setget somehow
 	storedMotion = get_node("../../Player").get("storedMotion")
 	$GUI/HBoxContainer/storedMotion/Background/Number.text = String(int(storedMotion.length()))
-	$GUI/HBoxContainer/storedMotion/Background/Arrow.set_rotation(atan2(storedMotion.x, storedMotion.y) - PI/2) 
+	$GUI/HBoxContainer/storedMotion/Background/Arrow.set_rotation(-atan2(storedMotion.x, storedMotion.y) + PI/2) 
