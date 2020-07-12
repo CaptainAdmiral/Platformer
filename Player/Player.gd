@@ -34,6 +34,8 @@ onready var inputBuffer = $InputBuffer
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
 var hook : Area2D = null
 
+var canHook = true
+
 var jumpSquat = 0
 var jumpBoost = 0
 var grappleWindup = 0
@@ -61,10 +63,10 @@ func _physics_process(_delta):
 	
 	#Grappling Hook Stuff
 	if Input.is_action_just_released("hook") and hook != null:
-		hook.queue_free()
-		hook = null
+		hook.setDead()
 		
-	if Input.is_action_just_pressed("hook") and hook == null:
+	if Input.is_action_just_pressed("hook") and canHook and hook == null:
+		canHook = false
 		hook = Hook.instance()
 		hook.setShooter(self)
 		get_parent().add_child(hook)
@@ -78,8 +80,7 @@ func _physics_process(_delta):
 		
 	#Ground Movement
 	if is_on_floor():
-#		if !jumpSquat and inputBuffer.hasAction(inputBuffer.JUMP_PRESS, 10):
-#			jumpSquat = JUMP_SQUAT_FRAMES
+		canHook = true
 
 		#Jump
 		if inputBuffer.hasAction("up", false, 10):
@@ -118,10 +119,16 @@ func _physics_process(_delta):
 			slideFrames-=1
 		
 	else:
+		#In air stuff
+		
 		if jumpBoost:
 			if Input.is_action_pressed("up"):
 				motion.y-=JUMP_BOOST_SPEED
 			jumpBoost-=1
+			
+		if Input.is_action_just_pressed("up") and hook != null:
+			hook.doDash()
+			
 		
 		#Can Wall Jump Check
 		if is_on_wall():

@@ -1,10 +1,12 @@
 extends Area2D
 
+const DASH_SPEED = 1000
+const maxLength = 700
+
 var shooter
 var motion = Vector2()
-var isAttached = false
 var length = 0
-var attatchedTo = null
+var attachedTo = null
 var offset = Vector2()
 var releaseTension=false
 var tenseLastFrame=false
@@ -20,17 +22,20 @@ func _physics_process(delta):
 		queue_free()
 		return
 	
-	if attatchedTo == null:
+	if attachedTo == null:
 		position += motion
+		if global_position.distance_to(shooter.global_position) > maxLength:
+			setDead()
+		
 	else:
-		position = attatchedTo.position - offset
+		position = attachedTo.position - offset
 		
 		##### draw links and adjust size according to length
 		links.rotation = self.position.angle_to_point(shooter.global_position) + deg2rad(90)
 		$Tip.rotation = self.position.angle_to_point(shooter.global_position) + deg2rad(90)
 		links.region_rect.size.y = length * 2
 		
-	if isAttached:
+	if attachedTo != null:
 		tenseLastFrame = false
 		if releaseTension:
 			length = max(length, global_position.distance_to(shooter.global_position))
@@ -62,10 +67,18 @@ func isTense():
 
 func setShooter(shooter):
 	self.shooter = shooter
+	
+func doDash():
+	if attachedTo != null and shooter != null:
+		shooter.motion += (position - shooter.position).normalized() * DASH_SPEED
+		setDead()
 
 func onCollision(body_id, body, body_shape, area_shape):
 	if body != shooter:
-		isAttached = true
 		length = global_position.distance_to(shooter.global_position)
-		attatchedTo = body
+		attachedTo = body
 		offset = body.position - position
+		
+func setDead():
+	shooter.hook = null
+	queue_free()
