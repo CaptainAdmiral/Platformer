@@ -20,7 +20,7 @@ func _ready():
 
 
 func onCollision(body):
-	if body == get_node("/root/World/Player"):
+	if body == Globals.player:
 		
 		
 		if direction == DIRECTION.up:

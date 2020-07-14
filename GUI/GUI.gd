@@ -1,4 +1,4 @@
-extends Node2D
+extends CanvasLayer
 
 var storedMotion = Vector2(0,0)
 
@@ -15,6 +15,6 @@ func _ready():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	#the following can probably be optimized by setget somehow
-	storedMotion = get_node("../../Player").get("storedMotion")
+	storedMotion = Globals.player.storedMotion
 	$GUI/HBoxContainer/storedMotion/Background/Number.text = String(int(storedMotion.length()))
 	$GUI/HBoxContainer/storedMotion/Background/Arrow.set_rotation(-atan2(storedMotion.x, storedMotion.y) + PI/2) 

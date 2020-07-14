@@ -48,7 +48,7 @@ var storedMotion = Vector2(0,0)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.		
+	Globals.player = self
 
 func _physics_process(_delta):
 	var shouldStick = hook==null
