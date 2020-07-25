@@ -37,7 +37,7 @@ var motion = Vector2()
 onready var inputBuffer = $InputBuffer
 
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
-var hook : Area2D = null
+var hook : KinematicBody2D = null
 
 var canHook = true
 var hookCharges = 0

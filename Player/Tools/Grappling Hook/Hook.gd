@@ -1,4 +1,4 @@
-extends Area2D
+extends KinematicBody2D
 
 const DASH_SPEED = 3000
 const MAX_LENGTH = 800
@@ -28,7 +28,11 @@ func _physics_process(delta):
 		dashBufferFrames-=1
 	
 	if attachedTo == null:
-		position += motion
+		var collision = move_and_collide(motion)
+		if collision!=null:
+			length = global_position.distance_to(shooter.global_position)+10
+			attachedTo = collision.collider
+			offset = to_local(collision.position) - position
 		if global_position.distance_to(shooter.global_position) > MAX_LENGTH:
 			setDead()
 		
