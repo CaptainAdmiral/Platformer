@@ -2,28 +2,27 @@ extends KinematicBody2D
 
 #TODO refactor for clarity
 
-const UP = Vector2(0, -1)
-const SNAP_VECTOR = Vector2(0, 64)
-
 const RUN_SPEED = 700
 const RUN_ACCELERATION_FRAMES = 20
 const GROUND_FRICTION = 0.7
 const FALL_SPEED = 40
 const AIR_FRICTION = 0.95
 
-const JUMP_VELOCITY = 600
+const JUMP_VELOCITY = 620
 const JUMP_BOOST_FRAMES = 10
 
-const DASH_SPEED = 2000
+const DASH_SPEED = 1800
 const DASH_FRAMES = 10
 const DASH_FREEZE_FRAMES = 3
+
+const CROUCH_SLOWDOWN = 0.875
+const SLIDE_FRAMES = 50
 
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 240
 const WALL_JUMP_GRACE_FRAMES=10
 
 const HOOK_SPEED = 70
-const GRAPPLED_AIR_ACCELERATION = 0.1
 
 #calculated values
 const AIR_SPEED = RUN_SPEED
@@ -34,31 +33,45 @@ const JUMP_BOOST_SPEED = JUMP_VELOCITY / JUMP_BOOST_FRAMES
 
 
 var motion = Vector2()
+enum Direction {UP, DOWN, LEFT, RIGHT}
+var facing = Direction.RIGHT
 
 onready var inputBuffer = $InputBuffer
 
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
 var hook : KinematicBody2D = null
 
-var hookCharges = 0
-var grappleWindup = 0
+var hookCharges : int = 0
+var grappleWindup : int = 0
 
-var dashFrames = 0
-var dashCharges = 0
+var dashFrames : int = 0
+var dashCharges : int = 0
 var dashDirection = Vector2()
 
-var jumpBoost = 0
+var jumpBoost : int = 0
 
-var canLeftWallJump = 0
-var canRightWallJump = 0
+var canLeftWallJump : int = 0
+var canRightWallJump : int = 0
+
+var isCrouching : bool = false
+
+var slideFrames : int = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Globals.player = self
 
 func _physics_process(_delta):
+	######################## SLIDING / CROUCHING ##################################
 	
-	#Grappling Hook Stuff
+	if !Input.is_action_pressed("down"):
+			setCrouching(false)
+	
+	if slideFrames:
+		slideFrames-=1
+	
+	######################## GRAPPLING HOOK ##################################
+	
 	if Input.is_action_just_released("hook") and hook != null:
 		if hook.attachedTo!=null and !hook.dashBufferFrames:
 			hook.setDead()
@@ -76,19 +89,29 @@ func _physics_process(_delta):
 		#Jump
 		if inputBuffer.hasAction("up", false, 10):
 			jump()
-		
+			
 		if Input.is_action_pressed("right"):
+			setFacing(Direction.RIGHT)
 			run(1)
-				
-		elif Input.is_action_pressed("left"):
+			
+		if Input.is_action_pressed("left"):
+			setFacing(Direction.LEFT)
 			run(-1)
 				
-		else:
+		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
 			motion.x *= GROUND_FRICTION
+			
+		if isCrouching:
+			motion.x *= CROUCH_SLOWDOWN
 			
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.9
-		
+			
+		if Input.is_action_pressed("down"):
+			slide()
+			setCrouching(true)
+			
+	
 	else:
 		######################## IN AIR ##################################
 		
@@ -96,6 +119,9 @@ func _physics_process(_delta):
 			if Input.is_action_pressed("up"):
 				motion.y-=JUMP_BOOST_SPEED
 			jumpBoost-=1
+			
+		if hook != null and hook.isTense():
+			slideFrames = 0
 		
 		#Air Movement
 		if Input.is_action_pressed("right"):
@@ -121,13 +147,13 @@ func _physics_process(_delta):
 	if canLeftWallJump:
 		canLeftWallJump-=1
 		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("right", false, 6):
-			wallJump(1)
+			wallJump(Direction.RIGHT)
 			
 		
 	if canRightWallJump:
 		canRightWallJump-=1
 		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("left", false, 6):
-			wallJump(-1)
+			wallJump(Direction.LEFT)
 		
 	if Input.is_action_just_pressed("dash") and dashCharges > 0:
 		dash(getDirectionFromInput())	
@@ -140,9 +166,9 @@ func _physics_process(_delta):
 		else:
 			motion = dashDirection * DASH_SPEED
 			if !dashFrames:
-				motion = dashDirection * AIR_SPEED
+				motion = dashDirection * AIR_SPEED * 1.3
 	
-	motion = move_and_slide(motion, UP)
+	motion = move_and_slide(motion, Vector2(0, -1))
 		
 
 func getDirectionFromInput():
@@ -160,9 +186,49 @@ func getDirectionFromInput():
 												#Baked value for 1/sqrt2
 	return Vector2(x, y) if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y)
 	
+func setFacing(direction):
+	facing = direction
+	if direction == Direction.LEFT:
+		$Sprite.flip_h = true
+	elif direction == Direction.RIGHT:
+		$Sprite.flip_h = false
+	
 func jump():
 	motion.y -= JUMP_VELOCITY
-	jumpBoost = JUMP_BOOST_FRAMES
+	if slideFrames < SLIDE_FRAMES * 0.75:
+		jumpBoost = JUMP_BOOST_FRAMES
+	
+	slideFrames = 0
+	
+func slide():
+	if !slideFrames and !isCrouching:
+		setCrouching(true)
+		if motion.x >= RUN_SPEED*0.75:
+			slideFrames = SLIDE_FRAMES
+			motion.x += RUN_SPEED*1.2
+		elif -motion.x >= RUN_SPEED*0.75:
+			slideFrames = SLIDE_FRAMES
+			motion.x -= RUN_SPEED*1.2
+	
+func setCrouching(crouching):
+	if isCrouching == crouching:
+		return
+		
+	if slideFrames:
+		return
+	
+	isCrouching = crouching
+	
+	#TODO place on ground
+	
+	if isCrouching:
+		$Sprite.scale.y *= 0.5
+		$Hitbox.shape.height *= 0.5
+	else:
+		position.y -= 30
+		$Sprite.scale.y *= 2
+		$Hitbox.shape.height *= 2
+	
 	
 func run(direction = 1):
 	if direction*motion.x < 0:
@@ -189,14 +255,23 @@ func setCanWallJump():
 			#right wall walljump
 			canRightWallJump = WALL_JUMP_GRACE_FRAMES
 
-func wallJump(direction=1):
+func wallJump(direction):
 	motion.y=-WALL_JUMP_VELOCITY.y
-	motion.x = direction*WALL_JUMP_VELOCITY.x
+	if direction == Direction.RIGHT:
+		motion.x = WALL_JUMP_VELOCITY.x
+		canLeftWallJump = 0
+		setFacing(Direction.RIGHT)
+	elif direction == Direction.LEFT:
+		motion.x = -WALL_JUMP_VELOCITY.x
+		canRightWallJump = 0
+		facing = Direction.LEFT
+		setFacing(Direction.LEFT)
 	jumpBoost=JUMP_BOOST_FRAMES
-	canLeftWallJump = 0
 	dashFrames = 0
 
 func dash(direction):
+	if slideFrames:
+		return
 	dashCharges -= 1
 	if hook != null and hook.isDashing:
 		hook.setDead()
