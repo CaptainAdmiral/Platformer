@@ -5,9 +5,10 @@
 [ext_resource path="res://chain_repeating_unit.png" type="Texture" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 16, 16 )
+extents = Vector2( 8.76501, 10.9217 )
 
-[node name="Hook" type="Area2D"]
+[node name="Hook" type="KinematicBody2D"]
+collision_layer = 0
 script = ExtResource( 2 )
 
 [node name="Links" type="Sprite" parent="."]
@@ -24,4 +25,3 @@ shape = SubResource( 1 )
 [node name="Tip" type="Sprite" parent="."]
 scale = Vector2( 0.5, 0.5 )
 texture = ExtResource( 1 )
-[connection signal="body_shape_entered" from="." to="." method="onCollision"]

@@ -10,6 +10,7 @@ height = 32.0
 
 [node name="Player" type="KinematicBody2D"]
 position = Vector2( 454.779, 295.603 )
+collision_layer = 2
 script = ExtResource( 2 )
 
 [node name="Sprite" type="Sprite" parent="."]
@@ -22,7 +23,7 @@ shape = SubResource( 1 )
 
 [node name="Camera2D" type="Camera2D" parent="."]
 current = true
-zoom = Vector2( 3, 3 )
+zoom = Vector2( 2, 2 )
 
 [node name="InputBuffer" type="Node" parent="."]
 script = ExtResource( 3 )

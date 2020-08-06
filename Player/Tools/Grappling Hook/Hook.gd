@@ -1,15 +1,17 @@
-extends Area2D
+extends KinematicBody2D
 
-const DASH_SPEED = 1000
-const maxLength = 700
+const DASH_SPEED = 3000
+const MAX_LENGTH = 800
 
 var shooter
 var motion = Vector2()
 var length = 0
 var attachedTo = null
 var offset = Vector2()
-var releaseTension=false
 var tenseLastFrame=false
+
+var isDashing=false
+var dashBufferFrames=10
 
 onready var links = $Links
 
@@ -21,10 +23,17 @@ func _physics_process(delta):
 	if shooter == null:
 		queue_free()
 		return
+		
+	if dashBufferFrames:
+		dashBufferFrames-=1
 	
 	if attachedTo == null:
-		position += motion
-		if global_position.distance_to(shooter.global_position) > maxLength:
+		var collision = move_and_collide(motion)
+		if collision!=null:
+			length = global_position.distance_to(shooter.global_position)+10
+			attachedTo = collision.collider
+			offset = to_local(collision.position) - position
+		if global_position.distance_to(shooter.global_position) > MAX_LENGTH:
 			setDead()
 		
 	else:
@@ -37,41 +46,43 @@ func _physics_process(delta):
 		
 	if attachedTo != null:
 		tenseLastFrame = false
-		if releaseTension:
-			length = max(length, global_position.distance_to(shooter.global_position))
-		else:
-			if global_position.distance_to(shooter.global_position) >= length:
-				var dist = global_position.distance_to(shooter.global_position)
-				var x_dist = shooter.global_position.x - global_position.x
-				var y_dist = shooter.global_position.y - global_position.y
-				var mag = sqrt(pow(shooter.motion.x, 2)+pow(shooter.motion.y, 2))
-				var ang = atan2(y_dist, x_dist)
+		if isDashing:
+			if global_position.distance_to(shooter.global_position) < 100:
+				shooter.motion = (position - shooter.position).normalized() * 1000
+				setDead()	
+			elif attachedTo != null and shooter != null:
+				shooter.motion = (position - shooter.position).normalized() * DASH_SPEED
+			
+		if global_position.distance_to(shooter.global_position) >= length:
+			var dist = global_position.distance_to(shooter.global_position)
+			var x_dist = shooter.global_position.x - global_position.x
+			var y_dist = shooter.global_position.y - global_position.y
+			var mag = sqrt(pow(shooter.motion.x, 2)+pow(shooter.motion.y, 2))
+			var ang = atan2(y_dist, x_dist)
+			
+			if !tenseLastFrame:
+				shooter.position.x -= (dist-length)*cos(ang)
+				shooter.position.y -= (dist-length)*sin(ang)
 				
-				if !tenseLastFrame:
-					shooter.position.x -= (dist-length)*cos(ang)
-					shooter.position.y -= (dist-length)*sin(ang)
-					
-					var motionAng = atan2(shooter.motion.y, shooter.motion.x)
-					var mag2 = mag*sin(90-ang+atan2(y_dist, x_dist))
-					
-					shooter.motion-=Vector2(mag2*cos(ang), mag2*sin(ang))
-				else:
-					var newAng = ang - mag/length
-					var newPos = Vector2(mag*cos(newAng), mag*sin(newAng))
-					shooter.motion = newPos - shooter.position
-				tenseLastFrame = true
+				var motionAng = atan2(shooter.motion.y, shooter.motion.x)
+				var mag2 = mag*sin(90-ang+atan2(y_dist, x_dist))
+				
+				shooter.motion-=Vector2(mag2*cos(ang), mag2*sin(ang))
+			else:
+				var newAng = ang - mag/length
+				var newPos = Vector2(mag*cos(newAng), mag*sin(newAng))
+				shooter.motion = newPos - shooter.position
+			tenseLastFrame = true
 
 
 func isTense():
-	return global_position.distance_to(shooter.global_position) >= length*0.999
+	return global_position.distance_to(shooter.global_position) >= length*0.9
 
 func setShooter(shooter):
 	self.shooter = shooter
-	
-func doDash():
-	if attachedTo != null and shooter != null:
-		shooter.motion += (position - shooter.position).normalized() * DASH_SPEED
-		setDead()
+
+func setDashing():
+	isDashing=true
 
 func onCollision(body_id, body, body_shape, area_shape):
 	if body != shooter:
