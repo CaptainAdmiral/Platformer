@@ -91,12 +91,10 @@ func _physics_process(_delta):
 			jump()
 			
 		if Input.is_action_pressed("right"):
-			setFacing(Direction.RIGHT)
-			run(1)
+			run(Direction.RIGHT)
 			
 		if Input.is_action_pressed("left"):
-			setFacing(Direction.LEFT)
-			run(-1)
+			run(Direction.LEFT)
 				
 		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
 			motion.x *= GROUND_FRICTION
@@ -125,10 +123,10 @@ func _physics_process(_delta):
 		
 		#Air Movement
 		if Input.is_action_pressed("right"):
-			airDrift(1)
+			airDrift(Direction.RIGHT)
 				
 		elif Input.is_action_pressed("left"):
-			airDrift(-1)
+			airDrift(Direction.LEFT)
 			
 		else:
 			motion.x *= AIR_FRICTION
@@ -216,6 +214,9 @@ func setCrouching(crouching):
 		
 	if slideFrames:
 		return
+		
+	if !crouching and test_move(Transform2D(0, position), Vector2(0, -60)):
+		return
 	
 	isCrouching = crouching
 	
@@ -230,18 +231,34 @@ func setCrouching(crouching):
 		$Hitbox.shape.height *= 2
 	
 	
-func run(direction = 1):
-	if direction*motion.x < 0:
-		motion.x *= GROUND_FRICTION
-		motion.x+= direction*RUN_ACCELERATION
-	if direction*motion.x < RUN_SPEED:
-		motion.x = direction*min(direction*motion.x + RUN_ACCELERATION, RUN_SPEED)
+func run(direction):
+	setFacing(direction)
+	if direction == Direction.RIGHT:
+		if motion.x < 0:
+			motion.x *= GROUND_FRICTION
+			motion.x += RUN_ACCELERATION
+		if motion.x < RUN_SPEED:
+			motion.x = min(motion.x + RUN_ACCELERATION, RUN_SPEED)
+	elif direction == Direction.LEFT:
+		if motion.x > 0:
+			motion.x *= GROUND_FRICTION
+			motion.x -= RUN_ACCELERATION
+		if -motion.x < RUN_SPEED:
+			motion.x = max(motion.x - RUN_ACCELERATION, -RUN_SPEED)
 
-func airDrift(direction = 1):
-	if direction*motion.x < 0:
-		motion.x *= AIR_FRICTION
-	if direction*motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
-		motion.x = direction*min(direction*motion.x + AIR_ACCELERATION, AIR_SPEED)
+func airDrift(direction):
+	setFacing(direction)
+	if direction == Direction.RIGHT:
+		if motion.x < 0:
+			motion.x *= AIR_FRICTION
+		if motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
+			motion.x = min(motion.x + AIR_ACCELERATION, AIR_SPEED)
+	elif direction == Direction.LEFT:
+		if motion.x > 0:
+			motion.x *= AIR_FRICTION
+		if -motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
+			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
+		
 		
 func setCanWallJump():
 	for i in range(get_slide_count()):
