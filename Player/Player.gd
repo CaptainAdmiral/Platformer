@@ -8,7 +8,7 @@ const GROUND_FRICTION = 0.7
 const FALL_SPEED = 40
 const AIR_FRICTION = 0.95
 
-const JUMP_VELOCITY = 620
+const JUMP_VELOCITY = 640
 const JUMP_BOOST_FRAMES = 10
 
 const DASH_SPEED = 1800
@@ -16,7 +16,8 @@ const DASH_FRAMES = 10
 const DASH_FREEZE_FRAMES = 3
 
 const CROUCH_SLOWDOWN = 0.875
-const SLIDE_FRAMES = 50
+const SLIDE_SLOWDOWN = 0.95
+const SLIDE_FRAMES = 40
 
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 240
@@ -90,20 +91,23 @@ func _physics_process(_delta):
 		if inputBuffer.hasAction("up", false, 10):
 			jump()
 			
-		if Input.is_action_pressed("right"):
-			run(Direction.RIGHT)
-			
-		if Input.is_action_pressed("left"):
-			run(Direction.LEFT)
+		if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
+			if Input.is_action_pressed("right"):
+				run(Direction.RIGHT)
 				
-		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
+			if Input.is_action_pressed("left"):
+				run(Direction.LEFT)
+				
+		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !slideFrames:
 			motion.x *= GROUND_FRICTION
-			
-		if isCrouching:
+		
+		if slideFrames:
+			motion.x *= SLIDE_SLOWDOWN
+		elif isCrouching:
 			motion.x *= CROUCH_SLOWDOWN
 			
 		if abs(motion.x) > RUN_SPEED:
-			motion.x*=0.9
+			motion.x*=0.99
 			
 		if Input.is_action_pressed("down"):
 			slide()
@@ -122,16 +126,15 @@ func _physics_process(_delta):
 			slideFrames = 0
 		
 		#Air Movement
-		if Input.is_action_pressed("right"):
-			airDrift(Direction.RIGHT)
-				
-		elif Input.is_action_pressed("left"):
-			airDrift(Direction.LEFT)
+		if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
+			if Input.is_action_pressed("right"):
+				airDrift(Direction.RIGHT)
+					
+			if Input.is_action_pressed("left"):
+				airDrift(Direction.LEFT)
 			
-		else:
+		if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 			motion.x *= AIR_FRICTION
-			
-		motion.y += FALL_SPEED
 		
 		######################## ON WALL ##################################
 		if is_on_wall():
@@ -165,8 +168,13 @@ func _physics_process(_delta):
 			motion = dashDirection * DASH_SPEED
 			if !dashFrames:
 				motion = dashDirection * AIR_SPEED * 1.3
+				
+	motion.y += FALL_SPEED
 	
 	motion = move_and_slide(motion, Vector2(0, -1))
+	
+	if(is_on_floor() and motion.y > FALL_SPEED):
+		motion.y = FALL_SPEED
 		
 
 func getDirectionFromInput():
@@ -187,14 +195,16 @@ func getDirectionFromInput():
 func setFacing(direction):
 	facing = direction
 	if direction == Direction.LEFT:
-		$Sprite.flip_h = true
+		$AnimatedSprite.flip_h = true
 	elif direction == Direction.RIGHT:
-		$Sprite.flip_h = false
+		$AnimatedSprite.flip_h = false
 	
 func jump():
 	motion.y -= JUMP_VELOCITY
-	if slideFrames < SLIDE_FRAMES * 0.75:
+	if slideFrames < SLIDE_FRAMES * 0.5:
 		jumpBoost = JUMP_BOOST_FRAMES
+	else:
+		jumpBoost = JUMP_BOOST_FRAMES / 2
 	
 	slideFrames = 0
 	
@@ -203,10 +213,10 @@ func slide():
 		setCrouching(true)
 		if motion.x >= RUN_SPEED*0.75:
 			slideFrames = SLIDE_FRAMES
-			motion.x += RUN_SPEED*1.2
+			motion.x += RUN_SPEED*1.75
 		elif -motion.x >= RUN_SPEED*0.75:
 			slideFrames = SLIDE_FRAMES
-			motion.x -= RUN_SPEED*1.2
+			motion.x -= RUN_SPEED*1.75
 	
 func setCrouching(crouching):
 	if isCrouching == crouching:
@@ -215,7 +225,13 @@ func setCrouching(crouching):
 	if slideFrames:
 		return
 		
-	if !crouching and test_move(Transform2D(0, position), Vector2(0, -60)):
+	var canStand = true
+	
+	for body in $StandingHitboxArea.get_overlapping_bodies():
+		if body is StaticBody2D or body is TileMap:
+			canStand = false
+		
+	if !crouching and !canStand:
 		return
 	
 	isCrouching = crouching
@@ -223,12 +239,13 @@ func setCrouching(crouching):
 	#TODO place on ground
 	
 	if isCrouching:
-		$Sprite.scale.y *= 0.5
-		$Hitbox.shape.height *= 0.5
+		$AnimatedSprite.scale.y *= 0.5
+		$Hitbox.set_deferred("disabled", true)
+		$CrouchHitbox.set_deferred("disabled", false)
 	else:
-		position.y -= 30
-		$Sprite.scale.y *= 2
-		$Hitbox.shape.height *= 2
+		$AnimatedSprite.scale.y *= 2
+		$Hitbox.set_deferred("disabled", false)
+		$CrouchHitbox.set_deferred("disabled", true)
 	
 	
 func run(direction):
