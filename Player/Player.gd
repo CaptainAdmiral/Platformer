@@ -11,7 +11,7 @@ const AIR_FRICTION = 0.95
 const JUMP_VELOCITY = 640
 const JUMP_BOOST_FRAMES = 10
 
-const DASH_SPEED = 1800
+const DASH_SPEED = 2200
 const DASH_FRAMES = 10
 const DASH_FREEZE_FRAMES = 3
 
@@ -63,6 +63,12 @@ func _ready():
 	Globals.player = self
 
 func _physics_process(_delta):
+	######################## IDLE ##################################
+	if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")) and abs(motion.x) < 50:
+		if $AnimatedSprite.animation != "idle":
+			$AnimatedSprite.play("idle")
+			
+	
 	######################## SLIDING / CROUCHING ##################################
 	
 	if !Input.is_action_pressed("down"):
@@ -250,6 +256,10 @@ func setCrouching(crouching):
 	
 func run(direction):
 	setFacing(direction)
+	
+	if $AnimatedSprite.animation == "idle":
+		$AnimatedSprite.play("run start")
+	
 	if direction == Direction.RIGHT:
 		if motion.x < 0:
 			motion.x *= GROUND_FRICTION
@@ -324,3 +334,8 @@ func throwHook():
 	
 	hook.position = position
 	hook.motion = (get_global_mouse_position() - position).normalized()*HOOK_SPEED
+
+
+func onAnimationFinished():
+	if $AnimatedSprite.animation == "run start":
+		$AnimatedSprite.play("run")
