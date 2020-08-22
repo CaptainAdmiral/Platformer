@@ -58,15 +58,25 @@ var isCrouching : bool = false
 
 var slideFrames : int = 0
 
+var onGround = false
+var prevOnGround = false
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Globals.player = self
 
 func _physics_process(_delta):
-	######################## IDLE ##################################
-	if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")) and abs(motion.x) < 50:
-		if $AnimatedSprite.animation != "idle":
-			$AnimatedSprite.play("idle")
+	prevOnGround = onGround
+	onGround = is_on_floor()
+	
+	######################## ANIMATIONS ##################################
+	if ($AnimatedSprite.animation == "run" or $AnimatedSprite.animation == "run start") and abs(motion.x) < 50:
+		$AnimatedSprite.stop()
+	
+	if !$AnimatedSprite.playing:
+		$AnimatedSprite.play("idle")
+		
+	
 			
 	
 	######################## SLIDING / CROUCHING ##################################
@@ -87,11 +97,14 @@ func _physics_process(_delta):
 		
 	if Input.is_action_just_pressed("hook") and hookCharges > 0 and hook == null:
 		throwHook()
-		
+	
 	######################## ON GROUND ##################################
-	if is_on_floor():
+	if is_on_floor():	
 		hookCharges = 2
 		dashCharges = 1
+		
+		if prevOnGround == false:
+			onLand()
 
 		#Jump
 		if inputBuffer.hasAction("up", false, 10):
@@ -213,6 +226,14 @@ func jump():
 		jumpBoost = JUMP_BOOST_FRAMES / 2
 	
 	slideFrames = 0
+	if $AnimatedSprite.animation == "idle":
+		$AnimatedSprite.play("jump")
+	elif $AnimatedSprite.animation == "run start":
+		var frame = $AnimatedSprite.frame
+		$AnimatedSprite.play("jump")
+		$AnimatedSprite.set_frame(frame+1)
+	else:
+		$AnimatedSprite.play("run jump")
 	
 func slide():
 	if !slideFrames and !isCrouching:
@@ -259,6 +280,8 @@ func run(direction):
 	
 	if $AnimatedSprite.animation == "idle":
 		$AnimatedSprite.play("run start")
+	elif !$AnimatedSprite.playing:
+		$AnimatedSprite.play("run")
 	
 	if direction == Direction.RIGHT:
 		if motion.x < 0:
@@ -274,7 +297,6 @@ func run(direction):
 			motion.x = max(motion.x - RUN_ACCELERATION, -RUN_SPEED)
 
 func airDrift(direction):
-	setFacing(direction)
 	if direction == Direction.RIGHT:
 		if motion.x < 0:
 			motion.x *= AIR_FRICTION
@@ -334,8 +356,21 @@ func throwHook():
 	
 	hook.position = position
 	hook.motion = (get_global_mouse_position() - position).normalized()*HOOK_SPEED
+	
+func onLand():
+	if $AnimatedSprite.animation == "run jump":
+		$AnimatedSprite.stop()
+		
+	if $AnimatedSprite.animation == "jump":
+		$AnimatedSprite.stop()
 
 
 func onAnimationFinished():
-	if $AnimatedSprite.animation == "run start":
+	var anim = $AnimatedSprite.animation
+	
+	if anim == "run start":
 		$AnimatedSprite.play("run")
+		
+	
+		
+	
