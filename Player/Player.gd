@@ -76,6 +76,12 @@ func _physics_process(_delta):
 	if !$AnimatedSprite.playing:
 		$AnimatedSprite.play("idle")
 		
+	if !onGround and motion.y > 10:
+		if $AnimatedSprite.animation == "jump":
+			$AnimatedSprite.play("fall")
+		elif $AnimatedSprite.animation == "run jump" or $AnimatedSprite.animation == "run":
+			$AnimatedSprite.play("fall")
+			$AnimatedSprite.set_frame(3)
 	
 			
 	
@@ -362,6 +368,9 @@ func onLand():
 		$AnimatedSprite.stop()
 		
 	if $AnimatedSprite.animation == "jump":
+		$AnimatedSprite.stop()
+		
+	if $AnimatedSprite.animation == "fall":
 		$AnimatedSprite.stop()
 
 
