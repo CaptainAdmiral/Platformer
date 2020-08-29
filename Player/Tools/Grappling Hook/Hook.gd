@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-const DASH_SPEED = 2000
+const DASH_SPEED = 1500
 const MAX_LENGTH = 800
 
 var shooter

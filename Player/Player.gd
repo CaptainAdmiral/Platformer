@@ -2,16 +2,17 @@ extends KinematicBody2D
 
 #TODO refactor for clarity
 
-const RUN_SPEED = 700
+const RUN_SPEED = 500
 const RUN_ACCELERATION_FRAMES = 20
 const GROUND_FRICTION = 0.7
-const FALL_SPEED = 40
+const FALL_SPEED = 30
 const AIR_FRICTION = 0.95
 
-const JUMP_VELOCITY = 640
-const JUMP_BOOST_FRAMES = 10
+const JUMP_VELOCITY = 500
+const JUMP_BOOST_FRAMES = 15
+const JUMP_GRACE_FRAMES = 5
 
-const DASH_SPEED = 2200
+const DASH_SPEED = 1800
 const DASH_FRAMES = 10
 const DASH_FREEZE_FRAMES = 3
 
@@ -20,7 +21,7 @@ const SLIDE_SLOWDOWN = 0.95
 const SLIDE_FRAMES = 40
 
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
-const WALL_SLIDE_SPEED = 240
+const WALL_SLIDE_SPEED = 120
 const WALL_JUMP_GRACE_FRAMES=10
 
 const HOOK_SPEED = 70
@@ -50,6 +51,7 @@ var dashCharges : int = 0
 var dashDirection = Vector2()
 
 var jumpBoost : int = 0
+var jumpGraceFrames = 0
 
 var canLeftWallJump : int = 0
 var canRightWallJump : int = 0
@@ -108,13 +110,10 @@ func _physics_process(_delta):
 	if is_on_floor():	
 		hookCharges = 2
 		dashCharges = 1
+		jumpGraceFrames = JUMP_GRACE_FRAMES
 		
 		if prevOnGround == false:
 			onLand()
-
-		#Jump
-		if inputBuffer.hasAction("up", false, 10):
-			jump()
 			
 		if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
 			if Input.is_action_pressed("right"):
@@ -168,6 +167,11 @@ func _physics_process(_delta):
 			
 			setCanWallJump()
 	
+	#Jump
+	if jumpGraceFrames:
+		if inputBuffer.hasAction("up", false, 10):
+			jump()
+		jumpGraceFrames-=1
 	
 	#Wall Jump Movement
 	if canLeftWallJump:
@@ -184,7 +188,6 @@ func _physics_process(_delta):
 	if Input.is_action_just_pressed("dash") and dashCharges > 0:
 		dash(getDirectionFromInput())	
 
-		
 	if dashFrames:
 		dashFrames -= 1
 		if dashFrames >= DASH_FRAMES:
@@ -225,6 +228,8 @@ func setFacing(direction):
 		$AnimatedSprite.flip_h = false
 	
 func jump():
+	jumpGraceFrames=1
+	
 	motion.y -= JUMP_VELOCITY
 	if slideFrames < SLIDE_FRAMES * 0.5:
 		jumpBoost = JUMP_BOOST_FRAMES

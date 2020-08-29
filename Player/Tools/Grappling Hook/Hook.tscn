@@ -8,7 +8,7 @@
 extents = Vector2( 8.76501, 10.9217 )
 
 [sub_resource type="CircleShape2D" id=2]
-radius = 96.8378
+radius = 65.2305
 
 [node name="Hook" type="KinematicBody2D"]
 collision_layer = 0

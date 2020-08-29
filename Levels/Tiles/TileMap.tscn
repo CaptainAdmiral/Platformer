@@ -136,4 +136,5 @@ points = PoolVector2Array( 0, 64, 0, 0, 64, 64 )
 
 [node name="TileMap" type="TileMap"]
 tile_set = SubResource( 13 )
+cell_size = Vector2( 32, 32 )
 format = 1
