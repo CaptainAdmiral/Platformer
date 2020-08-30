@@ -23,6 +23,7 @@ const SLIDE_FRAMES = 40
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 120
 const WALL_JUMP_GRACE_FRAMES=10
+const WALL_JUMP_GRACE_DISTANCE = 20
 
 const HOOK_SPEED = 70
 
@@ -159,6 +160,15 @@ func _physics_process(_delta):
 			
 		if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 			motion.x *= AIR_FRICTION
+			
+		var leftCollision =  move_and_collide(Vector2(-WALL_JUMP_GRACE_DISTANCE, 0), true, true, true)
+		var rightCollision =  move_and_collide(Vector2(WALL_JUMP_GRACE_DISTANCE, 0), true, true, true)
+		
+		if leftCollision != null and (leftCollision.collider is StaticBody2D or leftCollision.collider is TileMap):
+			canLeftWallJump = WALL_JUMP_GRACE_FRAMES
+			
+		if rightCollision != null and (rightCollision.collider is StaticBody2D or rightCollision.collider is TileMap):
+			canRightWallJump = WALL_JUMP_GRACE_FRAMES
 		
 		######################## ON WALL ##################################
 		if is_on_wall():

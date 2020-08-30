@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-const DASH_SPEED = 1500
+const DASH_SPEED = 2000
 const MAX_LENGTH = 800
 
 var shooter
@@ -48,9 +48,14 @@ func _physics_process(delta):
 	if attachedTo != null:
 		if isDashing:
 			if attachedTo != null and shooter != null:
-				length = max(0, length - DASH_SPEED*delta)
-			if length == 0:
-				setDead()
+				if length < DASH_SPEED*delta*2 or shooter.position.distance_to(position) < DASH_SPEED*delta*2:
+					setDead()
+					return
+				else:
+					length = max(0, length - DASH_SPEED*delta)
+					#Locks the player into a linear path while dashing, disable this line
+					#To allow the player to continue swinging while dashing
+					shooter.motion = shooter.position.direction_to(position).normalized()*DASH_SPEED*0.35
 			
 		if global_position.distance_to(shooter.global_position) >= length:
 			var dist = global_position.distance_to(shooter.global_position)
@@ -90,6 +95,4 @@ func setDead():
 
 
 func _on_Area2D_body_entered(body):
-	if isDashing and body == shooter:
-		shooter.motion *= 0.3
-		setDead()
+	pass
