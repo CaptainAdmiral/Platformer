@@ -44,11 +44,11 @@ onready var inputBuffer = $InputBuffer
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
 var hook : KinematicBody2D = null
 
-var hookCharges : int = 0
+var hookCharges : int = 1
 var grappleWindup : int = 0
 
 var dashFrames : int = 0
-var dashCharges : int = 0
+var dashCharges : int = 1
 var dashDirection = Vector2()
 
 var jumpBoost : int = 0
@@ -151,15 +151,16 @@ func _physics_process(_delta):
 			slideFrames = 0
 		
 		#Air Movement
-		if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
-			if Input.is_action_pressed("right"):
-				airDrift(Direction.RIGHT)
-					
-			if Input.is_action_pressed("left"):
-				airDrift(Direction.LEFT)
+		if hook == null:
+			if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
+				if Input.is_action_pressed("right"):
+					airDrift(Direction.RIGHT)
+						
+				if Input.is_action_pressed("left"):
+					airDrift(Direction.LEFT)
 			
-		if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
-			motion.x *= AIR_FRICTION
+			if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
+				motion.x *= AIR_FRICTION
 			
 		var leftCollision =  move_and_collide(Vector2(-WALL_JUMP_GRACE_DISTANCE, 0), true, true, true)
 		var rightCollision =  move_and_collide(Vector2(WALL_JUMP_GRACE_DISTANCE, 0), true, true, true)
@@ -287,11 +288,11 @@ func setCrouching(crouching):
 	#TODO place on ground
 	
 	if isCrouching:
-		$AnimatedSprite.scale.y *= 0.5
+		$AnimatedSprite.play("slide")
 		$Hitbox.set_deferred("disabled", true)
 		$CrouchHitbox.set_deferred("disabled", false)
 	else:
-		$AnimatedSprite.scale.y *= 2
+		$AnimatedSprite.play("run")
 		$Hitbox.set_deferred("disabled", false)
 		$CrouchHitbox.set_deferred("disabled", true)
 	

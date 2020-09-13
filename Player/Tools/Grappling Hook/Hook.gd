@@ -48,31 +48,36 @@ func _physics_process(delta):
 	if attachedTo != null:
 		if isDashing:
 			if attachedTo != null and shooter != null:
-				if length < DASH_SPEED*delta*2 or shooter.position.distance_to(position) < DASH_SPEED*delta*2:
+				if length <= 0 or shooter.position.distance_to(position) < DASH_SPEED*delta*2:
 					setDead()
 					return
 				else:
 					length = max(0, length - DASH_SPEED*delta)
 					#Locks the player into a linear path while dashing, disable this line
 					#To allow the player to continue swinging while dashing
+					#The magnitude of the vector (controlled by the coeficient at the end) determines the
+					#carryover speed when the dash ends
 					shooter.motion = shooter.position.direction_to(position).normalized()*DASH_SPEED*0.35
 			
-		if global_position.distance_to(shooter.global_position) >= length:
+		if global_position.distance_to(shooter.global_position) > length:
 			var dist = global_position.distance_to(shooter.global_position)
 			var x_dist = shooter.global_position.x - global_position.x
 			var y_dist = shooter.global_position.y - global_position.y
 			var mag = sqrt(pow(shooter.motion.x, 2)+pow(shooter.motion.y, 2))
 			var ang = atan2(y_dist, x_dist)
+			var motionAng = atan2(shooter.motion.y, shooter.motion.x)
+			
+			shooter.move_and_slide(Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
 			
 			if !isDashing:
-				shooter.move_and_collide(Vector2(-(dist-length)*cos(ang), -(dist-length)*sin(ang)))
-			else:
-				shooter.move_and_slide(Vector2(-(dist-length)*cos(ang), -(dist-length)*sin(ang))/delta)
-
-			var motionAng = atan2(shooter.motion.y, shooter.motion.x)
-			var mag2 = mag*sin(90-ang+atan2(y_dist, x_dist))
+				#Component of motion perpendicular to point of grapple
+				var perpComp = mag*sin(motionAng - ang)
+				
+				var perpMotion = Vector2(-perpComp*sin(ang), perpComp*cos(ang))
+				shooter.motion = perpMotion
 			
-			shooter.motion-=Vector2(mag2*cos(ang), mag2*sin(ang))
+
+			
 
 func isTense():
 	return global_position.distance_to(shooter.global_position) >= length*0.9
@@ -92,7 +97,3 @@ func onCollision(body_id, body, body_shape, area_shape):
 func setDead():
 	shooter.hook = null
 	queue_free()
-
-
-func _on_Area2D_body_entered(body):
-	pass
