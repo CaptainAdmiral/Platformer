@@ -23,6 +23,11 @@ const WALL_SLIDE_SPEED = 120
 const WALL_JUMP_GRACE_FRAMES=10
 const WALL_JUMP_GRACE_DISTANCE = 40
 
+const ATTACK_COOLDOWN_FRAMES = 20
+
+#How many frames the player is immune for after taking damage
+const DAMAGE_IFRAMES = 60
+
 const HOOK_SPEED = 4200
 
 #calculated values
@@ -33,6 +38,9 @@ const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
 const JUMP_BOOST_SPEED = JUMP_VELOCITY / JUMP_BOOST_FRAMES
 
 onready var inputBuffer = $InputBuffer
+
+var attackCooldownFrames : int = 0
+var hurtFrames : int = 0
 
 var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
 var hook : KinematicBody2D = null
@@ -45,7 +53,7 @@ var dashCharges : int = 1
 var dashDirection = Vector2()
 
 var jumpBoost : int = 0
-var jumpGraceFrames = 0
+var jumpGraceFrames : int = 0
 
 var canLeftWallJump : int = 0
 var canRightWallJump : int = 0
@@ -100,6 +108,16 @@ func _physics_process(_delta):
 		
 	if Input.is_action_just_pressed("hook") and hookCharges > 0 and hook == null:
 		throwHook()
+		
+	######################## ATTACK ##################################
+	if attackCooldownFrames:
+		attackCooldownFrames -= 1
+		
+	if hurtFrames:
+		hurtFrames -= 1
+	
+	if Input.is_action_just_pressed("attack") and ! attackCooldownFrames:
+		swingSword()
 	
 	######################## ON GROUND ##################################
 	if is_on_floor():	
@@ -204,10 +222,13 @@ func _physics_process(_delta):
 	
 	motion = move_and_slide(motion, Vector2(0, -1))
 	
-
+func damage(damage : float) -> void:
+	if !hurtFrames:
+		.damage(damage)
+		hurtFrames = DAMAGE_IFRAMES
 		
 
-func getDirectionFromInput():
+func getDirectionFromInput() -> Vector2:
 	var x = 0
 	var y = 0
 	
@@ -222,20 +243,21 @@ func getDirectionFromInput():
 												#Baked value for 1/sqrt2
 	return Vector2(x, y) if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y)
 	
-func setFacing(direction):
+func setFacing(direction) -> void:
 	facing = direction
 	if direction == Direction.LEFT:
 		$AnimatedSprite.flip_h = true
 	elif direction == Direction.RIGHT:
 		$AnimatedSprite.flip_h = false
 	
-func jump():
+func jump() -> void:
 	jumpGraceFrames=1
 	
 	motion.y -= JUMP_VELOCITY
 	if slideFrames < SLIDE_FRAMES * 0.5:
 		jumpBoost = JUMP_BOOST_FRAMES
 	else:
+# warning-ignore:integer_division
 		jumpBoost = JUMP_BOOST_FRAMES / 2
 	
 	slideFrames = 0
@@ -248,7 +270,7 @@ func jump():
 	else:
 		$AnimatedSprite.play("run jump")
 	
-func slide():
+func slide() -> void:
 	if !slideFrames and !isCrouching:
 		setCrouching(true)
 		if motion.x >= RUN_SPEED*0.75:
@@ -258,7 +280,7 @@ func slide():
 			slideFrames = SLIDE_FRAMES
 			motion.x -= RUN_SPEED*1.75
 	
-func setCrouching(crouching):
+func setCrouching(crouching) -> void:
 	if isCrouching == crouching:
 		return
 		
@@ -288,7 +310,7 @@ func setCrouching(crouching):
 		$CrouchHitbox.set_deferred("disabled", true)
 	
 	
-func run(direction):
+func run(direction) -> void:
 	setFacing(direction)
 	
 	if $AnimatedSprite.animation == "idle":
@@ -309,7 +331,7 @@ func run(direction):
 		if -motion.x < RUN_SPEED:
 			motion.x = max(motion.x - RUN_ACCELERATION, -RUN_SPEED)
 
-func airDrift(direction):
+func airDrift(direction) -> void:
 	if direction == Direction.RIGHT:
 		if motion.x < 0:
 			motion.x *= AIR_FRICTION
@@ -321,7 +343,7 @@ func airDrift(direction):
 		if -motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
 			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
 
-func wallJump(direction):
+func wallJump(direction) -> void:
 	motion.y=-WALL_JUMP_VELOCITY.y
 	if direction == Direction.RIGHT:
 		motion.x = WALL_JUMP_VELOCITY.x
@@ -334,7 +356,7 @@ func wallJump(direction):
 	jumpBoost=JUMP_BOOST_FRAMES
 	dashFrames = 0
 
-func dash(direction):
+func dash(direction) -> void:
 	if slideFrames:
 		return
 	dashCharges -= 1
@@ -347,7 +369,7 @@ func dash(direction):
 		dashFrames = DASH_FRAMES + DASH_FREEZE_FRAMES
 		
 		
-func throwHook():
+func throwHook() -> void:
 	hookCharges -= 1
 	hook = Hook.instance()
 	hook.setShooter(self)
@@ -355,11 +377,29 @@ func throwHook():
 	hook.motion = (get_global_mouse_position() - position).normalized()*HOOK_SPEED
 	get_parent().add_child(hook)
 	
-func onLeaveGround():
+func swingSword() -> void:
+	attackCooldownFrames = ATTACK_COOLDOWN_FRAMES
+	if hook != null:
+		hook.setDead()
+	for body in $AttackArea.get_overlapping_bodies():
+		assert(body is Living)
+		attack(body, 1, 1000)
+		
+func applyKnockback(from : Living, amount : float, _onlyXAxis = true) -> void:
+	dashFrames = 0
+	if hook !=null:
+		hook.setDead()
+	.applyKnockback(from, amount)
+	
+func setDead():
+# warning-ignore:return_value_discarded
+	get_tree().reload_current_scene()
+	
+func onLeaveGround() -> void:
 	$RightWallJumpRayCast.enabled = true
 	$LeftWallJumpRayCast.enabled = true
 	
-func onLand():
+func onLand() -> void:
 	if $AnimatedSprite.animation == "run jump":
 		$AnimatedSprite.stop()
 		
@@ -373,7 +413,7 @@ func onLand():
 	$LeftWallJumpRayCast.enabled = false
 
 
-func onAnimationFinished():
+func onAnimationFinished() -> void:
 	var anim = $AnimatedSprite.animation
 	
 	if anim == "run start":
