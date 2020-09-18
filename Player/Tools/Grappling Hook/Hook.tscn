@@ -9,6 +9,7 @@ extents = Vector2( 8.76501, 10.9217 )
 
 [node name="Hook" type="KinematicBody2D"]
 collision_layer = 0
+collision_mask = 5
 script = ExtResource( 2 )
 
 [node name="Links" type="Sprite" parent="."]

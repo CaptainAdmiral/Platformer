@@ -4,6 +4,7 @@ const DASH_SPEED = 2000
 const MAX_LENGTH = 800
 
 var shooter
+var startPos : Vector2
 var motion = Vector2()
 var length = 0
 var attachedTo = null
@@ -16,7 +17,7 @@ onready var links = $Links
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	startPos = global_position
 	
 func _physics_process(delta):
 	if shooter == null:
@@ -27,12 +28,15 @@ func _physics_process(delta):
 		dashBufferFrames-=1
 	
 	if attachedTo == null:
-		var collision = move_and_collide(motion)
+		var collision = move_and_collide(motion*delta)
 		if collision!=null:
 			length = global_position.distance_to(shooter.global_position)+10
 			attachedTo = collision.collider
-			offset = to_local(collision.position) - position
-		if global_position.distance_to(shooter.global_position) > MAX_LENGTH:
+			if !attachedTo is Living:
+				offset = attachedTo.global_position - collision.position
+			set_collision_mask(0)
+
+		if global_position.distance_to(startPos) > MAX_LENGTH:
 			#TODO replace with timer based max length
 			setDead()
 			return

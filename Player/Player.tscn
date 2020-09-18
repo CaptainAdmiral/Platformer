@@ -198,7 +198,9 @@ position = Vector2( 0, 37 )
 shape = SubResource( 2 )
 disabled = true
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera" type="Node2D" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="Camera"]
 position = Vector2( -0.735046, 2.94037 )
 current = true
 zoom = Vector2( 1.5, 1.5 )
@@ -220,6 +222,11 @@ shape = SubResource( 3 )
 scale = Vector2( 2, 2 )
 frames = SubResource( 36 )
 animation = "idle"
-frame = 1
 playing = true
+
+[node name="RightWallJumpRayCast" type="RayCast2D" parent="."]
+cast_to = Vector2( 40, 0 )
+
+[node name="LeftWallJumpRayCast" type="RayCast2D" parent="."]
+cast_to = Vector2( -40, 0 )
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="onAnimationFinished"]

@@ -1,6 +1,4 @@
-extends KinematicBody2D
-
-#TODO refactor for clarity
+extends Living
 
 const RUN_SPEED = 500
 const RUN_ACCELERATION_FRAMES = 20
@@ -23,9 +21,9 @@ const SLIDE_FRAMES = 40
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 120
 const WALL_JUMP_GRACE_FRAMES=10
-const WALL_JUMP_GRACE_DISTANCE = 20
+const WALL_JUMP_GRACE_DISTANCE = 40
 
-const HOOK_SPEED = 70
+const HOOK_SPEED = 4200
 
 #calculated values
 const AIR_SPEED = RUN_SPEED
@@ -33,11 +31,6 @@ const AIR_ACCELERATION_FRAMES = RUN_ACCELERATION_FRAMES*2
 const AIR_ACCELERATION = AIR_SPEED / AIR_ACCELERATION_FRAMES
 const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
 const JUMP_BOOST_SPEED = JUMP_VELOCITY / JUMP_BOOST_FRAMES
-
-
-var motion = Vector2()
-enum Direction {UP, DOWN, LEFT, RIGHT}
-var facing = Direction.RIGHT
 
 onready var inputBuffer = $InputBuffer
 
@@ -67,6 +60,7 @@ var prevOnGround = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Globals.player = self
+	fallSpeed = FALL_SPEED
 
 func _physics_process(_delta):
 	prevOnGround = onGround
@@ -141,6 +135,8 @@ func _physics_process(_delta):
 	
 	else:
 		######################## IN AIR ##################################
+		if prevOnGround == true:
+			onLeaveGround()
 		
 		if jumpBoost:
 			if Input.is_action_pressed("up"):
@@ -151,7 +147,7 @@ func _physics_process(_delta):
 			slideFrames = 0
 		
 		#Air Movement
-		if hook == null:
+		if hook == null or hook.attachedTo == null or !hook.isTense():
 			if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
 				if Input.is_action_pressed("right"):
 					airDrift(Direction.RIGHT)
@@ -161,14 +157,11 @@ func _physics_process(_delta):
 			
 			if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 				motion.x *= AIR_FRICTION
-			
-		var leftCollision =  move_and_collide(Vector2(-WALL_JUMP_GRACE_DISTANCE, 0), true, true, true)
-		var rightCollision =  move_and_collide(Vector2(WALL_JUMP_GRACE_DISTANCE, 0), true, true, true)
 		
-		if leftCollision != null and (leftCollision.collider is StaticBody2D or leftCollision.collider is TileMap):
+		if $LeftWallJumpRayCast.is_colliding():
 			canLeftWallJump = WALL_JUMP_GRACE_FRAMES
 			
-		if rightCollision != null and (rightCollision.collider is StaticBody2D or rightCollision.collider is TileMap):
+		if $RightWallJumpRayCast.is_colliding():
 			canRightWallJump = WALL_JUMP_GRACE_FRAMES
 		
 		######################## ON WALL ##################################
@@ -176,7 +169,7 @@ func _physics_process(_delta):
 			if motion.y > WALL_SLIDE_SPEED:
 				motion.y = max(motion.y/2, WALL_SLIDE_SPEED)
 			
-			setCanWallJump()
+			
 	
 	#Jump
 	if jumpGraceFrames:
@@ -208,12 +201,10 @@ func _physics_process(_delta):
 			if !dashFrames:
 				motion = dashDirection * AIR_SPEED * 1.3
 				
-	motion.y += FALL_SPEED
 	
 	motion = move_and_slide(motion, Vector2(0, -1))
 	
-	if(is_on_floor() and motion.y > FALL_SPEED):
-		motion.y = FALL_SPEED
+
 		
 
 func getDirectionFromInput():
@@ -329,19 +320,6 @@ func airDrift(direction):
 			motion.x *= AIR_FRICTION
 		if -motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
 			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
-		
-		
-func setCanWallJump():
-	for i in range(get_slide_count()):
-		var collision = get_slide_collision(i)
-		if collision.normal.x > 0:
-			#left wall walljump
-			canLeftWallJump = WALL_JUMP_GRACE_FRAMES
-			
-				
-		elif collision.normal.x < 0:
-			#right wall walljump
-			canRightWallJump = WALL_JUMP_GRACE_FRAMES
 
 func wallJump(direction):
 	motion.y=-WALL_JUMP_VELOCITY.y
@@ -352,7 +330,6 @@ func wallJump(direction):
 	elif direction == Direction.LEFT:
 		motion.x = -WALL_JUMP_VELOCITY.x
 		canRightWallJump = 0
-		facing = Direction.LEFT
 		setFacing(Direction.LEFT)
 	jumpBoost=JUMP_BOOST_FRAMES
 	dashFrames = 0
@@ -363,7 +340,7 @@ func dash(direction):
 	dashCharges -= 1
 	if hook != null and hook.isDashing:
 		hook.setDead()
-	if hook != null and hook.attachedTo != null:
+	if hook != null and hook.attachedTo != null and direction != Vector2(0,0):
 		motion += direction * DASH_SPEED * 0.5
 	else:
 		dashDirection = direction
@@ -374,10 +351,13 @@ func throwHook():
 	hookCharges -= 1
 	hook = Hook.instance()
 	hook.setShooter(self)
-	get_parent().add_child(hook)
-	
 	hook.position = position
 	hook.motion = (get_global_mouse_position() - position).normalized()*HOOK_SPEED
+	get_parent().add_child(hook)
+	
+func onLeaveGround():
+	$RightWallJumpRayCast.enabled = true
+	$LeftWallJumpRayCast.enabled = true
 	
 func onLand():
 	if $AnimatedSprite.animation == "run jump":
@@ -388,6 +368,9 @@ func onLand():
 		
 	if $AnimatedSprite.animation == "fall":
 		$AnimatedSprite.stop()
+		
+	$RightWallJumpRayCast.enabled = false
+	$LeftWallJumpRayCast.enabled = false
 
 
 func onAnimationFinished():
