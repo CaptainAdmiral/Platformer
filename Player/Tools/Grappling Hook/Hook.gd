@@ -57,7 +57,7 @@ func _physics_process(delta):
 					return
 				else:
 					length = max(0, length - DASH_SPEED*delta)
-					if attachedTo is Living and attachedTo.canPull:
+					if !isDashing and attachedTo is Living and attachedTo.canBePulled:
 						attachedTo.motion = attachedTo.position.direction_to(shooter.position).normalized()*DASH_SPEED*0.25
 					else:
 						#Locks the player into a linear path while dashing, disable this line
@@ -74,7 +74,7 @@ func _physics_process(delta):
 			var ang = atan2(y_dist, x_dist)
 			var motionAng = atan2(shooter.motion.y, shooter.motion.x)
 			
-			if(attachedTo is Living and attachedTo.canPull):
+			if(attachedTo is Living and attachedTo.canBePulled and !isDashing):
 				attachedTo.move_and_slide(-Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
 			else:
 				shooter.move_and_slide(Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
@@ -103,6 +103,9 @@ func onCollision(body_id, body, body_shape, area_shape):
 		length = global_position.distance_to(shooter.global_position)
 		attachedTo = body
 		offset = body.position - position
+		
+		if body is Living:
+			dashBufferFrames = 0
 		
 func setDead():
 	attachedTo = null

@@ -15,7 +15,8 @@ collision_layer = 4
 script = ExtResource( 2 )
 maxHealth = 6
 fallSpeed = 40
-canPull = true
+canBePulled = true
+knockbackMultiplier = 1.0
 
 [node name="Sprite" type="Sprite" parent="."]
 scale = Vector2( 2, 2 )

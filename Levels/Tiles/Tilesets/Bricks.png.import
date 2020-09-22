@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Bricks.png-ba0277e800bd702d96856154c99e9c6a.stex"
+path="res://.import/Bricks.png-1fdd722c8e3429e02f47be695f8e72bc.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Levels/Tiles/Bricks.png"
-dest_files=[ "res://.import/Bricks.png-ba0277e800bd702d96856154c99e9c6a.stex" ]
+source_file="res://Levels/Tiles/Tilesets/Bricks.png"
+dest_files=[ "res://.import/Bricks.png-1fdd722c8e3429e02f47be695f8e72bc.stex" ]
 
 [params]
 
