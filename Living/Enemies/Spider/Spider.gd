@@ -30,4 +30,6 @@ func _physics_process(delta):
 
 
 func _on_AttackHitbox_body_entered(player):
-	attack(player, 1, Vector2(global_position.direction_to(player.global_position).x*600, -600))
+	var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
+	if player.hurt(damage):
+		player.addKnockback(Vector2(global_position.direction_to(player.global_position).x*600, -600), true)

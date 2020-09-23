@@ -9,6 +9,11 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Object",
+"class": "Damage",
+"language": "GDScript",
+"path": "res://Living/Damage.gd"
+}, {
 "base": "",
 "class": "GitAPI",
 "language": "NativeScript",
@@ -18,10 +23,17 @@ _global_script_classes=[ {
 "class": "Living",
 "language": "GDScript",
 "path": "res://Living/Living.gd"
+}, {
+"base": "Object",
+"class": "PlayerData",
+"language": "GDScript",
+"path": "res://PlayerData.gd"
 } ]
 _global_script_class_icons={
+"Damage": "",
 "GitAPI": "",
-"Living": ""
+"Living": "",
+"PlayerData": ""
 }
 
 [application]
@@ -113,7 +125,8 @@ pause={
 
 2d_physics/layer_1="Environment"
 2d_physics/layer_2="Player"
-2d_physics/layer_3="Living"
+2d_physics/layer_3="Attackable"
+2d_physics/layer_4="Hookable"
 
 [rendering]
 

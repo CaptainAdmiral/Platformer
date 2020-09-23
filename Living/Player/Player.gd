@@ -50,7 +50,8 @@ var comboFrames : int = 0
 
 var hurtFrames : int = 0
 
-var Hook = load("res://Player/Tools/Grappling Hook/Hook.tscn")
+export(String, FILE, "*.tscn") var HookPath
+onready var Hook = load(HookPath)
 var hook : KinematicBody2D = null
 
 var maxHookCharges: int = 1
@@ -75,9 +76,11 @@ var slideFrames : int = 0
 var onGround = false
 var prevOnGround = false
 
+var checkpointScene : Node
+var checkpoint : Node
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	Globals.player = self
 	fallSpeed = FALL_SPEED
 
 func _physics_process(_delta):
@@ -136,8 +139,8 @@ func _physics_process(_delta):
 	
 	######################## ON GROUND ##################################
 	if is_on_floor():	
-		hookCharges = 2
-		dashCharges = 1
+		refreshHook()
+		refreshDash()
 		jumpGraceFrames = JUMP_GRACE_FRAMES
 		
 		if prevOnGround == false:
@@ -399,22 +402,30 @@ func swingSword() -> void:
 	
 	if hook != null:
 		hook.setDead()
+		
+	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
 	for body in $AttackArea.get_overlapping_bodies():
-		assert(body is Living)
-		
-		var knockback = motion + global_position.direction_to(body.global_position)*ATTACK_KNOCKBACK
-		if body.is_on_floor():
-			knockback.y = min(-300, knockback.y)
-		
-		attack(body, 1*combo, knockback)
-		if body.isDead:
-			onKill(body)
-		
-		hitSomething = true
-	if isDownSwing and hitSomething:
-		motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
-		
-func hurt() -> bool:
+		print(body.get_name())
+		if body is Living:
+			var knockback = motion + global_position.direction_to(body.global_position)*ATTACK_KNOCKBACK
+			if body.is_on_floor():
+				knockback.y = min(-300, knockback.y)
+			
+			if body.hurt(damage):
+				body.addKnockback(knockback, true)
+				hitSomething = true
+			
+		if body.is_in_group("attackable"):
+			body.onAttacked(damage)
+			
+		if isDownSwing and hitSomething:
+			swordPogo()
+			
+
+func swordPogo():
+	motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
+
+func hurt(damage : Damage) -> bool:
 	if hurtFrames:
 		return false
 	hurtFrames = DAMAGE_IFRAMES
@@ -424,11 +435,20 @@ func hurt() -> bool:
 	jumpBoost = 0
 	if hook !=null:
 		hook.setDead()
-	return .hurt()
+	return .hurt(damage)
 	
 func onKill(body : Living) -> void:
 	combo += 1
 	comboFrames = maxComboFrames
+	
+	refreshDash()
+	refreshHook()
+	
+func refreshDash():
+	dashCharges = maxDashCharges
+	
+func refreshHook():
+	hookCharges = maxHookCharges
 	
 func setDead() -> void:
 # warning-ignore:return_value_discarded

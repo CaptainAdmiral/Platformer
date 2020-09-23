@@ -1,7 +1,6 @@
 extends Node
 
 
-var player = null
 enum Direction {UP, DOWN, LEFT, RIGHT}
 
 

@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Player Idle.png-dab9a428e26cb2bf93354c61eb037e38.stex"
+path="res://.import/Player Running Jump.png-efc54dc0a2ac66edeb2a9f6e9f33b418.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Player/Assets/Player Idle.png"
-dest_files=[ "res://.import/Player Idle.png-dab9a428e26cb2bf93354c61eb037e38.stex" ]
+source_file="res://Living/Player/Assets/Player Running Jump.png"
+dest_files=[ "res://.import/Player Running Jump.png-efc54dc0a2ac66edeb2a9f6e9f33b418.stex" ]
 
 [params]
 

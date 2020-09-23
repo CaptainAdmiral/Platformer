@@ -32,17 +32,16 @@ func _physics_process(delta):
 		if collision!=null:
 			length = global_position.distance_to(shooter.global_position)+10
 			attachedTo = collision.collider
-			if !attachedTo is Living:
+			if attachedTo is TileMap:
 				offset = attachedTo.global_position - collision.position
 			set_collision_mask(0)
 
 		if global_position.distance_to(startPos) > MAX_LENGTH:
-			#TODO replace with timer based max length
 			setDead()
 			return
 		
 	else:
-		position = attachedTo.position - offset
+		global_position = attachedTo.global_position - offset
 		
 		##### draw links and adjust size according to length
 		links.rotation = self.position.angle_to_point(shooter.global_position) + deg2rad(90)
@@ -50,14 +49,14 @@ func _physics_process(delta):
 		links.region_rect.size.y = length * 2
 		
 	if attachedTo != null:
-		if isDashing or attachedTo is Living:
+		if isDashing or "canBePulled" in attachedTo:
 			if attachedTo != null and shooter != null:
 				if length <= 0 or shooter.position.distance_to(position) < DASH_SPEED*delta*2:
 					setDead()
 					return
 				else:
 					length = max(0, length - DASH_SPEED*delta)
-					if !isDashing and attachedTo is Living and attachedTo.canBePulled:
+					if !isDashing and "canBePulled" in attachedTo and attachedTo.canBePulled:
 						attachedTo.motion = attachedTo.position.direction_to(shooter.position).normalized()*DASH_SPEED*0.25
 					else:
 						#Locks the player into a linear path while dashing, disable this line
@@ -74,7 +73,7 @@ func _physics_process(delta):
 			var ang = atan2(y_dist, x_dist)
 			var motionAng = atan2(shooter.motion.y, shooter.motion.x)
 			
-			if(attachedTo is Living and attachedTo.canBePulled and !isDashing):
+			if("canBePulled" in attachedTo and attachedTo.canBePulled and !isDashing):
 				attachedTo.move_and_slide(-Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
 			else:
 				shooter.move_and_slide(Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
@@ -104,7 +103,7 @@ func onCollision(body_id, body, body_shape, area_shape):
 		attachedTo = body
 		offset = body.position - position
 		
-		if body is Living:
+		if "canBePulled" in body:
 			dashBufferFrames = 0
 		
 func setDead():
