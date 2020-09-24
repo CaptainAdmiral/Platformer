@@ -231,9 +231,6 @@ func _physics_process(_delta):
 			motion = dashDirection * DASH_SPEED
 			if !dashFrames:
 				motion = dashDirection * AIR_SPEED * 1.3
-				
-	
-	motion = move_and_slide(motion, Vector2(0, -1))	
 
 func getDirectionFromInput() -> Vector2:
 	var x = 0
@@ -287,7 +284,7 @@ func slide() -> void:
 			slideFrames = SLIDE_FRAMES
 			motion.x -= RUN_SPEED*1.75
 	
-func setCrouching(crouching) -> void:
+func setCrouching(crouching : bool) -> void:
 	if isCrouching == crouching:
 		return
 		
@@ -369,8 +366,8 @@ func wallJump(direction) -> void:
 	jumpBoost=JUMP_BOOST_FRAMES
 	dashFrames = 0
 
-func dash(direction) -> void:
-	if slideFrames:
+func dash(direction : Vector2) -> void:
+	if slideFrames or direction == Vector2(0,0):
 		return
 	dashCharges -= 1
 	if hook != null and hook.isDashing:
@@ -397,15 +394,13 @@ func swingSword() -> void:
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5
 	var hitSomething = false
 	
-	$AttackArea.rotation = rot
-	
-	
 	if hook != null:
 		hook.setDead()
 		
 	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
 	for body in $AttackArea.get_overlapping_bodies():
-		print(body.get_name())
+		if body == self:
+			continue
 		if body is Living:
 			var knockback = motion + global_position.direction_to(body.global_position)*ATTACK_KNOCKBACK
 			if body.is_on_floor():
@@ -473,3 +468,8 @@ func onAnimationFinished() -> void:
 	
 	if anim == "run start":
 		$AnimatedSprite.play("run")
+
+
+func _input(event):
+	if event is InputEventMouseMotion:
+		$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)

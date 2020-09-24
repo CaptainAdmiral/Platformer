@@ -1,18 +1,18 @@
 extends Living
 
-
 var speed = 300
 var acceleration = 50
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	maxHealth = 6
+	canBePulled = true
+	
 	setFacing(facing)
 
 
 func _physics_process(delta):
-	motion = move_and_slide(motion, Vector2(0, -1))
-		
 	if abs(motion.x) < speed:
 		if facing == Direction.RIGHT:
 			motion.x = min(speed, motion.x+acceleration)

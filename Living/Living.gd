@@ -1,21 +1,26 @@
 extends KinematicBody2D
 class_name Living
 
-export var maxHealth : int = 0
-var health : float
+var maxHealth : int = 1
+var health : int
 var isDead = false
-export var countsAsKill : bool = true
-export var fallSpeed : int = 30
+var countsAsKill : bool = true
+var fallSpeed : int = 30
 #Whether or not the player can pull with the grappling hook
-export var canBePulled : bool = false
+var canBePulled : bool = false
 #A higher knockback multiplier will result in more knockback taken
-export var knockbackMultiplier : float = 1
+var knockbackMultiplier : float = 1
 var motion = Vector2()
+var freezeFrames : int
+var handleOwnMovement : bool = false
 var Direction = Globals.Direction
 export(Globals.Direction) var facing = Globals.Direction.RIGHT
 
+var rng = RandomNumberGenerator.new()
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	rng.randomize()
 	health = maxHealth
 
 #Sets the direction the entity is facing
@@ -28,12 +33,23 @@ func setFacing(direction) -> void:
 	
 	scale.x*=-1
 	facing = direction
+	
 		
 func _physics_process(delta):
-	motion.y += fallSpeed
+	if !freezeFrames:
+		motion.y += fallSpeed
 	
 	if(is_on_floor() and motion.y > fallSpeed):
 		motion.y = fallSpeed
+	if !handleOwnMovement and !freezeFrames:
+		motion = move_and_slide(motion, Vector2(0, -1))
+		
+	if freezeFrames:
+		freezeFrames -= 1
+		
+#Does not add freeze frames to the existing number of frames, instead updates to whichever number is higher
+func addFreezeFrames(frames : int):
+	freezeFrames = max(frames, freezeFrames)
 
 #Directly decreases health by the given amount
 func damage(amount : float) -> void:

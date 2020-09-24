@@ -5,11 +5,11 @@
 [ext_resource path="res://chain_repeating_unit.png" type="Texture" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 8.76501, 10.9217 )
+extents = Vector2( 16.6747, 15.664 )
 
 [node name="Hook" type="KinematicBody2D"]
 collision_layer = 0
-collision_mask = 13
+collision_mask = 9
 script = ExtResource( 2 )
 
 [node name="Links" type="Sprite" parent="."]

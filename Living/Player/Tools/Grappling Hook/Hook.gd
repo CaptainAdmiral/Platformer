@@ -18,6 +18,8 @@ onready var links = $Links
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	startPos = global_position
+	if shooter != null:
+		add_collision_exception_with(shooter)
 	
 func _physics_process(delta):
 	if shooter == null:
@@ -57,19 +59,23 @@ func _physics_process(delta):
 				else:
 					length = max(0, length - DASH_SPEED*delta)
 					if !isDashing and "canBePulled" in attachedTo and attachedTo.canBePulled:
+						if shooter != null:
+							shooter.addFreezeFrames(1)
 						attachedTo.motion = attachedTo.position.direction_to(shooter.position).normalized()*DASH_SPEED*0.25
 					else:
 						#Locks the player into a linear path while dashing, disable this line
 						#To allow the player to continue swinging while dashing
 						#The magnitude of the vector (controlled by the coeficient at the end) determines the
 						#carryover speed when the dash ends
-						shooter.motion = shooter.position.direction_to(position).normalized()*DASH_SPEED*0.35
+						shooter.motion = shooter.position.direction_to(position).normalized()*DASH_SPEED*0.5
+						if attachedTo is Living:
+							attachedTo.addFreezeFrames(5)
 			
 		if global_position.distance_to(shooter.global_position) > length:
 			var dist = global_position.distance_to(shooter.global_position)
 			var x_dist = shooter.global_position.x - global_position.x
 			var y_dist = shooter.global_position.y - global_position.y
-			var mag = sqrt(pow(shooter.motion.x, 2)+pow(shooter.motion.y, 2))
+			var mag = shooter.motion.length()
 			var ang = atan2(y_dist, x_dist)
 			var motionAng = atan2(shooter.motion.y, shooter.motion.x)
 			
