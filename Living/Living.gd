@@ -1,7 +1,7 @@
 extends KinematicBody2D
 class_name Living
 
-var maxHealth : int = 1
+var maxHealth : int = 1 setget setMaxHealth
 var health : int
 var isDead = false
 var countsAsKill : bool = true
@@ -15,6 +15,8 @@ var freezeFrames : int
 var handleOwnMovement : bool = false
 var Direction = Globals.Direction
 export(Globals.Direction) var facing = Globals.Direction.RIGHT
+var onGround = false
+var prevOnGround = false
 
 var rng = RandomNumberGenerator.new()
 
@@ -22,7 +24,22 @@ var rng = RandomNumberGenerator.new()
 func _ready():
 	rng.randomize()
 	health = maxHealth
-
+		
+func _physics_process(delta):
+	prevOnGround = onGround
+	onGround = is_on_floor()
+	
+	if !freezeFrames:
+		motion.y += fallSpeed
+	
+	if(is_on_floor() and motion.y > fallSpeed):
+		motion.y = fallSpeed
+	if !handleOwnMovement and !freezeFrames:
+		motion = move_and_slide(motion, Vector2(0, -1))
+		
+	if freezeFrames:
+		freezeFrames -= 1
+		
 #Sets the direction the entity is facing
 #You should override this if inverting the scale is not desired such as
 #When you have a node that should always be on the left/right side
@@ -34,18 +51,22 @@ func setFacing(direction) -> void:
 	scale.x*=-1
 	facing = direction
 	
+func turnAround():
+	if facing == Direction.RIGHT:
+		setFacing(Direction.LEFT)
+	elif facing == Direction.LEFT:
+		setFacing(Direction.RIGHT)
 		
-func _physics_process(delta):
-	if !freezeFrames:
-		motion.y += fallSpeed
+#Returns 1 if the direction coresponds to a positive change along the axis, else -1
+func getSignForDirection() -> int:
+	if facing == Direction.RIGHT or facing == Direction.DOWN:
+		return 1
+	else:
+		return -1
 	
-	if(is_on_floor() and motion.y > fallSpeed):
-		motion.y = fallSpeed
-	if !handleOwnMovement and !freezeFrames:
-		motion = move_and_slide(motion, Vector2(0, -1))
-		
-	if freezeFrames:
-		freezeFrames -= 1
+func setMaxHealth(amount : int) -> void:
+	maxHealth = amount
+	health = amount
 		
 #Does not add freeze frames to the existing number of frames, instead updates to whichever number is higher
 func addFreezeFrames(frames : int):

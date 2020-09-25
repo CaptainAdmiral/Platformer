@@ -3,15 +3,14 @@ extends Living
 
 const MAX_AGRO_RANGE : float = 1500.0
 var driftSpeed = 20
-var attackAcceleration = 30
+var attackAcceleration = 40
 
 var target : Living = null
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	maxHealth = 3
-	health = maxHealth
+	setMaxHealth(3)
 	fallSpeed = 0
 	canBePulled = true
 	knockbackMultiplier = 1.5
@@ -37,16 +36,18 @@ func _physics_process(delta):
 		if drone == self:
 			continue
 		var dist = max(20, global_position.distance_squared_to(drone.global_position))
-		motion -= 200000*global_position.direction_to(drone.global_position)/dist
+		motion -= 150000*global_position.direction_to(drone.global_position)/dist
 			
 	if target != null:
-		var maxDist = 600
-		var dist = max(300, global_position.distance_to(target.global_position))*1.2
+		var maxDist = 800
+		var dist = max(400, global_position.distance_to(target.global_position))*1.2
 		motion += attackAcceleration*global_position.direction_to(target.global_position)
 		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist
 
 
 func _on_DetectionArea_body_entered(body):
+	if target != null:
+		return
 	if body.is_in_group("players"):
 		target = body
 		$AnimatedSprite.play("agro")

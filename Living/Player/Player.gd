@@ -73,20 +73,15 @@ var isCrouching : bool = false
 
 var slideFrames : int = 0
 
-var onGround = false
-var prevOnGround = false
-
 var checkpointScene : Node
 var checkpoint : Node
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	fallSpeed = FALL_SPEED
+	setMaxHealth(6)
 
-func _physics_process(_delta):
-	prevOnGround = onGround
-	onGround = is_on_floor()
-	
+func _physics_process(_delta):	
 	if comboFrames:
 		comboFrames -= 1
 		if comboFrames == 0:
@@ -391,7 +386,7 @@ func swingSword() -> void:
 	attackCooldownFrames = ATTACK_COOLDOWN_FRAMES
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
-	var isDownSwing = rot > PI/5 and rot < 4*PI/5
+	var isDownSwing = rot > PI/5 and rot < 4*PI/5 or !onGround
 	var hitSomething = false
 	
 	if hook != null:
