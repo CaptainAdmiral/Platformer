@@ -19,7 +19,7 @@ position = Vector2( -1824, 64 )
 [node name="ParallaxBackground" parent="." instance=ExtResource( 3 )]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
-position = Vector2( 1664, 144.983 )
+position = Vector2( -704, 128 )
 
 [node name="Enemy" parent="." instance=ExtResource( 4 )]
 position = Vector2( -32, 64 )
