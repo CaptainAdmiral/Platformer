@@ -10,28 +10,18 @@ const FALL_SPEED = 30
 const AIR_FRICTION = 0.95
 
 const JUMP_VELOCITY = 500
-const JUMP_BOOST_FRAMES = 15
-const JUMP_GRACE_FRAMES = 5
+const JUMP_BOOST_SPEED = 30
 
 const DASH_SPEED = 1800
-const DASH_FRAMES = 10
-const DASH_FREEZE_FRAMES = 3
 
 const CROUCH_SLOWDOWN = 0.875
 const SLIDE_SLOWDOWN = 0.95
-const SLIDE_FRAMES = 40
 
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 120
-const WALL_JUMP_GRACE_FRAMES=10
-const WALL_JUMP_GRACE_DISTANCE = 40
 
-const ATTACK_COOLDOWN_FRAMES = 15
 const ATTACK_KNOCKBACK = 1000
 const SWORD_POGO_VELOCITY = 700
-
-#How many frames the player is immune for after taking damage
-const DAMAGE_IFRAMES = 60
 
 const HOOK_SPEED = 4200
 
@@ -40,7 +30,6 @@ const AIR_SPEED = RUN_SPEED
 const AIR_ACCELERATION_FRAMES = RUN_ACCELERATION_FRAMES*2
 const AIR_ACCELERATION = AIR_SPEED / AIR_ACCELERATION_FRAMES
 const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
-const JUMP_BOOST_SPEED = JUMP_VELOCITY / JUMP_BOOST_FRAMES
 
 onready var inputBuffer = $InputBuffer
 
@@ -61,16 +50,9 @@ var maxHookCharges: int = 1
 var hookCharges : int = maxHookCharges
 var grappleWindup : int = 0
 
-var dashFrames : int = 0
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
-
-var jumpBoost : int = 0
-var jumpGraceFrames : int = 0
-
-var canLeftWallJump : int = 0
-var canRightWallJump : int = 0
 
 var isCrouching : bool = false
 
@@ -87,7 +69,7 @@ func _ready():
 	fallSpeed = FALL_SPEED
 	setMaxHealth(6)
 
-func _physics_process(_delta):	
+func _physics_process(_delta):
 	if comboFrames:
 		comboFrames -= 1
 		if comboFrames == 0:
@@ -142,7 +124,7 @@ func _physics_process(_delta):
 	if is_on_floor():	
 		refreshHook()
 		refreshDash()
-		jumpGraceFrames = JUMP_GRACE_FRAMES
+		$FrameCounters/JumpGrace.start()
 		
 		if prevOnGround == false:
 			onLand()
@@ -175,10 +157,9 @@ func _physics_process(_delta):
 		if prevOnGround == true:
 			onLeaveGround()
 		
-		if jumpBoost:
+		if $FrameCounters/JumpBoost.active():
 			if Input.is_action_pressed("up"):
 				motion.y-=JUMP_BOOST_SPEED
-			jumpBoost-=1
 			
 		if hook != null and hook.isTense():
 			slideFrames = 0
@@ -203,20 +184,17 @@ func _physics_process(_delta):
 			
 	
 	#Jump
-	if jumpGraceFrames:
-		jumpGraceFrames-=1
-		if inputBuffer.hasAction("up", false, 10) and hurtFrames < DAMAGE_IFRAMES - 5:
+	if $FrameCounters/JumpGrace.active():
+		if inputBuffer.hasAction("up", false, 10) and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
 			jump()
 	
 	#Wall Jump Movement
-	if canLeftWallJump:
-		canLeftWallJump-=1
+	if $FrameCounters/LeftWallJump.active():
 		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("right", false, 6):
 			wallJump(Direction.RIGHT)
 			
 		
-	if canRightWallJump:
-		canRightWallJump-=1
+	if $FrameCounters/RightWallJump.active():
 		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("left", false, 6):
 			wallJump(Direction.LEFT)
 		
@@ -224,14 +202,15 @@ func _physics_process(_delta):
 		dash(getDirectionFromInput())	
 
 	#Dash
-	if dashFrames:
-		dashFrames -= 1
-		if dashFrames >= DASH_FRAMES:
-			motion = Vector2(0,0)
-		else:
-			motion = dashDirection * DASH_SPEED
-			if !dashFrames:
-				motion = dashDirection * AIR_SPEED * 1.3
+	if $FrameCounters/DashFreeze.active():
+		motion = Vector2(0,0)		
+	elif $FrameCounters/DashFreeze.justFinished:
+		$FrameCounters/Dash.start()
+			
+	if $FrameCounters/Dash.active():
+		motion = dashDirection * DASH_SPEED
+	elif $FrameCounters/Dash.justFinished:
+		motion = dashDirection * AIR_SPEED * 1.3
 
 func getDirectionFromInput() -> Vector2:
 	var x = 0
@@ -256,16 +235,15 @@ func setFacing(direction) -> void:
 		$AnimatedSprite.flip_h = false
 	
 func jump() -> void:
-	jumpGraceFrames=0
+	$FrameCounters/JumpGrace.stop()
 	
 	motion.y -= JUMP_VELOCITY
-	if slideFrames < SLIDE_FRAMES * 0.5:
-		jumpBoost = JUMP_BOOST_FRAMES
+	if $FrameCounters/Slide.getFrame() < $FrameCounters/Slide.getActiveFrames() * 0.5:
+		$FrameCounters/JumpBoost.start()
 	else:
-# warning-ignore:integer_division
-		jumpBoost = JUMP_BOOST_FRAMES / 2
+		$FrameCounters/JumpBoost.setFrame($FrameCounters/JumpBoost.getActiveFrames()/2)
 	
-	slideFrames = 0
+	$FrameCounters/Slide.stop()
 	if $AnimatedSprite.animation == "idle":
 		$AnimatedSprite.play("jump")
 	elif $AnimatedSprite.animation == "run start":
@@ -279,10 +257,10 @@ func slide() -> void:
 	if !slideFrames and !isCrouching:
 		setCrouching(true)
 		if motion.x >= RUN_SPEED*0.75:
-			slideFrames = SLIDE_FRAMES
+			$FrameCounters/Slide.start()
 			motion.x += RUN_SPEED*1.75
 		elif -motion.x >= RUN_SPEED*0.75:
-			slideFrames = SLIDE_FRAMES
+			$FrameCounters/Slide.start()
 			motion.x -= RUN_SPEED*1.75
 	
 func setCrouching(crouching : bool) -> void:
@@ -349,23 +327,24 @@ func airDrift(direction) -> void:
 			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
 			
 func _on_Right_body_entered(_body):
-	canRightWallJump = WALL_JUMP_GRACE_FRAMES
+	$FrameCounters/RightWallJump.start()
 
 func _on_Left_body_entered(_body):
-	canLeftWallJump = WALL_JUMP_GRACE_FRAMES
+	$FrameCounters/LeftWallJump.start()
 
 func wallJump(direction) -> void:
 	motion.y=-WALL_JUMP_VELOCITY.y
 	if direction == Direction.RIGHT:
 		motion.x = WALL_JUMP_VELOCITY.x
-		canLeftWallJump = 0
+		$FrameCounters/LeftWallJump.stop()
 		setFacing(Direction.RIGHT)
 	elif direction == Direction.LEFT:
 		motion.x = -WALL_JUMP_VELOCITY.x
-		canRightWallJump = 0
+		$FrameCounters/RightWallJump.stop()
 		setFacing(Direction.LEFT)
-	jumpBoost=JUMP_BOOST_FRAMES
-	dashFrames = 0
+	$FrameCounters/JumpBoost.start()
+	$FrameCounters/DashFreeze.stop()
+	$FrameCounters/Dash.stop()
 
 func dash(direction : Vector2) -> void:
 	if slideFrames or direction == Vector2(0,0):
@@ -377,7 +356,7 @@ func dash(direction : Vector2) -> void:
 		motion += direction * DASH_SPEED * 0.5
 	else:
 		dashDirection = direction
-		dashFrames = DASH_FRAMES + DASH_FREEZE_FRAMES
+		$FrameCounters/DashFreeze.start()
 		
 		
 func throwHook() -> void:
@@ -389,7 +368,7 @@ func throwHook() -> void:
 	get_parent().add_child(hook)
 	
 func swingSword() -> void:
-	attackCooldownFrames = ATTACK_COOLDOWN_FRAMES
+	$FrameCounters/AttackCooldown.start()
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5 or (!onGround and swordPogoAnyAngle)
@@ -424,11 +403,12 @@ func swordPogo():
 func hurt(damage : Damage) -> bool:
 	if hurtFrames:
 		return false
-	hurtFrames = DAMAGE_IFRAMES
-	attackCooldownFrames = ATTACK_COOLDOWN_FRAMES
-	dashFrames = 0
-	jumpGraceFrames = 0
-	jumpBoost = 0
+	$FrameCounters/DamageInvincibility.start()
+	$FrameCounters/AttackCooldown.start()
+	$FrameCounters/DashFreeze.stop()
+	$FrameCounters/Dash.stop()
+	$FrameCounters/JumpGrace.stop()
+	$FrameCounters/JumpBoost.stop()
 	if hook !=null:
 		hook.setDead()
 	return .hurt(damage)
@@ -476,3 +456,4 @@ func onAnimationFinished() -> void:
 func _input(event):
 	if event is InputEventMouseMotion:
 		$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)
+		

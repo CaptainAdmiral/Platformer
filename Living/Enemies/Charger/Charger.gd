@@ -4,8 +4,6 @@ var target : Living = null
 var acceleration = 40
 var runSpeedIdle = 150
 var runSpeedAgro = 1700
-const TURN_AROUND_COOLDOWN = 10
-var turnAroundCooldownFrames : int = 0
 const MAX_AGRO_RANGE : float = 3000.0
 export var patrolRange = 500
 var patrolPoint : Vector2 = Vector2()
@@ -19,16 +17,13 @@ func _ready():
 
 
 func _physics_process(delta):
-	if turnAroundCooldownFrames:
-		turnAroundCooldownFrames -= 1
-	
-	if onGround and !turnAroundCooldownFrames:
+	if onGround and !$FrameCounter/TurnAround.active():
 		if target != null:
 			if target.global_position.x - global_position.x > 0:
 				setFacing(Direction.RIGHT)
 			else:
 				setFacing(Direction.LEFT)
-			turnAroundCooldownFrames = TURN_AROUND_COOLDOWN
+			$FrameCounter/TurnAround.start()
 		elif abs(global_position.x - patrolPoint.x) > patrolRange:
 			if global_position.x - patrolPoint.x < 0:
 				setFacing(Direction.RIGHT)

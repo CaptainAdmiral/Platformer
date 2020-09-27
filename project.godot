@@ -14,10 +14,20 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Living/Damage.gd"
 }, {
+"base": "Node",
+"class": "FrameCounter",
+"language": "GDScript",
+"path": "res://Living/FrameCounter.gd"
+}, {
 "base": "",
 "class": "GitAPI",
 "language": "NativeScript",
 "path": "res://git_api.gdns"
+}, {
+"base": "Node",
+"class": "InputBuffer",
+"language": "GDScript",
+"path": "res://Living/Player/InputBuffer.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Living",
@@ -31,7 +41,9 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Damage": "",
+"FrameCounter": "",
 "GitAPI": "",
+"InputBuffer": "",
 "Living": "",
 "PlayerData": ""
 }

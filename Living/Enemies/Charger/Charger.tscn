@@ -1,38 +1,39 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Living/Enemies/Charger/Charger.gd" type="Script" id=1]
 [ext_resource path="res://Living/Enemies/Charger/Assets/run at you enemy.png" type="Texture" id=2]
+[ext_resource path="res://Living/FrameCounter.gd" type="Script" id=3]
 
-[sub_resource type="RectangleShape2D" id=4]
+[sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 56.6341 )
 
-[sub_resource type="RectangleShape2D" id=5]
+[sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 45, 65 )
 
-[sub_resource type="AtlasTexture" id=1]
+[sub_resource type="AtlasTexture" id=3]
 atlas = ExtResource( 2 )
 region = Rect2( 0, 0, 37, 57 )
 
-[sub_resource type="AtlasTexture" id=2]
+[sub_resource type="AtlasTexture" id=4]
 atlas = ExtResource( 2 )
 region = Rect2( 37, 0, 37, 57 )
+
+[sub_resource type="AtlasTexture" id=5]
+atlas = ExtResource( 2 )
+region = Rect2( 0, 0, 37, 57 )
 
 [sub_resource type="AtlasTexture" id=6]
 atlas = ExtResource( 2 )
-region = Rect2( 0, 0, 37, 57 )
-
-[sub_resource type="AtlasTexture" id=7]
-atlas = ExtResource( 2 )
 region = Rect2( 37, 0, 37, 57 )
 
-[sub_resource type="SpriteFrames" id=3]
+[sub_resource type="SpriteFrames" id=7]
 animations = [ {
-"frames": [ SubResource( 1 ), SubResource( 2 ) ],
+"frames": [ SubResource( 3 ), SubResource( 4 ) ],
 "loop": true,
 "name": "idle",
 "speed": 4.0
 }, {
-"frames": [ SubResource( 6 ), SubResource( 7 ) ],
+"frames": [ SubResource( 5 ), SubResource( 6 ) ],
 "loop": true,
 "name": "agro",
 "speed": 12.0
@@ -43,14 +44,14 @@ collision_layer = 12
 script = ExtResource( 1 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource( 4 )
+shape = SubResource( 1 )
 
 [node name="AttackArea" type="Area2D" parent="."]
 collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
-shape = SubResource( 5 )
+shape = SubResource( 2 )
 
 [node name="FallDetector" type="RayCast2D" parent="."]
 position = Vector2( 0, 30 )
@@ -64,7 +65,13 @@ collision_mask = 3
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 scale = Vector2( 2, 2 )
-frames = SubResource( 3 )
+frames = SubResource( 7 )
 animation = "idle"
 playing = true
+
+[node name="FrameCounter" type="Node" parent="."]
+
+[node name="TurnAround" type="Node" parent="FrameCounter"]
+script = ExtResource( 3 )
+activeFrames = 10
 [connection signal="body_entered" from="AttackArea" to="." method="_on_AttackArea_body_entered"]

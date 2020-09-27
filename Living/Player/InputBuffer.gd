@@ -1,5 +1,7 @@
 extends Node
 
+class_name InputBuffer
+
 var size
 var buffer=[]
 var mouseLocked = true
@@ -47,6 +49,7 @@ func add(input:InputEvent):
 	
 #Returns true if the input was pressed within the specified number of frames
 func hasAction(action:String, release:bool = false, frames:int = size):
+# warning-ignore:narrowing_conversion
 	frames = min(frames, size)
 	
 	for frame in range(frames):
