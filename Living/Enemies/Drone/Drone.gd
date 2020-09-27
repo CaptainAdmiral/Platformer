@@ -3,7 +3,7 @@ extends Living
 
 const MAX_AGRO_RANGE : float = 1500.0
 var driftSpeed = 20
-var attackAcceleration = 40
+var attackAcceleration = 50
 var attackingFrames : int = 0
 
 var target : Living = null
@@ -14,7 +14,7 @@ func _ready():
 	setMaxHealth(3)
 	fallSpeed = 0
 	canBePulled = true
-	knockbackMultiplier = 1.5
+	knockbackMultiplier = 2
 	motion = Vector2(driftSpeed, 0).rotated(rng.randf_range(0, 2*PI))
 	$AnimatedSprite.frame = rng.randi()%5+1
 
@@ -40,7 +40,7 @@ func _physics_process(delta):
 		for drone in get_tree().get_nodes_in_group("drones"):
 			if drone == self:
 				continue
-			var dist = max(20, global_position.distance_squared_to(drone.global_position))
+			var dist = max(100, global_position.distance_squared_to(drone.global_position))
 			motion -= 150000*global_position.direction_to(drone.global_position)/dist
 			
 	if target != null:
@@ -58,7 +58,7 @@ func _physics_process(delta):
 				if player.hurt(damage):
 					player.addKnockback(Vector2(global_position.direction_to(player.global_position).x*600, -600), true)
 		
-		if !attackingFrames and rng.randi()%300 == 0:
+		if !attackingFrames and rng.randi()%600 == 0:
 			$AnimatedSprite.play("attack")
 			$AnimatedSprite.frame = 0
 			attackingFrames = 60

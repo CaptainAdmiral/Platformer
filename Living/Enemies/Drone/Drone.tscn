@@ -12,7 +12,7 @@ radius = 32.0
 radius = 400.0
 
 [sub_resource type="CircleShape2D" id=3]
-radius = 96.0
+radius = 70.0
 
 [sub_resource type="AtlasTexture" id=4]
 atlas = ExtResource( 1 )
@@ -200,7 +200,7 @@ cast_to = Vector2( 0, 300 )
 scale = Vector2( 3, 3 )
 frames = SubResource( 38 )
 animation = "idle"
-frame = 1
+frame = 3
 playing = true
 [connection signal="body_entered" from="AgroArea" to="." method="_on_DetectionArea_body_entered"]
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="_on_AnimatedSprite_animation_finished"]
