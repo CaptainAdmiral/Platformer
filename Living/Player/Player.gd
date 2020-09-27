@@ -1,5 +1,8 @@
 extends Living
 
+
+export var swordPogoAnyAngle = true
+
 const RUN_SPEED = 500
 const RUN_ACCELERATION_FRAMES = 20
 const GROUND_FRICTION = 0.7
@@ -75,6 +78,9 @@ var slideFrames : int = 0
 
 var checkpointScene : Node
 var checkpoint : Node
+
+var mana : int = 0
+var maxMana : int = 10
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -386,7 +392,7 @@ func swingSword() -> void:
 	attackCooldownFrames = ATTACK_COOLDOWN_FRAMES
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
-	var isDownSwing = rot > PI/5 and rot < 4*PI/5 or !onGround
+	var isDownSwing = rot > PI/5 and rot < 4*PI/5 or (!onGround and swordPogoAnyAngle)
 	var hitSomething = false
 	
 	if hook != null:
@@ -427,12 +433,14 @@ func hurt(damage : Damage) -> bool:
 		hook.setDead()
 	return .hurt(damage)
 	
-func onKill(body : Living) -> void:
+func onKill(living : Living) -> void:
 	combo += 1
 	comboFrames = maxComboFrames
 	
 	refreshDash()
 	refreshHook()
+	
+	mana += living.manaOnKill
 	
 func refreshDash():
 	dashCharges = maxDashCharges

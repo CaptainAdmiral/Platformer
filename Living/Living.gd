@@ -9,6 +9,7 @@ var fallSpeed : int = 30
 #Whether or not the player can pull with the grappling hook
 var canBePulled : bool = false
 #A higher knockback multiplier will result in more knockback taken
+var manaOnKill : int = 0
 var knockbackMultiplier : float = 1
 var motion = Vector2()
 var freezeFrames : int

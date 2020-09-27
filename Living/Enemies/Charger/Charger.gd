@@ -47,15 +47,18 @@ func _physics_process(delta):
 		
 	if target != null and global_position.distance_to(target.global_position) > MAX_AGRO_RANGE:
 		target = null
+		$View.enabled = true
 		$AnimatedSprite.play("idle")
 		
-	var collider = $View.get_collider()
-	if collider != null:
-		if collider.is_in_group("players"):
-			target = collider
-			if onGround:
-				motion.y += 300
-			$AnimatedSprite.play("agro")
+	if target == null:
+		var collider = $View.get_collider()
+		if collider != null:
+			if collider.is_in_group("players"):
+				target = collider
+				$View.enabled = false
+				if onGround:
+					motion.y -= 300
+				$AnimatedSprite.play("agro")
 
 
 func _on_AttackArea_body_entered(player):

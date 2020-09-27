@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Living/Player/Player.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Levels/Tiles/Tilesets/Bricks.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Living/Enemies/Spider/Spider.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Living/Enemies/Drone/Drone.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Living/Enemies/Charger/Charger.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Living/Enemies/Turret/Turret.tscn" type="PackedScene" id=7]
 
 [node name="Node2D" type="Node2D"]
 
@@ -33,9 +34,6 @@ position = Vector2( -1824, -256 )
 [node name="Drone3" parent="." instance=ExtResource( 5 )]
 position = Vector2( -2112, 144.983 )
 
-[node name="Living" parent="Drone3" instance=ExtResource( 6 )]
-position = Vector2( 3872, -16.9828 )
-
 [node name="Drone4" parent="." instance=ExtResource( 5 )]
 position = Vector2( -2624, -288 )
 
@@ -55,7 +53,7 @@ position = Vector2( -2848, -608 )
 position = Vector2( -2112, -320 )
 
 [node name="Drone10" parent="." instance=ExtResource( 5 )]
-position = Vector2( -256, -416 )
+position = Vector2( -352, -572 )
 
 [node name="Drone11" parent="." instance=ExtResource( 5 )]
 position = Vector2( -1216, -128 )
@@ -65,3 +63,6 @@ position = Vector2( -1632, -608 )
 
 [node name="Drone13" parent="." instance=ExtResource( 5 )]
 position = Vector2( -2400, -320 )
+
+[node name="Living" parent="." instance=ExtResource( 7 )]
+position = Vector2( 768, 144.983 )
