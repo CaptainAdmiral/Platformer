@@ -51,25 +51,20 @@ func _physics_process(delta):
 		links.region_rect.size.y = length * 2
 		
 	if attachedTo != null:
-		if isDashing or "canBePulled" in attachedTo:
+		if isDashing:
 			if attachedTo != null and shooter != null:
 				if length <= 0 or shooter.position.distance_to(position) < DASH_SPEED*delta*2:
 					setDead()
 					return
 				else:
 					length = max(0, length - DASH_SPEED*delta)
-					if !isDashing and "canBePulled" in attachedTo and attachedTo.canBePulled:
-						if shooter != null:
-							shooter.addFreezeFrames(1)
-						attachedTo.motion = attachedTo.position.direction_to(shooter.position).normalized()*DASH_SPEED*0.25
-					else:
-						#Locks the player into a linear path while dashing, disable this line
-						#To allow the player to continue swinging while dashing
-						#The magnitude of the vector (controlled by the coeficient at the end) determines the
-						#carryover speed when the dash ends
-						shooter.motion = shooter.position.direction_to(position).normalized()*DASH_SPEED*0.5
-						if attachedTo is Living:
-							attachedTo.addFreezeFrames(5)
+					#Locks the player into a linear path while dashing, disable this line
+					#To allow the player to continue swinging while dashing
+					#The magnitude of the vector (controlled by the coeficient at the end) determines the
+					#carryover speed when the dash ends
+					shooter.motion = shooter.position.direction_to(position).normalized()*DASH_SPEED*0.5
+					if attachedTo is Living:
+						attachedTo.addFreezeFrames(5)
 			
 		if global_position.distance_to(shooter.global_position) > length:
 			var dist = global_position.distance_to(shooter.global_position)
@@ -79,10 +74,7 @@ func _physics_process(delta):
 			var ang = atan2(y_dist, x_dist)
 			var motionAng = atan2(shooter.motion.y, shooter.motion.x)
 			
-			if("canBePulled" in attachedTo and attachedTo.canBePulled and !isDashing):
-				attachedTo.move_and_slide(-Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
-			else:
-				shooter.move_and_slide(Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
+			shooter.move_and_slide(Vector2((length-dist)*cos(ang), (length-dist)*sin(ang))/delta)
 			
 			if !isDashing:
 				#Component of motion perpendicular to point of grapple
