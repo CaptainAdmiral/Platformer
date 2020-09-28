@@ -33,12 +33,9 @@ const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
 
 onready var inputBuffer = $InputBuffer
 
-var attackCooldownFrames : int = 0
 var attackDamage : float  = 1
 var maxCombo : int = 3
 var combo : int = 1
-var maxComboFrames : int = 300
-var comboFrames : int = 0
 
 var hurtFrames : int = 0
 
@@ -56,13 +53,17 @@ var dashDirection = Vector2()
 
 var isCrouching : bool = false
 
-var slideFrames : int = 0
-
 var checkpointScene : Node
 var checkpoint : Node
 
-var mana : int = 0
-var maxMana : int = 10
+var mana : float = 0
+var maxMana : int = 100
+var manaOvercapDecay = 0.1
+var isHealing : bool = false
+var manaPerHealth : float = 20
+var manaUntilNextHeal : float  = manaPerHealth
+var isChargingHeal : bool = false
+var healCharge : int = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -70,10 +71,10 @@ func _ready():
 	setMaxHealth(6)
 
 func _physics_process(_delta):
-	if comboFrames:
-		comboFrames -= 1
-		if comboFrames == 0:
-			combo = 1
+	print(health)
+	print(mana)
+	print("\n")
+	
 	
 	######################## ANIMATIONS ##################################
 	if ($AnimatedSprite.animation == "run" or $AnimatedSprite.animation == "run start") and abs(motion.x) < 50:
@@ -88,16 +89,39 @@ func _physics_process(_delta):
 		elif $AnimatedSprite.animation == "run jump" or $AnimatedSprite.animation == "run":
 			$AnimatedSprite.play("fall")
 			$AnimatedSprite.set_frame(3)
+			
+	######################## MANA / HEALING ##################################
 	
+	if !isChargingHeal:
+		healCharge = 0
+	else:
+		healCharge+=1
+		if healCharge >= 120:
+			isHealing = true
+			isChargingHeal = false
+	
+	if mana == 0:
+		isHealing = false
+	elif mana > maxMana:
+		mana -= manaOvercapDecay
+		
+		
+	if isHealing:
+		if useMana(1):
+			manaUntilNextHeal-=1
+			if manaUntilNextHeal == 0:
+				heal(1)
+				manaUntilNextHeal = manaPerHealth
+	else:
+		manaUntilNextHeal = manaPerHealth
+			
 			
 	
 	######################## SLIDING / CROUCHING ##################################
 	
 	if !Input.is_action_pressed("down"):
-			setCrouching(false)
-	
-	if slideFrames:
-		slideFrames-=1
+		setCrouching(false)
+		isChargingHeal = false
 	
 	######################## GRAPPLING HOOK ##################################
 	
@@ -111,13 +135,7 @@ func _physics_process(_delta):
 		throwHook()
 		
 	######################## ATTACK ##################################
-	if attackCooldownFrames:
-		attackCooldownFrames -= 1
-		
-	if hurtFrames:
-		hurtFrames -= 1
-	
-	if Input.is_action_just_pressed("attack") and ! attackCooldownFrames:
+	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
 		swingSword()
 	
 	######################## ON GROUND ##################################
@@ -129,17 +147,18 @@ func _physics_process(_delta):
 		if prevOnGround == false:
 			onLand()
 			
-		if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
+		
+		if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or $FrameCounters/Slide.active()):
 			if Input.is_action_pressed("right"):
 				run(Direction.RIGHT)
 				
 			if Input.is_action_pressed("left"):
 				run(Direction.LEFT)
 				
-		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !slideFrames:
+		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !$FrameCounters/Slide.active():
 			motion.x *= GROUND_FRICTION
 		
-		if slideFrames:
+		if $FrameCounters/Slide.active():
 			motion.x *= SLIDE_SLOWDOWN
 		elif isCrouching:
 			motion.x *= CROUCH_SLOWDOWN
@@ -148,25 +167,30 @@ func _physics_process(_delta):
 			motion.x*=0.99
 			
 		if Input.is_action_pressed("down"):
-			slide()
-			setCrouching(true)
-			
+			if abs(motion.x) > RUN_SPEED/2:			
+				slide()
+				setCrouching(true)
+			else:
+				isChargingHeal = true
+				
 	
 	else:
 		######################## IN AIR ##################################
 		if prevOnGround == true:
 			onLeaveGround()
+			
+		isChargingHeal = false
 		
 		if $FrameCounters/JumpBoost.active():
 			if Input.is_action_pressed("up"):
 				motion.y-=JUMP_BOOST_SPEED
 			
 		if hook != null and hook.isTense():
-			slideFrames = 0
+			$FrameCounters/Slide.stop()
 		
 		#Air Movement
 		if hook == null or hook.attachedTo == null or !hook.isTense():
-			if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or slideFrames):
+			if !(Input.is_action_pressed("right") and Input.is_action_pressed("left") or $FrameCounters/Slide.active()):
 				if Input.is_action_pressed("right"):
 					airDrift(Direction.RIGHT)
 						
@@ -236,6 +260,7 @@ func setFacing(direction) -> void:
 	
 func jump() -> void:
 	$FrameCounters/JumpGrace.stop()
+	isChargingHeal = false
 	
 	motion.y -= JUMP_VELOCITY
 	if $FrameCounters/Slide.getFrame() < $FrameCounters/Slide.getActiveFrames() * 0.5:
@@ -254,7 +279,7 @@ func jump() -> void:
 		$AnimatedSprite.play("run jump")
 	
 func slide() -> void:
-	if !slideFrames and !isCrouching:
+	if !$FrameCounters/Slide.active() and !isCrouching:
 		setCrouching(true)
 		if motion.x >= RUN_SPEED*0.75:
 			$FrameCounters/Slide.start()
@@ -267,7 +292,7 @@ func setCrouching(crouching : bool) -> void:
 	if isCrouching == crouching:
 		return
 		
-	if slideFrames:
+	if $FrameCounters/Slide.active():
 		return
 		
 	var canStand = true
@@ -294,6 +319,9 @@ func setCrouching(crouching : bool) -> void:
 	
 	
 func run(direction) -> void:
+	if isChargingHeal:
+		return
+	
 	setFacing(direction)
 	
 	if $AnimatedSprite.animation == "idle":
@@ -347,7 +375,9 @@ func wallJump(direction) -> void:
 	$FrameCounters/Dash.stop()
 
 func dash(direction : Vector2) -> void:
-	if slideFrames or direction == Vector2(0,0):
+	if isChargingHeal:
+		return
+	if $FrameCounters/Slide.active() or direction == Vector2(0,0):
 		return
 	dashCharges -= 1
 	if hook != null and hook.isDashing:
@@ -360,6 +390,8 @@ func dash(direction : Vector2) -> void:
 		
 		
 func throwHook() -> void:
+	if isChargingHeal:
+		return
 	hookCharges -= 1
 	hook = Hook.instance()
 	hook.setShooter(self)
@@ -368,6 +400,8 @@ func throwHook() -> void:
 	get_parent().add_child(hook)
 	
 func swingSword() -> void:
+	if isChargingHeal:
+		return
 	$FrameCounters/AttackCooldown.start()
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
@@ -409,18 +443,30 @@ func hurt(damage : Damage) -> bool:
 	$FrameCounters/Dash.stop()
 	$FrameCounters/JumpGrace.stop()
 	$FrameCounters/JumpBoost.stop()
+	isChargingHeal = false
+	if isHealing:
+		mana = 0
+		isHealing = false
 	if hook !=null:
 		hook.setDead()
 	return .hurt(damage)
 	
 func onKill(living : Living) -> void:
 	combo += 1
-	comboFrames = maxComboFrames
+	$FrameCounters/ComboTimer.start()
 	
 	refreshDash()
 	refreshHook()
 	
 	mana += living.manaOnKill
+	
+func useMana(amount : float) -> bool:
+	assert(amount >= 0)
+	if amount <= mana:
+		mana -= amount
+		return true
+	else:
+		return false
 	
 func refreshDash():
 	dashCharges = maxDashCharges

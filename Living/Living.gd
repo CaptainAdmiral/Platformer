@@ -74,15 +74,15 @@ func addFreezeFrames(frames : int):
 	freezeFrames = max(frames, freezeFrames)
 
 #Directly decreases health by the given amount
-func damage(amount : float) -> void:
-	assert(amount > 0)
+func damage(amount : int) -> void:
+	assert(amount >= 0)
 	health -= amount
 	if health <= 0:
 		setDead()
 
 #Directly increases health by the given amount
-func heal(amount : float) -> void:
-	assert(amount > 0)
+func heal(amount : int) -> void:
+	assert(amount >= 0)
 	health = min(maxHealth, health + amount)
 	
 #Called as a result of being damaged to allow entities to handle their own
