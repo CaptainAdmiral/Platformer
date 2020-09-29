@@ -101,9 +101,6 @@ func onCollision(body_id, body, body_shape, area_shape):
 		attachedTo = body
 		offset = body.position - position
 		
-		if "canBePulled" in body:
-			dashBufferFrames = 0
-		
 func setDead():
 	attachedTo = null
 	shooter.hook = null

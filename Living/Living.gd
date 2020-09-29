@@ -24,7 +24,7 @@ func _ready():
 	rng.randomize()
 	health = maxHealth
 		
-func _physics_process(delta):
+func _physics_process(_delta):
 	prevOnGround = onGround
 	onGround = is_on_floor()
 	
@@ -69,6 +69,7 @@ func setMaxHealth(amount : int) -> void:
 		
 #Does not add freeze frames to the existing number of frames, instead updates to whichever number is higher
 func addFreezeFrames(frames : int):
+# warning-ignore:narrowing_conversion
 	freezeFrames = max(frames, freezeFrames)
 
 #Directly decreases health by the given amount
@@ -81,6 +82,7 @@ func damage(amount : int) -> void:
 #Directly increases health by the given amount
 func heal(amount : int) -> void:
 	assert(amount >= 0)
+# warning-ignore:narrowing_conversion
 	health = min(maxHealth, health + amount)
 	
 #Called as a result of being damaged to allow entities to handle their own
@@ -92,7 +94,7 @@ func hurt(damage : Damage) -> bool:
 	return true
 	
 #Called when hit if entitiy is part of "attackable" group
-func onAttacked(damage : Damage) -> void:
+func onAttacked(_damage : Damage) -> void:
 	pass
 
 #Adds a knockback vector to the players motion. If overwrite motion is true sets player motion instead

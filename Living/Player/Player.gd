@@ -50,6 +50,7 @@ var grappleWindup : int = 0
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
+var dashPogo : bool = false
 
 var isCrouching : bool = false
 
@@ -58,9 +59,10 @@ var checkpoint : Node
 
 var mana : float = 0
 var maxMana : int = 100
-var manaOvercapDecay = 0.1
+var manaOvercapDecay = 0.025
 var isHealing : bool = false
-var manaPerHealth : float = 20
+var manaPerHealth : float = 50
+var manaPerFrame : float = 0.2
 var manaUntilNextHeal : float  = manaPerHealth
 var isChargingHeal : bool = false
 var healCharge : int = 0
@@ -96,24 +98,28 @@ func _physics_process(_delta):
 		healCharge = 0
 	else:
 		healCharge+=1
-		if healCharge >= 120:
+		if healCharge >= 60:
 			isHealing = true
 			isChargingHeal = false
 	
-	if mana == 0:
-		isHealing = false
-	elif mana > maxMana:
+	if mana > maxMana:
 		mana -= manaOvercapDecay
 		
+	if health == maxHealth:
+		isHealing = false
 		
 	if isHealing:
-		if useMana(1):
-			manaUntilNextHeal-=1
-			if manaUntilNextHeal == 0:
+		if useMana(manaPerFrame):
+			manaUntilNextHeal-=manaPerFrame
+			if manaUntilNextHeal <= 0:
 				heal(1)
-				manaUntilNextHeal = manaPerHealth
+				manaUntilNextHeal += manaPerHealth
+		else:
+			isHealing = false
+			mana = 0
 	else:
-		manaUntilNextHeal = manaPerHealth
+		pass
+		#manaUntilNextHeal = manaPerHealth
 			
 			
 	
@@ -235,6 +241,9 @@ func _physics_process(_delta):
 		motion = dashDirection * DASH_SPEED
 	elif $FrameCounters/Dash.justFinished:
 		motion = dashDirection * AIR_SPEED * 1.3
+		if dashPogo:
+			dashPogo = false
+			swordPogo()
 
 func getDirectionFromInput() -> Vector2:
 	var x = 0
@@ -432,7 +441,10 @@ func swingSword() -> void:
 			
 
 func swordPogo():
-	motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
+	if $FrameCounters/Dash.active():
+		dashPogo = true
+	else:
+		motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
 
 func hurt(damage : Damage) -> bool:
 	if hurtFrames:
