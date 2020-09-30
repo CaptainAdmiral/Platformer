@@ -17,11 +17,8 @@ export(Globals.Direction) var facing = Globals.Direction.RIGHT
 var onGround = false
 var prevOnGround = false
 
-var rng = RandomNumberGenerator.new()
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	rng.randomize()
 	health = maxHealth
 		
 func _physics_process(_delta):

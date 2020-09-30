@@ -31,10 +31,10 @@ position = Vector2( -1824, -256 )
 position = Vector2( -2176, 104 )
 
 [node name="Drone4" parent="." instance=ExtResource( 5 )]
-position = Vector2( -2624, -288 )
+position = Vector2( -2688, -384 )
 
 [node name="Drone5" parent="." instance=ExtResource( 5 )]
-position = Vector2( -1216, -640 )
+position = Vector2( -2880, 128 )
 
 [node name="Drone6" parent="." instance=ExtResource( 5 )]
 position = Vector2( -2112, -576 )
@@ -43,22 +43,22 @@ position = Vector2( -2112, -576 )
 position = Vector2( -2496, -32 )
 
 [node name="Drone8" parent="." instance=ExtResource( 5 )]
-position = Vector2( -2848, -608 )
+position = Vector2( -3104, -256 )
 
 [node name="Drone9" parent="." instance=ExtResource( 5 )]
 position = Vector2( -2112, -320 )
 
 [node name="Drone10" parent="." instance=ExtResource( 5 )]
-position = Vector2( -352, -572 )
+position = Vector2( -544, -356 )
 
 [node name="Drone11" parent="." instance=ExtResource( 5 )]
 position = Vector2( -1216, -128 )
 
 [node name="Drone12" parent="." instance=ExtResource( 5 )]
-position = Vector2( -1632, -608 )
+position = Vector2( -1728, 140 )
 
 [node name="Drone13" parent="." instance=ExtResource( 5 )]
-position = Vector2( -2400, -320 )
+position = Vector2( -3424, 4 )
 
 [node name="Living" parent="." instance=ExtResource( 7 )]
 position = Vector2( 768, 144.983 )

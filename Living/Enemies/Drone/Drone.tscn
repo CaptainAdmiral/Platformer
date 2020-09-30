@@ -10,7 +10,7 @@
 radius = 32.0
 
 [sub_resource type="CircleShape2D" id=2]
-radius = 400.0
+radius = 600.0
 
 [sub_resource type="CircleShape2D" id=3]
 radius = 70.0
@@ -201,7 +201,7 @@ cast_to = Vector2( 0, 300 )
 scale = Vector2( 3, 3 )
 frames = SubResource( 38 )
 animation = "idle"
-frame = 4
+frame = 2
 playing = true
 
 [node name="FrameCounter" type="Node" parent="."]
@@ -212,7 +212,7 @@ activeFrames = 30
 
 [node name="AttackCooldown" type="Node" parent="FrameCounter"]
 script = ExtResource( 5 )
-activeFrames = 180
+activeFrames = 240
 
 [node name="AttackTargeting" type="Node" parent="FrameCounter"]
 script = ExtResource( 5 )

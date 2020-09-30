@@ -1,7 +1,7 @@
 extends Living
 
 
-const MAX_AGRO_RANGE : float = 1500.0
+const MAX_AGRO_RANGE : float = 2000.0
 var driftSpeed : float = 40
 var attackAcceleration : float = 50
 var nearHover = false
@@ -17,8 +17,8 @@ func _ready():
 	fallSpeed = 0
 	knockbackMultiplier = 2
 	manaOnKill = 10
-	motion = Vector2(driftSpeed, 0).rotated(rng.randf_range(0, 2*PI))
-	$AnimatedSprite.frame = rng.randi()%5+1
+	motion = Vector2(driftSpeed, 0).rotated(rand_range(0, 2*PI))
+	$AnimatedSprite.frame = randi()%5+1
 	
 func _process(delta):
 	if target != null:
@@ -34,20 +34,22 @@ func _physics_process(delta):
 		update()
 		
 	if $WallDetector.is_colliding():
-		var dist = max(50, global_position.distance_to($WallDetector.get_collision_point()))
-		motion -= 20000*global_position.direction_to($WallDetector.get_collision_point())/dist
+		var dist = max(100, global_position.distance_squared_to($WallDetector.get_collision_point()))
+		motion -= 1000000*global_position.direction_to($WallDetector.get_collision_point())/dist
 		
 	$WallDetector.rotate(2.1*PI/10)
 		
 	for drone in get_tree().get_nodes_in_group("drones"):
 		if drone == self:
 			continue
-		var dist = max(100, global_position.distance_squared_to(drone.global_position))
-		motion -= 150000*global_position.direction_to(drone.global_position)/dist
+		var dist = max(800, global_position.distance_squared_to(drone.global_position))
+		motion -= 200000*global_position.direction_to(drone.global_position)/dist
 			
 	if target != null:
-		var maxDist = 600 if nearHover else 800
-		var dist = max(400, global_position.distance_to(target.global_position))*1.2
+		if randi()%200 == 0:
+			nearHover = !nearHover
+		var maxDist = 400 if nearHover else 800
+		var dist = max(400, global_position.distance_to(target.global_position))
 		motion += attackAcceleration*global_position.direction_to(target.global_position)
 		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist
 		
@@ -58,7 +60,7 @@ func _physics_process(delta):
 				if player.hurt(damage):
 					player.addKnockback(global_position.direction_to(player.global_position)*1200, true)
 			$FrameCounter/AttackCooldown.start()
-			$FrameCounter/AttackCooldown.addFrames(rng.randi()%300)
+			$FrameCounter/AttackCooldown.addFrames(randi()%420)
 		
 		if $FrameCounter/AttackCooldown.justFinished:
 			$FrameCounter/AttackTargeting.start()
@@ -95,7 +97,7 @@ func _on_DetectionArea_body_entered(body):
 		return
 	if body.is_in_group("players"):
 		target = body
-		nearHover = rng.randi()%2
+		nearHover = randi()%2
 		$AnimatedSprite.play("agro")
 		$FrameCounter/AttackCooldown.start()
 
