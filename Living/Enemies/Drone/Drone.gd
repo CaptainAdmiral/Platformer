@@ -2,8 +2,9 @@ extends Living
 
 
 const MAX_AGRO_RANGE : float = 1500.0
-var driftSpeed = 40
-var attackAcceleration = 50
+var driftSpeed : float = 40
+var attackAcceleration : float = 50
+var nearHover = false
 
 var target : Living = null
 
@@ -45,7 +46,7 @@ func _physics_process(delta):
 		motion -= 150000*global_position.direction_to(drone.global_position)/dist
 			
 	if target != null:
-		var maxDist = 800
+		var maxDist = 600 if nearHover else 800
 		var dist = max(400, global_position.distance_to(target.global_position))*1.2
 		motion += attackAcceleration*global_position.direction_to(target.global_position)
 		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist
@@ -94,6 +95,7 @@ func _on_DetectionArea_body_entered(body):
 		return
 	if body.is_in_group("players"):
 		target = body
+		nearHover = rng.randi()%2
 		$AnimatedSprite.play("agro")
 		$FrameCounter/AttackCooldown.start()
 
