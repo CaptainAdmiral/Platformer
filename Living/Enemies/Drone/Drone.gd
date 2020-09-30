@@ -43,7 +43,10 @@ func _physics_process(delta):
 		if drone == self:
 			continue
 		var dist = max(800, global_position.distance_squared_to(drone.global_position))
-		motion -= 200000*global_position.direction_to(drone.global_position)/dist
+		if target == null:
+			motion -= 200000*global_position.direction_to(drone.global_position)/dist
+		else:
+			motion -= 800000*global_position.direction_to(drone.global_position)/dist
 			
 	if target != null:
 		if randi()%200 == 0:
