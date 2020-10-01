@@ -68,7 +68,7 @@ var healCharge : int = 0
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	fallSpeed = FALL_SPEED
-	setMaxHealth(6)
+	setMaxHealth(60)
 
 func _physics_process(_delta):
 	print(health)

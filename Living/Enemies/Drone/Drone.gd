@@ -45,9 +45,10 @@ func _physics_process(delta):
 	if target != null: 
 		var maxDist = 800
 		var dist = max(400, global_position.distance_to(target.global_position))*1.2
-		var speedMultiplier = 2 if !$FrameCounter/Attack.active() else 3 # does this need to adjust for player distance?
-		motion += attackAcceleration*global_position.direction_to(target.global_position) * speedMultiplier # Force Towards Player
-		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist # Balancing Motion
+		var speedMultiplier = 2 if !$FrameCounter/Attack.active() else 3 #
+		var balance_factor = 100 if !$FrameCounter/Attack.active() else 30
+		motion += attackAcceleration*global_position.direction_to(target.global_position) * speedMultiplier# Force Towards Player
+		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist * (exp(balance_factor/global_position.distance_to(target.global_position)))  # Balancing Motion
 		
 #		if attacking != null:
 #			if !$FrameCounter/Attack.active():
@@ -60,7 +61,8 @@ func _physics_process(delta):
 #				begin_attack()
 
 func controller_move(destination):
-	motion += 50*global_position.direction_to(destination)
+	if !(target == null):
+		motion += 40*global_position.direction_to(destination)
 
 func end_attack():
 	for body in $AttackArea.get_overlapping_bodies():
