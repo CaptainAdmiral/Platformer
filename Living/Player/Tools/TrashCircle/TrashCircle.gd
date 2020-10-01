@@ -22,7 +22,7 @@ func _physics_process(delta):
 	
 	# Clean arrays for dead drones (there's probably a better way to clean..)
 	for drone in active_drones:
-		if !is_instance_valid(drone):
+		if drone == null or !is_instance_valid(drone):
 			active_drones_destination.remove(active_drones.find(drone))
 			active_drones.erase(drone)
 	
@@ -60,7 +60,8 @@ func _physics_process(delta):
 	if !(active_drones == [null]):
 		var i = 0
 		for drone in active_drones:
-
+			if drone == null:
+				continue
 			if !(drone == attacker):
 				# send drone global position update (local stays same)
 				drone.get_node("../").controller_move(self.global_position + active_drones_destination[i])
