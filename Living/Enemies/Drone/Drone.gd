@@ -48,7 +48,7 @@ func _physics_process(delta):
 		var speedMultiplier = 2 if !$FrameCounter/Attack.active() else 3 #
 		var balance_factor = 100 if !$FrameCounter/Attack.active() else 30
 		motion += attackAcceleration*global_position.direction_to(target.global_position) * speedMultiplier# Force Towards Player
-		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist * (exp(balance_factor/global_position.distance_to(target.global_position)))  # Balancing Motion
+		motion -= attackAcceleration*maxDist*global_position.direction_to(target.global_position)/dist * (exp(balance_factor/max(100,global_position.distance_to(target.global_position))))  # Balancing Motion
 		
 #		if attacking != null:
 #			if !$FrameCounter/Attack.active():

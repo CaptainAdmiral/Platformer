@@ -23,8 +23,8 @@ func _physics_process(delta):
 	# Clean arrays for dead drones (there's probably a better way to clean..)
 	for drone in active_drones:
 		if !is_instance_valid(drone):
-			active_drones.erase(drone)
 			active_drones_destination.remove(active_drones.find(drone))
+			active_drones.erase(drone)
 	
 	if !$FrameCounter.active() && randi()%int(GaussianRandom.nextGaussian3(100, 30, 1, 130)) == 0:  
 		
