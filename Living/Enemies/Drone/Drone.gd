@@ -2,7 +2,7 @@ extends Living
 
 
 const MAX_AGRO_RANGE : float = 2000.0
-var driftSpeed : float = 40
+var driftSpeed : float = 20
 var attackAcceleration : float = 50
 var nearHover = false
 
@@ -42,10 +42,12 @@ func _physics_process(delta):
 	for drone in get_tree().get_nodes_in_group("drones"):
 		if drone == self:
 			continue
-		var dist = max(800, global_position.distance_squared_to(drone.global_position))
+		
 		if target == null:
-			motion -= 200000*global_position.direction_to(drone.global_position)/dist
+			var dist = max(20, global_position.distance_squared_to(drone.global_position))
+			motion -= 1000*global_position.direction_to(drone.global_position)/dist
 		else:
+			var dist = max(800, global_position.distance_squared_to(drone.global_position))
 			motion -= 800000*global_position.direction_to(drone.global_position)/dist
 			
 	if target != null:

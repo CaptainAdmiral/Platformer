@@ -195,13 +195,13 @@ shape = SubResource( 3 )
 
 [node name="WallDetector" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 0, 300 )
+cast_to = Vector2( 0, 200 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 scale = Vector2( 3, 3 )
 frames = SubResource( 38 )
 animation = "idle"
-frame = 3
+frame = 1
 playing = true
 
 [node name="FrameCounter" type="Node" parent="."]
