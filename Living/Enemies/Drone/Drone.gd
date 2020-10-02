@@ -1,7 +1,10 @@
 extends Living
 
-
 const MAX_AGRO_RANGE : float = 2000.0
+const PATROL_RANGE : float = 1000.0
+
+var patrolPoint : Vector2 = Vector2()
+
 var driftSpeed : float = 20
 var attackAcceleration : float = 50
 var nearHover = false
@@ -20,6 +23,8 @@ func _ready():
 	motion = Vector2(driftSpeed, 0).rotated(rand_range(0, 2*PI))
 	$AnimatedSprite.frame = randi()%5+1
 	
+	patrolPoint = global_position
+	
 func _process(delta):
 	if target != null:
 		update()
@@ -27,6 +32,13 @@ func _process(delta):
 func _physics_process(delta):
 	if motion.length() > driftSpeed:
 		motion *= 0.9
+		
+	if target == null and patrolPoint.distance_to(global_position) > PATROL_RANGE:
+		var randAng = rand_range(0, 2*PI)
+		var newPos = patrolPoint + rand_range(0, 1)*PATROL_RANGE*Vector2(cos(randAng), sin(randAng))
+		motion = driftSpeed*global_position.direction_to(newPos)
+		
+		
 		
 	if target != null and global_position.distance_to(target.global_position) > MAX_AGRO_RANGE and !($FrameCounter/AttackTargeting.active() or $FrameCounter/Attack.active()):
 		target = null

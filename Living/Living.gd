@@ -9,7 +9,8 @@ var fallSpeed : int = 30
 #A higher knockback multiplier will result in more knockback taken
 var manaOnKill : int = 0
 var knockbackMultiplier : float = 1
-var motion = Vector2()
+var motion : Vector2 = Vector2()
+var prevMotion : Vector2 = Vector2()
 var freezeFrames : int
 var handleOwnMovement : bool = false
 var Direction = Globals.Direction
@@ -31,6 +32,7 @@ func _physics_process(_delta):
 	if(is_on_floor() and motion.y > fallSpeed):
 		motion.y = fallSpeed
 	if !handleOwnMovement and !freezeFrames:
+		prevMotion = motion
 		motion = move_and_slide(motion, Vector2(0, -1))
 		
 	if freezeFrames:

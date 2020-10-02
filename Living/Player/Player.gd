@@ -47,6 +47,8 @@ var maxHookCharges: int = 1
 var hookCharges : int = maxHookCharges
 var grappleWindup : int = 0
 
+var storedWallJumpMotion : float = 0
+
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
@@ -73,11 +75,6 @@ func _ready():
 	setMaxHealth(6)
 
 func _physics_process(_delta):
-	print(health)
-	print(mana)
-	print("\n")
-	
-	
 	######################## ANIMATIONS ##################################
 	if ($AnimatedSprite.animation == "run" or $AnimatedSprite.animation == "run start") and abs(motion.x) < 50:
 		$AnimatedSprite.stop()
@@ -114,6 +111,10 @@ func _physics_process(_delta):
 			if manaUntilNextHeal <= 0:
 				heal(1)
 				manaUntilNextHeal += manaPerHealth
+				
+				print(health)
+				print(mana)
+				print("\n")
 		else:
 			isHealing = false
 			mana = 0
@@ -193,6 +194,11 @@ func _physics_process(_delta):
 			
 		if hook != null and hook.isTense():
 			$FrameCounters/Slide.stop()
+			
+		if $WallJump/WallJumpTopRight.is_colliding() or $WallJump/WallJumpBottomRight.is_colliding():
+			$FrameCounters/RightWallJump.start()
+		if $WallJump/WallJumpTopLeft.is_colliding() or $WallJump/WallJumpBottomLeft.is_colliding():
+			$FrameCounters/LeftWallJump.start()
 		
 		#Air Movement
 		if hook == null or hook.attachedTo == null or !hook.isTense():
@@ -205,14 +211,32 @@ func _physics_process(_delta):
 			
 			if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 				motion.x *= AIR_FRICTION
-		
+				
+		if !$LedgeGrab/LedgeSpaceLeft.is_colliding() and $LedgeGrab/LedgeGrabLeft.is_colliding() or !$LedgeGrab/LedgeSpaceRight.is_colliding() and $LedgeGrab/LedgeGrabRight.is_colliding():
+			if Input.is_action_just_pressed("up") and !$FrameCounters/LedgeJump.active():
+				motion.y = min(motion.y, -JUMP_VELOCITY*1.5)
+				$FrameCounters/LedgeJump.start()
+				
 		######################## ON WALL ##################################
 		if is_on_wall():
+			storedWallJumpMotion = max(storedWallJumpMotion, abs(prevMotion.x))
+			
+			for i in get_slide_count():
+				var norm = get_slide_collision(i).normal
+				
+				if (norm == Vector2(1, 0) and !Input.is_action_pressed("right") and Input.is_action_pressed("left")) or (norm == Vector2(-1, 0) and !Input.is_action_pressed("left") and Input.is_action_pressed("right")):
+					motion.y -= min(fallSpeed, storedWallJumpMotion)*0.5
+					storedWallJumpMotion -= min(fallSpeed, storedWallJumpMotion)
+					
+				
+
+			
 			if motion.y > WALL_SLIDE_SPEED:
 				motion.y = max(motion.y/2, WALL_SLIDE_SPEED)
 			
 			
-	
+		else:
+			storedWallJumpMotion = 0
 	#Jump
 	if $FrameCounters/JumpGrace.active():
 		if inputBuffer.hasAction("up", false, 10) and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
@@ -362,12 +386,6 @@ func airDrift(direction) -> void:
 			motion.x *= AIR_FRICTION
 		if -motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
 			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
-			
-func _on_Right_body_entered(_body):
-	$FrameCounters/RightWallJump.start()
-
-func _on_Left_body_entered(_body):
-	$FrameCounters/LeftWallJump.start()
 
 func wallJump(direction) -> void:
 	motion.y=-WALL_JUMP_VELOCITY.y
@@ -461,6 +479,11 @@ func hurt(damage : Damage) -> bool:
 		isHealing = false
 	if hook !=null:
 		hook.setDead()
+		
+	print(health)
+	print(mana)
+	print("\n")
+		
 	return .hurt(damage)
 	
 func onKill(living : Living) -> void:
@@ -491,9 +514,13 @@ func setDead() -> void:
 	get_tree().reload_current_scene()
 	
 func onLeaveGround() -> void:
-	pass
+	for rc in $WallJump.get_children():
+		rc.set_enabled(true)
 	
 func onLand() -> void:
+	for rc in $WallJump.get_children():
+		rc.set_enabled(false)
+	
 	if $AnimatedSprite.animation == "run jump":
 		$AnimatedSprite.stop()
 		
