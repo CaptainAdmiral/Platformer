@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://Living/Player/Assets/Player Idle.png" type="Texture" id=1]
 [ext_resource path="res://Living/Player/Player.gd" type="Script" id=2]
@@ -40,52 +40,52 @@ atlas = ExtResource( 1 )
 region = Rect2( 48, 0, 16, 59 )
 
 [sub_resource type="AtlasTexture" id=9]
-atlas = ExtResource( 4 )
-region = Rect2( 0, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=10]
-atlas = ExtResource( 4 )
-region = Rect2( 64, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=11]
-atlas = ExtResource( 4 )
-region = Rect2( 128, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=12]
-atlas = ExtResource( 4 )
-region = Rect2( 192, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=13]
-atlas = ExtResource( 4 )
-region = Rect2( 0, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=14]
-atlas = ExtResource( 4 )
-region = Rect2( 64, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=15]
-atlas = ExtResource( 4 )
-region = Rect2( 128, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=16]
-atlas = ExtResource( 4 )
-region = Rect2( 192, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=17]
 atlas = ExtResource( 6 )
 region = Rect2( 0, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=18]
+[sub_resource type="AtlasTexture" id=10]
 atlas = ExtResource( 6 )
 region = Rect2( 64, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=19]
+[sub_resource type="AtlasTexture" id=11]
 atlas = ExtResource( 6 )
 region = Rect2( 128, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=20]
+[sub_resource type="AtlasTexture" id=12]
 atlas = ExtResource( 6 )
 region = Rect2( 192, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=13]
+atlas = ExtResource( 4 )
+region = Rect2( 0, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=14]
+atlas = ExtResource( 4 )
+region = Rect2( 64, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=15]
+atlas = ExtResource( 4 )
+region = Rect2( 128, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=16]
+atlas = ExtResource( 4 )
+region = Rect2( 192, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=17]
+atlas = ExtResource( 4 )
+region = Rect2( 0, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=18]
+atlas = ExtResource( 4 )
+region = Rect2( 64, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=19]
+atlas = ExtResource( 4 )
+region = Rect2( 128, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=20]
+atlas = ExtResource( 4 )
+region = Rect2( 192, 118, 64, 59 )
 
 [sub_resource type="AtlasTexture" id=21]
 atlas = ExtResource( 7 )
@@ -159,14 +159,14 @@ animations = [ {
 "name": "idle",
 "speed": 3.0
 }, {
-"frames": [ SubResource( 9 ), SubResource( 10 ), SubResource( 11 ), SubResource( 12 ), SubResource( 13 ), SubResource( 14 ), SubResource( 15 ), SubResource( 16 ) ],
-"loop": true,
-"name": "run",
-"speed": 10.0
-}, {
-"frames": [ SubResource( 17 ), SubResource( 18 ), SubResource( 19 ), SubResource( 20 ) ],
+"frames": [ SubResource( 9 ), SubResource( 10 ), SubResource( 11 ), SubResource( 12 ) ],
 "loop": false,
 "name": "jump",
+"speed": 10.0
+}, {
+"frames": [ SubResource( 13 ), SubResource( 14 ), SubResource( 15 ), SubResource( 16 ), SubResource( 17 ), SubResource( 18 ), SubResource( 19 ), SubResource( 20 ) ],
+"loop": true,
+"name": "run",
 "speed": 10.0
 }, {
 "frames": [ SubResource( 21 ), SubResource( 22 ), SubResource( 23 ), SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ) ],
@@ -187,6 +187,9 @@ animations = [ {
 
 [sub_resource type="ConvexPolygonShape2D" id=37]
 points = PoolVector2Array( -20, -50, 150, -80, 200, 0, 150, 80, -20, 50, -40, 0 )
+
+[sub_resource type="RectangleShape2D" id=38]
+extents = Vector2( 16, 42 )
 
 [node name="Player" type="KinematicBody2D" groups=[
 "players",
@@ -225,6 +228,7 @@ position = Vector2( 0, -2.5 )
 scale = Vector2( 2, 2 )
 frames = SubResource( 36 )
 animation = "idle"
+frame = 2
 playing = true
 
 [node name="AttackArea" type="Area2D" parent="."]
@@ -236,25 +240,22 @@ collision_mask = 4
 shape = SubResource( 37 )
 
 [node name="WallJump" type="Node2D" parent="."]
-position = Vector2( 0, 10 )
+position = Vector2( 0, 12 )
 
-[node name="WallJumpTopRight" type="RayCast2D" parent="WallJump"]
-enabled = true
-cast_to = Vector2( 50, -40 )
+[node name="WallJumpRight" type="Area2D" parent="WallJump"]
+position = Vector2( 28, 0 )
 
-[node name="WallJumpTopLeft" type="RayCast2D" parent="WallJump"]
-enabled = true
-cast_to = Vector2( -50, -40 )
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump/WallJumpRight"]
+shape = SubResource( 38 )
 
-[node name="WallJumpBottomRight" type="RayCast2D" parent="WallJump"]
-enabled = true
-cast_to = Vector2( 50, 40 )
+[node name="WallJumpLeft" type="Area2D" parent="WallJump"]
+position = Vector2( -28, 0 )
 
-[node name="WallJumpBottomLeft" type="RayCast2D" parent="WallJump"]
-enabled = true
-cast_to = Vector2( -50, 40 )
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump/WallJumpLeft"]
+shape = SubResource( 38 )
 
 [node name="LedgeGrab" type="Node2D" parent="."]
+visible = false
 position = Vector2( 0, -90 )
 
 [node name="LedgeGrabRight" type="RayCast2D" parent="LedgeGrab"]

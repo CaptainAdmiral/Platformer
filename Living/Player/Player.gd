@@ -118,9 +118,6 @@ func _physics_process(_delta):
 		else:
 			isHealing = false
 			mana = 0
-	else:
-		pass
-		#manaUntilNextHeal = manaPerHealth
 			
 			
 	
@@ -195,10 +192,13 @@ func _physics_process(_delta):
 		if hook != null and hook.isTense():
 			$FrameCounters/Slide.stop()
 			
-		if $WallJump/WallJumpTopRight.is_colliding() or $WallJump/WallJumpBottomRight.is_colliding():
-			$FrameCounters/RightWallJump.start()
-		if $WallJump/WallJumpTopLeft.is_colliding() or $WallJump/WallJumpBottomLeft.is_colliding():
-			$FrameCounters/LeftWallJump.start()
+		for body in $WallJump/WallJumpRight.get_overlapping_bodies():
+			if body is StaticBody or body is TileMap:
+				$FrameCounters/RightWallJump.start()
+				
+		for body in $WallJump/WallJumpLeft.get_overlapping_bodies():
+			if body is StaticBody or body is TileMap:
+				$FrameCounters/LeftWallJump.start()
 		
 		#Air Movement
 		if hook == null or hook.attachedTo == null or !hook.isTense():
@@ -514,13 +514,9 @@ func setDead() -> void:
 	get_tree().reload_current_scene()
 	
 func onLeaveGround() -> void:
-	for rc in $WallJump.get_children():
-		rc.set_enabled(true)
+	pass
 	
 func onLand() -> void:
-	for rc in $WallJump.get_children():
-		rc.set_enabled(false)
-	
 	if $AnimatedSprite.animation == "run jump":
 		$AnimatedSprite.stop()
 		
