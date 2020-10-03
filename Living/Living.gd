@@ -54,10 +54,24 @@ func turnAround():
 		setFacing(Direction.LEFT)
 	elif facing == Direction.LEFT:
 		setFacing(Direction.RIGHT)
+
+#Looking right because you left me
+#Looking left because you ain’t treat me right
+#Looking up because you let me down
+#Looking down because you fucked me up
+func getOppositeDirection(direction):
+	if facing == Direction.RIGHT:
+		return Direction.LEFT
+	elif facing == Direction.LEFT:
+		return Direction.RIGHT
+	elif facing == Direction.UP:
+		return Direction.DOWN
+	elif facing == Direction.DOWN:
+		return Direction.UP
 		
 #Returns 1 if the direction coresponds to a positive change along the axis, else -1
-func getSignForDirection() -> int:
-	if facing == Direction.RIGHT or facing == Direction.DOWN:
+func getSignForDirection(direction = facing) -> int:
+	if direction == Direction.RIGHT or direction == Direction.DOWN:
 		return 1
 	else:
 		return -1

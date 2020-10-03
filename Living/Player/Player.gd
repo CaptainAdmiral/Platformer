@@ -159,7 +159,7 @@ func _physics_process(_delta):
 			motion.x*=0.99
 			
 		if Input.is_action_pressed("down") and !$FrameCounters/Slide.active():
-			if abs(motion.x) == RUN_SPEED:
+			if abs(motion.x) >= RUN_SPEED:
 				motion.x += getSignForDirection()*2*RUN_SPEED
 				$FrameCounters/Slide.start()
 				$AnimatedSprite.play("slide")
@@ -185,13 +185,9 @@ func _physics_process(_delta):
 		if hook != null and hook.isTense():
 			$FrameCounters/Slide.setFinished()
 			
-		for body in $WallJump/WallJumpRight.get_overlapping_bodies():
+		for body in $WallJump.get_overlapping_bodies():
 			if body is StaticBody or body is TileMap:
-				$FrameCounters/RightWallJump.start()
-				
-		for body in $WallJump/WallJumpLeft.get_overlapping_bodies():
-			if body is StaticBody or body is TileMap:
-				$FrameCounters/LeftWallJump.start()
+				$FrameCounters/WallJump.start()
 		
 		#Air Movement
 		if hook == null or hook.attachedTo == null or !hook.isTense():
@@ -205,7 +201,7 @@ func _physics_process(_delta):
 			if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 				motion.x *= AIR_FRICTION
 				
-		if !$LedgeGrab/LedgeSpaceLeft.is_colliding() and $LedgeGrab/LedgeGrabLeft.is_colliding() or !$LedgeGrab/LedgeSpaceRight.is_colliding() and $LedgeGrab/LedgeGrabRight.is_colliding():
+		if !$LedgeGrab/LedgeSpace.is_colliding() and $LedgeGrab/LedgeGrab.is_colliding():
 			if Input.is_action_just_pressed("up") and !$FrameCounters/LedgeJump.active():
 				motion.y = min(motion.y, -JUMP_VELOCITY*1.5)
 				$FrameCounters/LedgeJump.start()
@@ -236,14 +232,9 @@ func _physics_process(_delta):
 			jump()
 	
 	#Wall Jump Movement
-	if $FrameCounters/LeftWallJump.active():
-		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("right", false, 6):
-			wallJump(Direction.RIGHT)
-			
-		
-	if $FrameCounters/RightWallJump.active():
-		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("left", false, 6):
-			wallJump(Direction.LEFT)
+	if $FrameCounters/WallJump.active():
+		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
+			wallJump(getOppositeDirection(facing))
 		
 	if Input.is_action_just_pressed("dash") and dashCharges > 0:
 		dash(getDirectionFromInput())	
@@ -277,12 +268,16 @@ func getDirectionFromInput() -> Vector2:
 												#Baked value for 1/sqrt2
 	return Vector2(x, y) if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y)
 	
-func setFacing(direction) -> void:
-	facing = direction
+func getInputFromDirection(direction) -> String:
 	if direction == Direction.LEFT:
-		$AnimatedSprite.flip_h = true
+		return "left"
 	elif direction == Direction.RIGHT:
-		$AnimatedSprite.flip_h = false
+		return "right"
+	elif direction == Direction.UP:
+		return "up"
+	elif direction == Direction.DOWN:
+		return "down"
+	return "err"
 	
 func jump() -> void:
 	$FrameCounters/JumpGrace.stop()
@@ -355,15 +350,11 @@ func airDrift(direction) -> void:
 			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
 
 func wallJump(direction) -> void:
+	turnAround()
 	motion.y=-WALL_JUMP_VELOCITY.y
-	if direction == Direction.RIGHT:
-		motion.x = WALL_JUMP_VELOCITY.x
-		$FrameCounters/LeftWallJump.stop()
-		setFacing(Direction.RIGHT)
-	elif direction == Direction.LEFT:
-		motion.x = -WALL_JUMP_VELOCITY.x
-		$FrameCounters/RightWallJump.stop()
-		setFacing(Direction.LEFT)
+	motion.x = getSignForDirection()*WALL_JUMP_VELOCITY.x
+		
+	$FrameCounters/WallJump.stop()
 	$FrameCounters/JumpBoost.start()
 	$FrameCounters/DashFreeze.stop()
 	$FrameCounters/Dash.stop()

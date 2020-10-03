@@ -100,52 +100,52 @@ atlas = ExtResource( 4 )
 region = Rect2( 192, 0, 64, 59 )
 
 [sub_resource type="AtlasTexture" id=24]
-atlas = ExtResource( 4 )
-region = Rect2( 0, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=25]
-atlas = ExtResource( 4 )
-region = Rect2( 64, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=26]
-atlas = ExtResource( 4 )
-region = Rect2( 128, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=27]
-atlas = ExtResource( 4 )
-region = Rect2( 192, 59, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=28]
-atlas = ExtResource( 4 )
-region = Rect2( 0, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=29]
-atlas = ExtResource( 4 )
-region = Rect2( 64, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=30]
-atlas = ExtResource( 4 )
-region = Rect2( 128, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=31]
-atlas = ExtResource( 4 )
-region = Rect2( 192, 118, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=32]
 atlas = ExtResource( 6 )
 region = Rect2( 0, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=33]
+[sub_resource type="AtlasTexture" id=25]
 atlas = ExtResource( 6 )
 region = Rect2( 64, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=34]
+[sub_resource type="AtlasTexture" id=26]
 atlas = ExtResource( 6 )
 region = Rect2( 128, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=35]
+[sub_resource type="AtlasTexture" id=27]
 atlas = ExtResource( 6 )
 region = Rect2( 192, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=28]
+atlas = ExtResource( 4 )
+region = Rect2( 0, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=29]
+atlas = ExtResource( 4 )
+region = Rect2( 64, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=30]
+atlas = ExtResource( 4 )
+region = Rect2( 128, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=31]
+atlas = ExtResource( 4 )
+region = Rect2( 192, 59, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=32]
+atlas = ExtResource( 4 )
+region = Rect2( 0, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=33]
+atlas = ExtResource( 4 )
+region = Rect2( 64, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=34]
+atlas = ExtResource( 4 )
+region = Rect2( 128, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=35]
+atlas = ExtResource( 4 )
+region = Rect2( 192, 118, 64, 59 )
 
 [sub_resource type="SpriteFrames" id=36]
 animations = [ {
@@ -174,14 +174,14 @@ animations = [ {
 "name": "run start",
 "speed": 10.0
 }, {
-"frames": [ SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ) ],
-"loop": true,
-"name": "run",
-"speed": 10.0
-}, {
-"frames": [ SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ) ],
+"frames": [ SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ) ],
 "loop": false,
 "name": "jump",
+"speed": 10.0
+}, {
+"frames": [ SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ), SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ) ],
+"loop": true,
+"name": "run",
 "speed": 10.0
 } ]
 
@@ -238,45 +238,16 @@ collision_mask = 4
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
 shape = SubResource( 37 )
 
-[node name="WallJump" type="Node2D" parent="."]
-visible = false
-position = Vector2( 0, 12 )
-
-[node name="WallJumpRight" type="Area2D" parent="WallJump"]
-position = Vector2( 28, 0 )
-collision_layer = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump/WallJumpRight"]
-shape = SubResource( 38 )
-
-[node name="WallJumpLeft" type="Area2D" parent="WallJump"]
-position = Vector2( -28, 0 )
-collision_layer = 0
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump/WallJumpLeft"]
-shape = SubResource( 38 )
-
 [node name="LedgeGrab" type="Node2D" parent="."]
-visible = false
 position = Vector2( 0, -90 )
 
-[node name="LedgeGrabRight" type="RayCast2D" parent="LedgeGrab"]
+[node name="LedgeGrab" type="RayCast2D" parent="LedgeGrab"]
 position = Vector2( 20, 0 )
 enabled = true
 cast_to = Vector2( 0, 100 )
 
-[node name="LedgeSpaceRight" type="RayCast2D" parent="LedgeGrab"]
+[node name="LedgeSpace" type="RayCast2D" parent="LedgeGrab"]
 position = Vector2( 20, 10 )
-enabled = true
-cast_to = Vector2( 0, -40 )
-
-[node name="LedgeGrabLeft" type="RayCast2D" parent="LedgeGrab"]
-position = Vector2( -20, 0 )
-enabled = true
-cast_to = Vector2( 0, 100 )
-
-[node name="LedgeSpaceLeft" type="RayCast2D" parent="LedgeGrab"]
-position = Vector2( -20, 10 )
 enabled = true
 cast_to = Vector2( 0, -40 )
 
@@ -310,11 +281,7 @@ activeFrames = 8
 script = ExtResource( 8 )
 activeFrames = 15
 
-[node name="LeftWallJump" type="Node" parent="FrameCounters"]
-script = ExtResource( 8 )
-activeFrames = 10
-
-[node name="RightWallJump" type="Node" parent="FrameCounters"]
+[node name="WallJump" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 10
 
@@ -325,5 +292,12 @@ activeFrames = 40
 [node name="LedgeJump" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 60
+
+[node name="WallJump" type="Area2D" parent="."]
+position = Vector2( 28, 12 )
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump"]
+shape = SubResource( 38 )
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="onAnimationFinished"]
 [connection signal="finished" from="FrameCounters/Slide" to="." method="_on_Slide_finished"]
