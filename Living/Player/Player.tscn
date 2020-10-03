@@ -217,6 +217,7 @@ smoothing_enabled = true
 script = ExtResource( 3 )
 
 [node name="StandingHitboxArea" type="Area2D" parent="."]
+visible = false
 collision_layer = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StandingHitboxArea"]
@@ -228,6 +229,7 @@ position = Vector2( 0, -2.5 )
 scale = Vector2( 2, 2 )
 frames = SubResource( 36 )
 animation = "idle"
+frame = 3
 playing = true
 
 [node name="AttackArea" type="Area2D" parent="."]
@@ -239,17 +241,21 @@ collision_mask = 4
 shape = SubResource( 37 )
 
 [node name="LedgeGrab" type="Node2D" parent="."]
-position = Vector2( 0, -90 )
+position = Vector2( 30, -90 )
 
 [node name="LedgeGrab" type="RayCast2D" parent="LedgeGrab"]
-position = Vector2( 20, 0 )
 enabled = true
 cast_to = Vector2( 0, 100 )
 
-[node name="LedgeSpace" type="RayCast2D" parent="LedgeGrab"]
-position = Vector2( 20, 10 )
+[node name="CeilingCheck" type="RayCast2D" parent="LedgeGrab"]
+position = Vector2( -40, 100 )
 enabled = true
-cast_to = Vector2( 0, -40 )
+cast_to = Vector2( 0, -100 )
+
+[node name="LedgeSpace" type="RayCast2D" parent="LedgeGrab"]
+position = Vector2( 0, 100 )
+enabled = true
+cast_to = Vector2( 0, -100 )
 
 [node name="FrameCounters" type="Node" parent="."]
 
@@ -280,6 +286,10 @@ activeFrames = 8
 [node name="JumpBoost" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 15
+
+[node name="JumpDisable" type="Node" parent="FrameCounters"]
+script = ExtResource( 8 )
+activeFrames = 10
 
 [node name="WallJump" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )

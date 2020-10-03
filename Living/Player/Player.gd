@@ -201,10 +201,19 @@ func _physics_process(_delta):
 			if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 				motion.x *= AIR_FRICTION
 				
-		if !$LedgeGrab/LedgeSpace.is_colliding() and $LedgeGrab/LedgeGrab.is_colliding():
-			if Input.is_action_just_pressed("up") and !$FrameCounters/LedgeJump.active():
-				motion.y = min(motion.y, -JUMP_VELOCITY*1.5)
-				$FrameCounters/LedgeJump.start()
+		if $LedgeGrab/LedgeGrab.is_colliding() and !$LedgeGrab/CeilingCheck.is_colliding():
+			var collisionPos = $LedgeGrab/LedgeGrab.get_collision_point()
+			collisionPos.y -= 1
+			$LedgeGrab/LedgeSpace.set_position($LedgeGrab.to_local(collisionPos))
+			$LedgeGrab/LedgeSpace.force_raycast_update()
+			if !$LedgeGrab/LedgeSpace.is_colliding():
+				if Input.is_action_just_pressed("up") and !$FrameCounters/LedgeJump.active():
+					position = collisionPos
+					position.y-=$Hitbox.shape.extents.y
+					motion.y = 0
+					$FrameCounters/JumpDisable.start()
+#					motion.y = min(motion.y, -JUMP_VELOCITY*1.5)
+#					$FrameCounters/LedgeJump.start()
 				
 		######################## ON WALL ##################################
 		if is_on_wall():
@@ -280,6 +289,8 @@ func getInputFromDirection(direction) -> String:
 	return "err"
 	
 func jump() -> void:
+	if $FrameCounters/JumpDisable.active():
+		return
 	$FrameCounters/JumpGrace.stop()
 	isChargingHeal = false
 	
@@ -472,9 +483,13 @@ func setDead() -> void:
 	get_tree().reload_current_scene()
 	
 func onLeaveGround() -> void:
-	pass
+	for rc in $LedgeGrab.get_children():
+		rc.set_enabled(true)
 	
 func onLand() -> void:
+	for rc in $LedgeGrab.get_children():
+		rc.set_enabled(false)
+		
 	if $AnimatedSprite.animation == "run jump":
 		$AnimatedSprite.stop()
 		
