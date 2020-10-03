@@ -33,9 +33,22 @@ func start():
 func stop():
 	frame = 0
 	
+func setFinished():
+	if frame == 0:
+		return
+	frame = 0
+	justFinished = true
+	emit_signal("finished")
+	
 func setFrame(f:int) -> void:
 	assert(f >= 0)
 	frame = f
+	if frame != 0:
+		set_physics_process(true)
+		
+func setMinFrame(f:int) -> void:
+	assert(f >= 0)
+	frame = max(frame, f)
 	if frame != 0:
 		set_physics_process(true)
 

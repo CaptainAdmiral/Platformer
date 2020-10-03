@@ -15,7 +15,7 @@ const JUMP_BOOST_SPEED = 30
 const DASH_SPEED = 1800
 
 const CROUCH_SLOWDOWN = 0.875
-const SLIDE_SLOWDOWN = 0.95
+const SLIDE_SLOWDOWN = 0.96
 
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 120
@@ -53,8 +53,6 @@ var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
 var dashPogo : bool = false
-
-var isCrouching : bool = false
 
 var checkpointScene : Node
 var checkpoint : Node
@@ -118,13 +116,8 @@ func _physics_process(_delta):
 		else:
 			isHealing = false
 			mana = 0
-			
-			
-	
-	######################## SLIDING / CROUCHING ##################################
 	
 	if !Input.is_action_pressed("down"):
-		setCrouching(false)
 		isChargingHeal = false
 	
 	######################## GRAPPLING HOOK ##################################
@@ -159,25 +152,25 @@ func _physics_process(_delta):
 			if Input.is_action_pressed("left"):
 				run(Direction.LEFT)
 				
-		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !$FrameCounters/Slide.active():
+		if isChargingHeal or !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !$FrameCounters/Slide.active():
 			motion.x *= GROUND_FRICTION
-		
-		if $FrameCounters/Slide.active():
-			motion.x *= SLIDE_SLOWDOWN
-		elif isCrouching:
-			motion.x *= CROUCH_SLOWDOWN
 			
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.99
 			
-		if Input.is_action_pressed("down"):
-			if abs(motion.x) > RUN_SPEED/2:			
-				slide()
-				setCrouching(true)
-			else:
+		if Input.is_action_pressed("down") and !$FrameCounters/Slide.active():
+			if abs(motion.x) == RUN_SPEED:
+				motion.x += getSignForDirection()*2*RUN_SPEED
+				$FrameCounters/Slide.start()
+				$AnimatedSprite.play("slide")
+				$Hitbox.set_deferred("disabled", true)
+				$CrouchHitbox.set_deferred("disabled", false)
+			elif !$FrameCounters/Slide.active():
 				isChargingHeal = true
 				
-	
+		if $FrameCounters/Slide.active():
+			slide()
+
 	else:
 		######################## IN AIR ##################################
 		if prevOnGround == true:
@@ -190,7 +183,7 @@ func _physics_process(_delta):
 				motion.y-=JUMP_BOOST_SPEED
 			
 		if hook != null and hook.isTense():
-			$FrameCounters/Slide.stop()
+			$FrameCounters/Slide.setFinished()
 			
 		for body in $WallJump/WallJumpRight.get_overlapping_bodies():
 			if body is StaticBody or body is TileMap:
@@ -301,7 +294,7 @@ func jump() -> void:
 	else:
 		$FrameCounters/JumpBoost.setFrame($FrameCounters/JumpBoost.getActiveFrames()/2)
 	
-	$FrameCounters/Slide.stop()
+	$FrameCounters/Slide.setFinished()
 	if $AnimatedSprite.animation == "idle":
 		$AnimatedSprite.play("jump")
 	elif $AnimatedSprite.animation == "run start":
@@ -312,45 +305,19 @@ func jump() -> void:
 		$AnimatedSprite.play("run jump")
 	
 func slide() -> void:
-	if !$FrameCounters/Slide.active() and !isCrouching:
-		setCrouching(true)
-		if motion.x >= RUN_SPEED*0.75:
-			$FrameCounters/Slide.start()
-			motion.x += RUN_SPEED*1.75
-		elif -motion.x >= RUN_SPEED*0.75:
-			$FrameCounters/Slide.start()
-			motion.x -= RUN_SPEED*1.75
+	motion.x *= SLIDE_SLOWDOWN
 	
-func setCrouching(crouching : bool) -> void:
-	if isCrouching == crouching:
-		return
+	if !canStand():
+		$FrameCounters/Slide.setMinFrame(2)
+		motion.x += getSignForDirection()*RUN_ACCELERATION
 		
-	if $FrameCounters/Slide.active():
-		return
 		
-	var canStand = true
-	
+func canStand():
 	for body in $StandingHitboxArea.get_overlapping_bodies():
 		if body is StaticBody2D or body is TileMap:
-			canStand = false
-		
-	if !crouching and !canStand:
-		return
-	
-	isCrouching = crouching
-	
-	#TODO place on ground
-	
-	if isCrouching:
-		$AnimatedSprite.play("slide")
-		$Hitbox.set_deferred("disabled", true)
-		$CrouchHitbox.set_deferred("disabled", false)
-	else:
-		$AnimatedSprite.play("run")
-		$Hitbox.set_deferred("disabled", false)
-		$CrouchHitbox.set_deferred("disabled", true)
-	
-	
+			return false
+	return true
+			
 func run(direction) -> void:
 	if isChargingHeal:
 		return
@@ -532,9 +499,16 @@ func onAnimationFinished() -> void:
 	
 	if anim == "run start":
 		$AnimatedSprite.play("run")
-
-
+		
+func _on_Slide_finished():
+	$AnimatedSprite.play("run")
+	$Hitbox.set_deferred("disabled", false)
+	$CrouchHitbox.set_deferred("disabled", true)
+		
 func _input(event):
 	if event is InputEventMouseMotion:
 		$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)
 		
+
+
+
