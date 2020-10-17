@@ -16,7 +16,7 @@ tile_data = PoolIntArray( -1638468, 0, 0, -1638467, 0, 0, -1638466, 0, 0, -16384
 [node name="ParallaxBackground" parent="." instance=ExtResource( 3 )]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
-position = Vector2( -704, 128 )
+position = Vector2( -726.323, 74.1478 )
 
 [node name="Enemy" parent="." instance=ExtResource( 4 )]
 position = Vector2( -32, 64 )
@@ -52,13 +52,13 @@ position = Vector2( -2112, -320 )
 position = Vector2( -547.558, -353.593 )
 
 [node name="Drone11" parent="." instance=ExtResource( 5 )]
-position = Vector2( -506.596, 185.21 )
+position = Vector2( 1197.46, 303.358 )
 
 [node name="Drone12" parent="." instance=ExtResource( 5 )]
 position = Vector2( -1638.03, -867.263 )
 
 [node name="Drone13" parent="." instance=ExtResource( 5 )]
-position = Vector2( -1344.86, -442.174 )
+position = Vector2( 693.19, -1035.19 )
 
 [node name="Living" parent="." instance=ExtResource( 7 )]
 position = Vector2( 768, 144.983 )

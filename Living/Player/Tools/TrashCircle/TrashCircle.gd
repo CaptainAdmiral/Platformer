@@ -57,7 +57,8 @@ func _physics_process(delta):
 #						print("Shot command issued")
 
 	
-	if !(active_drones == [null]):
+	if !(active_drones == [null]): # Still crashes on null instance sometimes...
+									# Race issue?
 		var i = 0
 		for drone in active_drones:
 			if drone == null:
@@ -76,5 +77,5 @@ func _on_Area2D_area_shape_entered(area_id, area, area_shape, self_shape):
 	if area.get_node("../") in get_tree().get_nodes_in_group("drones") and area.get_name() == "SelfArea" and !(area in active_drones):
 		active_drones.append(area)
 		active_drones_destination.append(self.global_position)
-		print("New Drone entered!\n", area)
-		print("List of active drones:", active_drones)
+#		print("New Drone entered!\n", area)
+#		print("List of active drones:", active_drones)

@@ -14,7 +14,7 @@ func _ready():
 	setMaxHealth(3)
 	fallSpeed = 0
 	canBePulled = true
-	knockbackMultiplier = 2
+	knockbackMultiplier = 0.5
 	manaOnKill = 20
 	motion = Vector2(driftSpeed, 0).rotated(rng.randf_range(0, 2*PI))
 	$AnimatedSprite.frame = rng.randi()%5+1
