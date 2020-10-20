@@ -3,6 +3,7 @@ extends Living
 const MAX_AGRO_RANGE : float = 2000.0
 const PATROL_RANGE : float = 1000.0
 
+
 var patrolPoint : Vector2 = Vector2()
 
 var driftSpeed : float = 20
@@ -18,11 +19,13 @@ var targetOffset = Vector2(0, 0)
 var rng = RandomNumberGenerator.new()
 
 
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	rng.randomize()
 	setMaxHealth(3)
 	fallSpeed = 0
+
 	knockbackMultiplier = 2
 	manaOnKill = 10
 	motion = Vector2(driftSpeed, 0).rotated(rand_range(0, 2*PI))
@@ -33,6 +36,7 @@ func _ready():
 func _process(delta):
 	if target != null:
 		update()
+
 
 func _physics_process(delta):
 	if motion.length() > driftSpeed:
@@ -123,12 +127,14 @@ func _physics_process(delta):
 					player.addKnockback(global_position.direction_to(player.global_position)*600, true)
 			
 		
+
 func end_attack():
 	for body in $AttackArea.get_overlapping_bodies():
 		var player = body
 		var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
 		if player.hurt(damage):
 			player.addKnockback(Vector2(global_position.direction_to(player.global_position).x*600, -600), true)
+
 	selectNewAttacker()
 
 func begin_attack():
@@ -179,6 +185,21 @@ func setDead() -> void:
 		selectNewAttacker()
 	.setDead()
 
+
+func begin_attack():
+	$AnimatedSprite.play("attack")
+	$AnimatedSprite.frame = 0
+#	$FrameCounter/Attack.setActiveFrames(60)
+	$FrameCounter/Attack.start()
+
+#func _on_Attack_command():
+#	begin_attack()
+
+func shoot():
+	if !$FrameCounter/Shoot.active():
+		projectile.instance().init(self, 400)
+		$FrameCounter/Shoot.start()
+		
 func _on_DetectionArea_body_entered(body):
 	if target != null:
 		return

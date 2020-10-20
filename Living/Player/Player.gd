@@ -1,7 +1,7 @@
 extends Living
 
 
-export var swordPogoAnyAngle = true
+export var swordPogoAnyAngle = false
 
 const RUN_SPEED = 500
 const RUN_ACCELERATION_FRAMES = 20
@@ -25,6 +25,9 @@ const SWORD_POGO_VELOCITY = 700
 
 const HOOK_SPEED = 4200
 
+const DASH_SLOWMO_MULTIPLIER = 40
+const DASH_ATTACK_MULTIPLIER = 1
+
 #calculated values
 const AIR_SPEED = RUN_SPEED
 const AIR_ACCELERATION_FRAMES = RUN_ACCELERATION_FRAMES*2
@@ -46,13 +49,20 @@ var hook : KinematicBody2D = null
 var maxHookCharges: int = 1
 var hookCharges : int = maxHookCharges
 var grappleWindup : int = 0
+var lastHooked = null
 
-var storedWallJumpMotion : float = 0
 
+var dashModifier : int = DASH_SLOWMO_MULTIPLIER
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
-var dashPogo : bool = false
+var currentlyDashing : bool = false
+
+var lastAttack : int = 0
+onready var AttackArea = $AttackArea
+
+var storedWallJumpMotion : float = 0
+
 
 var checkpointScene : Node
 var checkpoint : Node
@@ -67,12 +77,16 @@ var manaUntilNextHeal : float  = manaPerHealth
 var isChargingHeal : bool = false
 var healCharge : int = 0
 
+var slowdownFactor : float = 1
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	fallSpeed = FALL_SPEED
-	setMaxHealth(6)
+	setMaxHealth(60)
 
 func _physics_process(_delta):
+	slowdownFactor = (1/Engine.get_time_scale())
+
 	######################## ANIMATIONS ##################################
 	if ($AnimatedSprite.animation == "run" or $AnimatedSprite.animation == "run start") and abs(motion.x) < 50:
 		$AnimatedSprite.stop()
@@ -127,12 +141,16 @@ func _physics_process(_delta):
 			hook.setDead()
 		if hook != null and hook.dashBufferFrames:
 			hook.setDashing()
+			$FrameCounters/OnHook.start()
 		
 	if Input.is_action_just_pressed("hook") and hookCharges > 0 and hook == null:
 		throwHook()
 		
+	if $FrameCounters/OnHookDeath.justFinished:
+		lastHooked = null
+	
 	######################## ATTACK ##################################
-	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
+	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active() and lastAttack < 3:
 		swingSword()
 	
 	######################## ON GROUND ##################################
@@ -245,23 +263,33 @@ func _physics_process(_delta):
 		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
 			wallJump(getOppositeDirection(facing))
 		
-	if Input.is_action_just_pressed("dash") and dashCharges > 0:
-		dash(getDirectionFromInput())	
-
-	#Dash
+		
+##############################   Dash   ################################
+################## Dash Input Controller
+	if Input.is_action_just_pressed("dash") and dashCharges > 0:  # Just pressed
+		Engine.set_time_scale(0.02)
+		$FrameCounters/DashSlowmo.start()
+		
+	if (Input.is_action_just_released("dash") and $FrameCounters/DashSlowmo.active()) or $FrameCounters/DashSlowmo.justFinished: # Released
+		$FrameCounters/DashSlowmo.stop()
+		dash((get_global_mouse_position() - position).normalized(), "dashInput")
+		
 	if $FrameCounters/DashFreeze.active():
 		motion = Vector2(0,0)		
 	elif $FrameCounters/DashFreeze.justFinished:
 		$FrameCounters/Dash.start()
-			
-	if $FrameCounters/Dash.active():
-		motion = dashDirection * DASH_SPEED
-	elif $FrameCounters/Dash.justFinished:
-		motion = dashDirection * AIR_SPEED * 1.3
-		if dashPogo:
-			dashPogo = false
-			swordPogo()
 
+################# Physics Process Dash movement handler
+	if $FrameCounters/Dash.active():
+		motion = dashDirection * DASH_SPEED * dashModifier #BUG WITH MASHING DASH ATM
+	elif $FrameCounters/Dash.justFinished:
+
+		motion = dashDirection * AIR_SPEED * 1.3    
+		self.addFreezeFrames(5)
+		Engine.set_time_scale(1.0)
+
+
+#########################   Input Direction   ##########################
 func getDirectionFromInput() -> Vector2:
 	var x = 0
 	var y = 0
@@ -293,8 +321,9 @@ func jump() -> void:
 		return
 	$FrameCounters/JumpGrace.stop()
 	isChargingHeal = false
+	lastAttack = 0
 	
-	motion.y -= JUMP_VELOCITY
+	motion.y -= JUMP_VELOCITY 
 	if $FrameCounters/Slide.getFrame() < $FrameCounters/Slide.getActiveFrames() * 0.5:
 		$FrameCounters/JumpBoost.start()
 	else:
@@ -370,7 +399,25 @@ func wallJump(direction) -> void:
 	$FrameCounters/DashFreeze.stop()
 	$FrameCounters/Dash.stop()
 
-func dash(direction : Vector2) -> void:
+func dash(direction : Vector2, dashMode : String) -> void:
+	
+	if dashMode == "dashInput":
+		dashModifier = DASH_SLOWMO_MULTIPLIER
+		$FrameCounters/DashFreeze.setActiveFrames(3)
+		$FrameCounters/Dash.setActiveFrames(5)
+	elif dashMode == "attackInput":
+		dashModifier = DASH_ATTACK_MULTIPLIER
+		$FrameCounters/DashFreeze.setActiveFrames(0)
+		if lastAttack < 4:
+			$FrameCounters/Dash.setActiveFrames(2)
+		else:
+			$FrameCounters/Dash.setActiveFrames(1)
+	elif dashMode == "dashThroughTarget":
+		dashModifier = DASH_ATTACK_MULTIPLIER
+		$FrameCounters/DashFreeze.setActiveFrames(0)
+		$FrameCounters/Dash.setActiveFrames(8)
+
+	
 	if isChargingHeal:
 		return
 	if $FrameCounters/Slide.active() or direction == Vector2(0,0):
@@ -383,8 +430,9 @@ func dash(direction : Vector2) -> void:
 	else:
 		dashDirection = direction
 		$FrameCounters/DashFreeze.start()
-		
-		
+	
+	
+
 func throwHook() -> void:
 	if isChargingHeal:
 		return
@@ -395,20 +443,95 @@ func throwHook() -> void:
 	hook.motion = (get_global_mouse_position() - position).normalized()*HOOK_SPEED
 	get_parent().add_child(hook)
 	
-func swingSword() -> void:
+func swingSword() -> void: # Handles attack based on context
 	if isChargingHeal:
 		return
-	$FrameCounters/AttackCooldown.start()
 	
+	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5 or (!onGround and swordPogoAnyAngle)
 	var hitSomething = false
 	
-	if hook != null:
-		hook.setDead()
-		
-	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
-	for body in $AttackArea.get_overlapping_bodies():
+	if $FrameCounters/OnHook.active():
+		if lastHooked is Living:
+			$AttackAreaLong/AttackSprite.set_frame(0) # this line bugfixes something or other
+			AttackArea  = $AttackAreaLong
+			dash((lastHooked.position - position).normalized(), "dashThroughTarget")
+			$AttackAreaLong/AttackSprite.play("AttackLong")
+			$FrameCounters/AttackCooldown.setActiveFrames(30)
+			$FrameCounters/AttackCooldown.start()
+			lastAttack = 0
+			print("TARGET VALID")
+		else:
+			pass
+
+	elif onGround:   ### Handle animation, combo limitations and cooldowns
+		if hook != null:
+			hook.setDead()
+		match lastAttack:
+			0: 
+				AttackArea = $AttackArea
+				dash((get_global_mouse_position() - position).normalized(), "attackInput")
+				$AttackArea/AttackSprite.play("Attack1")
+				$FrameCounters/AttackCooldown.setActiveFrames(15)
+				$FrameCounters/AttackCooldown.start()
+				lastAttack = 1
+				
+			1: 
+				AttackArea = $AttackArea
+				dash((get_global_mouse_position() - position).normalized(), "attackInput")
+				$AttackArea/AttackSprite.play("Attack2")
+				$FrameCounters/AttackCooldown.start()
+				lastAttack = 2
+			2:
+				$AttackAreaLong/AttackSprite.set_frame(0) # this line bugfixes something or other
+				AttackArea  = $AttackAreaLong
+				dash((get_global_mouse_position() - position).normalized(), "attackInput")
+				$AttackAreaLong/AttackSprite.play("AttackLong")
+				$FrameCounters/AttackCooldown.setActiveFrames(30)
+				$FrameCounters/AttackCooldown.start()
+				lastAttack = 0
+	else:
+		if hook != null:
+			hook.setDead()
+		if isDownSwing and lastAttack < 4 :
+			$AttackAreaLong/AttackSprite.set_frame(0)
+			AttackArea  = $AttackAreaLong
+			$AttackAreaLong/AttackSprite.play("AttackLong")
+			$FrameCounters/AttackCooldown.setActiveFrames(30)
+			$FrameCounters/AttackCooldown.start()
+			lastAttack = 4  
+		else:
+			match lastAttack:
+				0: 
+					AttackArea = $AttackArea
+					dash((get_global_mouse_position() - position).normalized(), "attackInput")
+					$AttackArea/AttackSprite.play("Attack1")
+					$FrameCounters/AttackCooldown.setActiveFrames(15)
+					$FrameCounters/AttackCooldown.start()
+					lastAttack = 1
+					
+				1: 
+					AttackArea = $AttackArea
+					dash((get_global_mouse_position() - position).normalized(), "attackInput")
+					$AttackArea/AttackSprite.play("Attack2")
+					$FrameCounters/AttackCooldown.start()
+					lastAttack = 2
+				2:
+					$AttackAreaLong/AttackSprite.set_frame(0)
+					AttackArea  = $AttackAreaLong
+					dash((get_global_mouse_position() - position).normalized(), "attackInput")
+					$AttackAreaLong/AttackSprite.play("AttackLong")
+					$FrameCounters/AttackCooldown.setActiveFrames(30)
+					$FrameCounters/AttackCooldown.start()
+					lastAttack = 4
+	
+	if AttackArea == $AttackAreaLong:
+		damage = Damage.new(self, 2*combo, Damage.TYPE.PHYSICAL)	
+	else:
+		pass
+	
+	for body in AttackArea.get_overlapping_bodies():   ### Handle Damage
 		if body == self:
 			continue
 		if body is Living:
@@ -419,13 +542,15 @@ func swingSword() -> void:
 			if body.hurt(damage):
 				body.addKnockback(knockback, true)
 				hitSomething = true
+				if body.isDead:
+					lastAttack = 0
 			
 		if body.is_in_group("attackable"):
 			body.onAttacked(damage)
 			
 		if isDownSwing and hitSomething:
 			swordPogo()
-			
+			lastAttack = 0
 
 func swordPogo():
 	if $FrameCounters/Dash.active():
@@ -487,8 +612,12 @@ func onLeaveGround() -> void:
 		rc.set_enabled(true)
 	
 func onLand() -> void:
+	if lastAttack == 3 or lastAttack == 4:
+		lastAttack = 0
+
 	for rc in $LedgeGrab.get_children():
 		rc.set_enabled(false)
+
 		
 	if $AnimatedSprite.animation == "run jump":
 		$AnimatedSprite.stop()
@@ -499,22 +628,25 @@ func onLand() -> void:
 	if $AnimatedSprite.animation == "fall":
 		$AnimatedSprite.stop()
 
-
 func onAnimationFinished() -> void:
 	var anim = $AnimatedSprite.animation
 	
 	if anim == "run start":
 		$AnimatedSprite.play("run")
-		
+
+func _on_Hook_collided(lasthook):
+	lastHooked = lasthook
+
+func _on_Hook_dead():
+	$FrameCounters/OnHookDeath.start()
+
+func _input(event):
+	if event is InputEventMouseMotion:
+		if !$FrameCounters/AttackCooldown.active():
+			$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)
+			$AttackAreaLong.rotation = get_global_mouse_position().angle_to_point(global_position)
+
 func _on_Slide_finished():
 	$AnimatedSprite.play("run")
 	$Hitbox.set_deferred("disabled", false)
 	$CrouchHitbox.set_deferred("disabled", true)
-		
-func _input(event):
-	if event is InputEventMouseMotion:
-		$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)
-		
-
-
-
