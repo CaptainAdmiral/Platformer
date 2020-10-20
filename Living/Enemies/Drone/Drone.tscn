@@ -158,7 +158,14 @@ animations = [ {
 "name": "idle",
 "speed": 5.0
 }, {
-"frames": [ SubResource( 9 ), SubResource( 10 ), SubResource( 11 ), SubResource( 12 ) ],
+
+"frames": [ SubResource( 9 ), SubResource( 10 ), SubResource( 11 ), SubResource( 12 ), SubResource( 13 ), SubResource( 14 ), SubResource( 15 ), SubResource( 16 ), SubResource( 17 ), SubResource( 18 ), SubResource( 19 ), SubResource( 20 ), SubResource( 21 ), SubResource( 22 ), SubResource( 23 ), SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ), SubResource( 32 ), SubResource( 33 ) ],
+"loop": true,
+"name": "attack",
+"speed": 40.0
+}, {
+"frames": [ SubResource( 34 ), SubResource( 35 ), SubResource( 36 ), SubResource( 37 ) ],
+
 "loop": true,
 "name": "agro",
 "speed": 5.0
@@ -182,6 +189,7 @@ shape = SubResource( 1 )
 [node name="AgroArea" type="Area2D" parent="." groups=[
 "drones",
 ]]
+collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AgroArea"]
 shape = SubResource( 2 )
@@ -195,18 +203,32 @@ shape = SubResource( 3 )
 
 [node name="WallDetector" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 0, 300 )
+cast_to = Vector2( 0, 200 )
 
 [node name="AnimatedSprite" type="AnimatedSprite" parent="."]
 scale = Vector2( 3, 3 )
 frames = SubResource( 38 )
 animation = "idle"
-frame = 2
+
+frame = 1
+
 playing = true
 
 [node name="FrameCounter" type="Node" parent="."]
 
 [node name="Attack" type="Node" parent="FrameCounter"]
+script = ExtResource( 5 )
+activeFrames = 30
+
+[node name="AttackCooldown" type="Node" parent="FrameCounter"]
+script = ExtResource( 5 )
+activeFrames = 90
+
+[node name="AttackTargeting" type="Node" parent="FrameCounter"]
+script = ExtResource( 5 )
+activeFrames = 120
+
+[node name="ChargeAttack" type="Node" parent="FrameCounter"]
 script = ExtResource( 5 )
 activeFrames = 60
 

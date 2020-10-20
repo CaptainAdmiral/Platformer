@@ -6,12 +6,11 @@ var health : int
 var isDead = false
 var countsAsKill : bool = true
 var fallSpeed : int = 30
-#Whether or not the player can pull with the grappling hook
-var canBePulled : bool = false
 #A higher knockback multiplier will result in more knockback taken
 var manaOnKill : int = 0
 var knockbackMultiplier : float = 1
-var motion = Vector2()
+var motion : Vector2 = Vector2()
+var prevMotion : Vector2 = Vector2()
 var freezeFrames : int
 var handleOwnMovement : bool = false
 var Direction = Globals.Direction
@@ -19,14 +18,11 @@ export(Globals.Direction) var facing = Globals.Direction.RIGHT
 var onGround = false
 var prevOnGround = false
 
-var rng = RandomNumberGenerator.new()
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	rng.randomize()
 	health = maxHealth
 		
-func _physics_process(delta):
+func _physics_process(_delta):
 	prevOnGround = onGround
 	onGround = is_on_floor()
 	
@@ -36,6 +32,7 @@ func _physics_process(delta):
 	if(is_on_floor() and motion.y > fallSpeed):
 		motion.y = fallSpeed
 	if !handleOwnMovement and !freezeFrames:
+		prevMotion = motion
 		motion = move_and_slide(motion, Vector2(0, -1))
 		
 	if freezeFrames:
@@ -57,10 +54,24 @@ func turnAround():
 		setFacing(Direction.LEFT)
 	elif facing == Direction.LEFT:
 		setFacing(Direction.RIGHT)
+
+#Looking right because you left me
+#Looking left because you ain’t treat me right
+#Looking up because you let me down
+#Looking down because you fucked me up
+func getOppositeDirection(direction):
+	if facing == Direction.RIGHT:
+		return Direction.LEFT
+	elif facing == Direction.LEFT:
+		return Direction.RIGHT
+	elif facing == Direction.UP:
+		return Direction.DOWN
+	elif facing == Direction.DOWN:
+		return Direction.UP
 		
 #Returns 1 if the direction coresponds to a positive change along the axis, else -1
-func getSignForDirection() -> int:
-	if facing == Direction.RIGHT or facing == Direction.DOWN:
+func getSignForDirection(direction = facing) -> int:
+	if direction == Direction.RIGHT or direction == Direction.DOWN:
 		return 1
 	else:
 		return -1
@@ -71,6 +82,7 @@ func setMaxHealth(amount : int) -> void:
 		
 #Does not add freeze frames to the existing number of frames, instead updates to whichever number is higher
 func addFreezeFrames(frames : int):
+# warning-ignore:narrowing_conversion
 	freezeFrames = max(frames, freezeFrames)
 
 #Directly decreases health by the given amount
@@ -83,6 +95,7 @@ func damage(amount : int) -> void:
 #Directly increases health by the given amount
 func heal(amount : int) -> void:
 	assert(amount >= 0)
+# warning-ignore:narrowing_conversion
 	health = min(maxHealth, health + amount)
 	
 #Called as a result of being damaged to allow entities to handle their own
@@ -94,7 +107,7 @@ func hurt(damage : Damage) -> bool:
 	return true
 	
 #Called when hit if entitiy is part of "attackable" group
-func onAttacked(damage : Damage) -> void:
+func onAttacked(_damage : Damage) -> void:
 	pass
 
 #Adds a knockback vector to the players motion. If overwrite motion is true sets player motion instead

@@ -52,6 +52,7 @@ func _physics_process(delta):
 				target = collider
 				$View.enabled = false
 				if onGround:
+					motion.x = 0
 					motion.y -= 300
 				$AnimatedSprite.play("agro")
 

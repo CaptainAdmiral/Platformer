@@ -1,4 +1,5 @@
-[gd_scene load_steps=57 format=2]
+[gd_scene load_steps=48 format=2]
+
 
 [ext_resource path="res://Living/Player/Assets/Player Idle.png" type="Texture" id=1]
 [ext_resource path="res://Living/Player/Player.gd" type="Script" id=2]
@@ -19,7 +20,7 @@
 extents = Vector2( 12, 45 )
 
 [sub_resource type="RectangleShape2D" id=2]
-extents = Vector2( 12, 20 )
+extents = Vector2( 12, 10 )
 
 [sub_resource type="RectangleShape2D" id=3]
 extents = Vector2( 12, 45 )
@@ -81,6 +82,7 @@ atlas = ExtResource( 7 )
 region = Rect2( 128, 118, 64, 59 )
 
 [sub_resource type="AtlasTexture" id=18]
+
 atlas = ExtResource( 5 )
 region = Rect2( 0, 0, 64, 59 )
 
@@ -170,13 +172,28 @@ animations = [ {
 "speed": 8.0
 }, {
 "frames": [ SubResource( 18 ), SubResource( 19 ), SubResource( 20 ) ],
+
+
+"loop": false,
+"name": "run start",
+"speed": 10.0
+}, {
+"frames": [ SubResource( 21 ), SubResource( 22 ), SubResource( 23 ) ],
+
 "loop": false,
 "name": "run jump",
 "speed": 10.0
 }, {
+
 "frames": [ SubResource( 21 ), SubResource( 22 ), SubResource( 23 ) ],
+
 "loop": false,
-"name": "run start",
+"name": "jump",
+"speed": 10.0
+}, {
+"frames": [ SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ), SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ) ],
+"loop": true,
+"name": "run",
 "speed": 10.0
 }, {
 "frames": [ SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ) ],
@@ -192,6 +209,7 @@ animations = [ {
 
 [sub_resource type="ConvexPolygonShape2D" id=37]
 points = PoolVector2Array( -20, -50, 150, -80, 200, 0, 150, 80, -20, 50, -40, 0 )
+
 
 [sub_resource type="SpriteFrames" id=38]
 animations = [ {
@@ -223,6 +241,7 @@ extents = Vector2( 20, 40 )
 [sub_resource type="RectangleShape2D" id=42]
 extents = Vector2( 20, 40 )
 
+
 [node name="Player" type="KinematicBody2D" groups=[
 "players",
 ]]
@@ -236,7 +255,7 @@ shape = SubResource( 1 )
 
 [node name="CrouchHitbox" type="CollisionShape2D" parent="."]
 modulate = Color( 0.219608, 1, 0, 1 )
-position = Vector2( 0, 37 )
+position = Vector2( 0, 47 )
 shape = SubResource( 2 )
 disabled = true
 
@@ -249,6 +268,7 @@ smoothing_enabled = true
 script = ExtResource( 3 )
 
 [node name="StandingHitboxArea" type="Area2D" parent="."]
+visible = false
 collision_layer = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StandingHitboxArea"]
@@ -260,15 +280,19 @@ position = Vector2( 0, -2.5 )
 scale = Vector2( 2, 2 )
 frames = SubResource( 36 )
 animation = "idle"
-frame = 3
+
+frame = 1
+
 playing = true
 
 [node name="AttackArea" type="Area2D" parent="."]
+visible = false
 collision_layer = 0
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
 shape = SubResource( 37 )
+
 
 [node name="AttackSprite" type="AnimatedSprite" parent="AttackArea"]
 position = Vector2( 98.3977, 0.868629 )
@@ -300,12 +324,25 @@ collision_layer = 0
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump/Right"]
 shape = SubResource( 41 )
 
-[node name="Left" type="Area2D" parent="WallJump"]
-position = Vector2( -30, 0 )
-collision_layer = 0
+[node name="LedgeGrab" type="Node2D" parent="."]
+position = Vector2( 30, -90 )
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump/Left"]
-shape = SubResource( 42 )
+[node name="LedgeGrab" type="RayCast2D" parent="LedgeGrab"]
+enabled = true
+cast_to = Vector2( 0, 100 )
+
+
+[node name="CeilingCheck" type="RayCast2D" parent="LedgeGrab"]
+position = Vector2( -40, 100 )
+enabled = true
+cast_to = Vector2( 0, -100 )
+
+
+[node name="LedgeSpace" type="RayCast2D" parent="LedgeGrab"]
+position = Vector2( 0, 100 )
+enabled = true
+cast_to = Vector2( 0, -100 )
+
 
 [node name="FrameCounters" type="Node" parent="."]
 
@@ -337,17 +374,18 @@ activeFrames = 8
 script = ExtResource( 8 )
 activeFrames = 15
 
-[node name="LeftWallJump" type="Node" parent="FrameCounters"]
+[node name="JumpDisable" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 10
 
-[node name="RightWallJump" type="Node" parent="FrameCounters"]
+[node name="WallJump" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 10
 
 [node name="Slide" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 40
+
 
 [node name="DashSlowmo" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
@@ -361,7 +399,17 @@ activeFrames = 30
 script = ExtResource( 8 )
 activeFrames = 40
 
-[node name="TrashCircle" parent="." instance=ExtResource( 10 )]
+
+[node name="LedgeJump" type="Node" parent="FrameCounters"]
+script = ExtResource( 8 )
+activeFrames = 60
+
+[node name="WallJump" type="Area2D" parent="."]
+position = Vector2( 28, 12 )
+collision_layer = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WallJump"]
+shape = SubResource( 38 )
+
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="onAnimationFinished"]
-[connection signal="body_entered" from="WallJump/Right" to="." method="_on_Right_body_entered"]
-[connection signal="body_entered" from="WallJump/Left" to="." method="_on_Left_body_entered"]
+[connection signal="finished" from="FrameCounters/Slide" to="." method="_on_Slide_finished"]

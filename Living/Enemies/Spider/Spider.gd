@@ -7,7 +7,6 @@ var acceleration = 50
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	setMaxHealth(6)
-	canBePulled = true
 	
 	setFacing(facing)
 

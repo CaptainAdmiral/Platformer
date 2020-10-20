@@ -15,7 +15,7 @@ const JUMP_BOOST_SPEED = 30
 const DASH_SPEED = 1800
 
 const CROUCH_SLOWDOWN = 0.875
-const SLIDE_SLOWDOWN = 0.95
+const SLIDE_SLOWDOWN = 0.96
 
 const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 120
@@ -51,6 +51,7 @@ var hookCharges : int = maxHookCharges
 var grappleWindup : int = 0
 var lastHooked = null
 
+
 var dashModifier : int = DASH_SLOWMO_MULTIPLIER
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
@@ -60,16 +61,18 @@ var currentlyDashing : bool = false
 var lastAttack : int = 0
 onready var AttackArea = $AttackArea
 
-var isCrouching : bool = false
+var storedWallJumpMotion : float = 0
+
 
 var checkpointScene : Node
 var checkpoint : Node
 
 var mana : float = 0
 var maxMana : int = 100
-var manaOvercapDecay = 0.1
+var manaOvercapDecay = 0.025
 var isHealing : bool = false
-var manaPerHealth : float = 20
+var manaPerHealth : float = 25
+var manaPerFrame : float = 0.15
 var manaUntilNextHeal : float  = manaPerHealth
 var isChargingHeal : bool = false
 var healCharge : int = 0
@@ -82,12 +85,8 @@ func _ready():
 	setMaxHealth(60)
 
 func _physics_process(_delta):
-#	print(health)
-#	print(mana)
-#	print("\n")
-	
 	slowdownFactor = (1/Engine.get_time_scale())
-	
+
 	######################## ANIMATIONS ##################################
 	if ($AnimatedSprite.animation == "run" or $AnimatedSprite.animation == "run start") and abs(motion.x) < 50:
 		$AnimatedSprite.stop()
@@ -108,31 +107,31 @@ func _physics_process(_delta):
 		healCharge = 0
 	else:
 		healCharge+=1
-		if healCharge >= 120:
+		if healCharge >= 60:
 			isHealing = true
 			isChargingHeal = false
 	
-	if mana == 0:
-		isHealing = false
-	elif mana > maxMana:
+	if mana > maxMana:
 		mana -= manaOvercapDecay
 		
+	if health == maxHealth:
+		isHealing = false
 		
 	if isHealing:
-		if useMana(1):
-			manaUntilNextHeal-=1
-			if manaUntilNextHeal == 0:
+		if useMana(manaPerFrame):
+			manaUntilNextHeal-=manaPerFrame
+			if manaUntilNextHeal <= 0:
 				heal(1)
-				manaUntilNextHeal = manaPerHealth
-	else:
-		manaUntilNextHeal = manaPerHealth
-			
-			
-	
-	######################## SLIDING / CROUCHING ##################################
+				manaUntilNextHeal += manaPerHealth
+				
+				print(health)
+				print(mana)
+				print("\n")
+		else:
+			isHealing = false
+			mana = 0
 	
 	if !Input.is_action_pressed("down"):
-		setCrouching(false)
 		isChargingHeal = false
 	
 	######################## GRAPPLING HOOK ##################################
@@ -171,25 +170,25 @@ func _physics_process(_delta):
 			if Input.is_action_pressed("left"):
 				run(Direction.LEFT)
 				
-		if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !$FrameCounters/Slide.active():
+		if isChargingHeal or !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !$FrameCounters/Slide.active():
 			motion.x *= GROUND_FRICTION
-		
-		if $FrameCounters/Slide.active():
-			motion.x *= SLIDE_SLOWDOWN
-		elif isCrouching:
-			motion.x *= CROUCH_SLOWDOWN
 			
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.99
 			
-		if Input.is_action_pressed("down"):
-			if abs(motion.x) > RUN_SPEED/2:			
-				slide()
-				setCrouching(true)
-			else:
+		if Input.is_action_pressed("down") and !$FrameCounters/Slide.active():
+			if abs(motion.x) >= RUN_SPEED:
+				motion.x += getSignForDirection()*2*RUN_SPEED
+				$FrameCounters/Slide.start()
+				$AnimatedSprite.play("slide")
+				$Hitbox.set_deferred("disabled", true)
+				$CrouchHitbox.set_deferred("disabled", false)
+			elif !$FrameCounters/Slide.active():
 				isChargingHeal = true
 				
-	
+		if $FrameCounters/Slide.active():
+			slide()
+
 	else:
 		######################## IN AIR ##################################
 		if prevOnGround == true:
@@ -202,7 +201,11 @@ func _physics_process(_delta):
 				motion.y-=JUMP_BOOST_SPEED
 			
 		if hook != null and hook.isTense():
-			$FrameCounters/Slide.stop()
+			$FrameCounters/Slide.setFinished()
+			
+		for body in $WallJump.get_overlapping_bodies():
+			if body is StaticBody or body is TileMap:
+				$FrameCounters/WallJump.start()
 		
 		#Air Movement
 		if hook == null or hook.attachedTo == null or !hook.isTense():
@@ -215,28 +218,50 @@ func _physics_process(_delta):
 			
 			if !(Input.is_action_pressed("right") or Input.is_action_pressed("left")):
 				motion.x *= AIR_FRICTION
-		
+				
+		if $LedgeGrab/LedgeGrab.is_colliding() and !$LedgeGrab/CeilingCheck.is_colliding():
+			var collisionPos = $LedgeGrab/LedgeGrab.get_collision_point()
+			collisionPos.y -= 1
+			$LedgeGrab/LedgeSpace.set_position($LedgeGrab.to_local(collisionPos))
+			$LedgeGrab/LedgeSpace.force_raycast_update()
+			if !$LedgeGrab/LedgeSpace.is_colliding():
+				if Input.is_action_just_pressed("up") and !$FrameCounters/LedgeJump.active():
+					position = collisionPos
+					position.y-=$Hitbox.shape.extents.y
+					motion.y = 0
+					$FrameCounters/JumpDisable.start()
+#					motion.y = min(motion.y, -JUMP_VELOCITY*1.5)
+#					$FrameCounters/LedgeJump.start()
+				
 		######################## ON WALL ##################################
 		if is_on_wall():
+			storedWallJumpMotion = max(storedWallJumpMotion, abs(prevMotion.x))
+			
+			for i in get_slide_count():
+				var norm = get_slide_collision(i).normal
+				
+				if (norm == Vector2(1, 0) and !Input.is_action_pressed("right") and Input.is_action_pressed("left")) or (norm == Vector2(-1, 0) and !Input.is_action_pressed("left") and Input.is_action_pressed("right")):
+					motion.y -= min(fallSpeed, storedWallJumpMotion)*0.5
+					storedWallJumpMotion -= min(fallSpeed, storedWallJumpMotion)
+					
+				
+
+			
 			if motion.y > WALL_SLIDE_SPEED:
 				motion.y = max(motion.y/2, WALL_SLIDE_SPEED)
 			
 			
-	
+		else:
+			storedWallJumpMotion = 0
 	#Jump
 	if $FrameCounters/JumpGrace.active():
 		if inputBuffer.hasAction("up", false, 10) and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
 			jump()
 	
 	#Wall Jump Movement
-	if $FrameCounters/LeftWallJump.active():
-		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("right", false, 6):
-			wallJump(Direction.RIGHT)
-			
-		
-	if $FrameCounters/RightWallJump.active():
-		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction("left", false, 6):
-			wallJump(Direction.LEFT)
+	if $FrameCounters/WallJump.active():
+		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
+			wallJump(getOppositeDirection(facing))
 		
 		
 ##############################   Dash   ################################
@@ -258,9 +283,11 @@ func _physics_process(_delta):
 	if $FrameCounters/Dash.active():
 		motion = dashDirection * DASH_SPEED * dashModifier #BUG WITH MASHING DASH ATM
 	elif $FrameCounters/Dash.justFinished:
+
 		motion = dashDirection * AIR_SPEED * 1.3    
 		self.addFreezeFrames(5)
 		Engine.set_time_scale(1.0)
+
 
 #########################   Input Direction   ##########################
 func getDirectionFromInput() -> Vector2:
@@ -278,14 +305,20 @@ func getDirectionFromInput() -> Vector2:
 												#Baked value for 1/sqrt2
 	return Vector2(x, y) if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y)
 	
-func setFacing(direction) -> void:
-	facing = direction
+func getInputFromDirection(direction) -> String:
 	if direction == Direction.LEFT:
-		$AnimatedSprite.flip_h = true
+		return "left"
 	elif direction == Direction.RIGHT:
-		$AnimatedSprite.flip_h = false
+		return "right"
+	elif direction == Direction.UP:
+		return "up"
+	elif direction == Direction.DOWN:
+		return "down"
+	return "err"
 	
 func jump() -> void:
+	if $FrameCounters/JumpDisable.active():
+		return
 	$FrameCounters/JumpGrace.stop()
 	isChargingHeal = false
 	lastAttack = 0
@@ -296,7 +329,7 @@ func jump() -> void:
 	else:
 		$FrameCounters/JumpBoost.setFrame($FrameCounters/JumpBoost.getActiveFrames()/2)
 	
-	$FrameCounters/Slide.stop()
+	$FrameCounters/Slide.setFinished()
 	if $AnimatedSprite.animation == "idle":
 		$AnimatedSprite.play("jump")
 	elif $AnimatedSprite.animation == "run start":
@@ -307,44 +340,19 @@ func jump() -> void:
 		$AnimatedSprite.play("run jump")
 	
 func slide() -> void:
-	if !$FrameCounters/Slide.active() and !isCrouching:
-		setCrouching(true)
-		if motion.x >= RUN_SPEED*0.75:
-			$FrameCounters/Slide.start()
-			motion.x += RUN_SPEED*1.75
-		elif -motion.x >= RUN_SPEED*0.75:
-			$FrameCounters/Slide.start()
-			motion.x -= RUN_SPEED*1.75
+	motion.x *= SLIDE_SLOWDOWN
 	
-func setCrouching(crouching : bool) -> void:
-	if isCrouching == crouching:
-		return
+	if !canStand():
+		$FrameCounters/Slide.setMinFrame(2)
+		motion.x += getSignForDirection()*RUN_ACCELERATION
 		
-	if $FrameCounters/Slide.active():
-		return
 		
-	var canStand = true
-	
+func canStand():
 	for body in $StandingHitboxArea.get_overlapping_bodies():
 		if body is StaticBody2D or body is TileMap:
-			canStand = false
-		
-	if !crouching and !canStand:
-		return
-	
-	isCrouching = crouching
-	
-	#TODO place on ground
-	
-	if isCrouching:
-		$AnimatedSprite.play("slide")
-		$Hitbox.set_deferred("disabled", true)
-		$CrouchHitbox.set_deferred("disabled", false)
-	else:
-		$AnimatedSprite.play("run")
-		$Hitbox.set_deferred("disabled", false)
-		$CrouchHitbox.set_deferred("disabled", true)
-	
+			return false
+	return true
+			
 func run(direction) -> void:
 	if isChargingHeal:
 		return
@@ -380,23 +388,13 @@ func airDrift(direction) -> void:
 			motion.x *= AIR_FRICTION
 		if -motion.x < AIR_SPEED and !(hook != null and hook.isTense()):
 			motion.x = max(motion.x - AIR_ACCELERATION, -AIR_SPEED)
-			
-func _on_Right_body_entered(_body):
-	$FrameCounters/RightWallJump.start()
-
-func _on_Left_body_entered(_body):
-	$FrameCounters/LeftWallJump.start()
 
 func wallJump(direction) -> void:
+	turnAround()
 	motion.y=-WALL_JUMP_VELOCITY.y
-	if direction == Direction.RIGHT:
-		motion.x = WALL_JUMP_VELOCITY.x
-		$FrameCounters/LeftWallJump.stop()
-		setFacing(Direction.RIGHT)
-	elif direction == Direction.LEFT:
-		motion.x = -WALL_JUMP_VELOCITY.x
-		$FrameCounters/RightWallJump.stop()
-		setFacing(Direction.LEFT)
+	motion.x = getSignForDirection()*WALL_JUMP_VELOCITY.x
+		
+	$FrameCounters/WallJump.stop()
 	$FrameCounters/JumpBoost.start()
 	$FrameCounters/DashFreeze.stop()
 	$FrameCounters/Dash.stop()
@@ -555,7 +553,10 @@ func swingSword() -> void: # Handles attack based on context
 			lastAttack = 0
 
 func swordPogo():
-	motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
+	if $FrameCounters/Dash.active():
+		dashPogo = true
+	else:
+		motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
 
 func hurt(damage : Damage) -> bool:
 	if hurtFrames:
@@ -572,6 +573,11 @@ func hurt(damage : Damage) -> bool:
 		isHealing = false
 	if hook !=null:
 		hook.setDead()
+		
+	print(health)
+	print(mana)
+	print("\n")
+		
 	return .hurt(damage)
 	
 func onKill(living : Living) -> void:
@@ -602,11 +608,16 @@ func setDead() -> void:
 	get_tree().reload_current_scene()
 	
 func onLeaveGround() -> void:
-	pass
+	for rc in $LedgeGrab.get_children():
+		rc.set_enabled(true)
 	
 func onLand() -> void:
 	if lastAttack == 3 or lastAttack == 4:
 		lastAttack = 0
+
+	for rc in $LedgeGrab.get_children():
+		rc.set_enabled(false)
+
 		
 	if $AnimatedSprite.animation == "run jump":
 		$AnimatedSprite.stop()
@@ -634,3 +645,8 @@ func _input(event):
 		if !$FrameCounters/AttackCooldown.active():
 			$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)
 			$AttackAreaLong.rotation = get_global_mouse_position().angle_to_point(global_position)
+
+func _on_Slide_finished():
+	$AnimatedSprite.play("run")
+	$Hitbox.set_deferred("disabled", false)
+	$CrouchHitbox.set_deferred("disabled", true)
