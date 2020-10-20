@@ -184,21 +184,6 @@ func setDead() -> void:
 	if isCurAttacker:
 		selectNewAttacker()
 	.setDead()
-
-
-func begin_attack():
-	$AnimatedSprite.play("attack")
-	$AnimatedSprite.frame = 0
-#	$FrameCounter/Attack.setActiveFrames(60)
-	$FrameCounter/Attack.start()
-
-#func _on_Attack_command():
-#	begin_attack()
-
-func shoot():
-	if !$FrameCounter/Shoot.active():
-		projectile.instance().init(self, 400)
-		$FrameCounter/Shoot.start()
 		
 func _on_DetectionArea_body_entered(body):
 	if target != null:

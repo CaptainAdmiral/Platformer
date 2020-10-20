@@ -57,6 +57,7 @@ var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
 var currentlyDashing : bool = false
+var dashPogo = false
 
 var lastAttack : int = 0
 onready var AttackArea = $AttackArea
