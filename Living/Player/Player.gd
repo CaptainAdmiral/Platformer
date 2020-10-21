@@ -1,8 +1,5 @@
 extends Living
 
-
-export var swordPogoAnyAngle = true
-
 const RUN_SPEED = 500
 const RUN_ACCELERATION_FRAMES = 20
 const GROUND_FRICTION = 0.7
@@ -21,7 +18,6 @@ const WALL_JUMP_VELOCITY = Vector2(RUN_SPEED, JUMP_VELOCITY)
 const WALL_SLIDE_SPEED = 120
 
 const ATTACK_KNOCKBACK = 1000
-const SWORD_POGO_VELOCITY = 700
 
 const HOOK_SPEED = 4200
 
@@ -36,6 +32,9 @@ onready var inputBuffer = $InputBuffer
 var attackDamage : float  = 1
 var maxCombo : int = 3
 var combo : int = 1
+var curAttackInChain : int = 1
+var attacksInChain = 3
+var hitSomethingLastAttack = false
 
 var hurtFrames : int = 0
 
@@ -46,13 +45,13 @@ var hook : KinematicBody2D = null
 var maxHookCharges: int = 1
 var hookCharges : int = maxHookCharges
 var grappleWindup : int = 0
+var lastHooked = null
 
 var storedWallJumpMotion : float = 0
 
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
-var dashPogo : bool = false
 
 var checkpointScene : Node
 var checkpoint : Node
@@ -130,6 +129,13 @@ func _physics_process(_delta):
 		
 	if Input.is_action_just_pressed("hook") and hookCharges > 0 and hook == null:
 		throwHook()
+	
+	if hook != null and hook.attachedTo is Living:
+		lastHooked = hook.attachedTo
+		$FrameCounters/HookAttack.start()
+		
+	if $FrameCounters/HookAttack.justFinished:
+		lastHooked = null
 		
 	######################## ATTACK ##################################
 	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
@@ -140,6 +146,10 @@ func _physics_process(_delta):
 		refreshHook()
 		refreshDash()
 		$FrameCounters/JumpGrace.start()
+		if curAttackInChain > attacksInChain:
+			curAttackInChain = 1
+			
+		hitSomethingLastAttack = false
 		
 		if prevOnGround == false:
 			onLand()
@@ -258,9 +268,6 @@ func _physics_process(_delta):
 		motion = dashDirection * DASH_SPEED
 	elif $FrameCounters/Dash.justFinished:
 		motion = dashDirection * AIR_SPEED * 1.3
-		if dashPogo:
-			dashPogo = false
-			swordPogo()
 
 func getDirectionFromInput() -> Vector2:
 	var x = 0
@@ -401,14 +408,43 @@ func swingSword() -> void:
 	$FrameCounters/AttackCooldown.start()
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
-	var isDownSwing = rot > PI/5 and rot < 4*PI/5 or (!onGround and swordPogoAnyAngle)
+	var isDownSwing = rot > PI/5 and rot < 4*PI/5
 	var hitSomething = false
+		
+	var attackArea = null
 	
+	if lastHooked != null or curAttackInChain == 3:
+		$AttackAreaLong/AttackSprite.set_frame(0)
+		attackArea  = $AttackAreaLong
+		$AttackAreaLong/AttackSprite.play("long attack")
+		$FrameCounters/AttackCooldown.setActiveFrames(30)
+		$FrameCounters/AttackCooldown.start()
+	else:
+		match curAttackInChain:
+			1:
+					$AttackArea/AttackSprite.set_frame(0)
+					attackArea = $AttackArea
+					$AttackArea/AttackSprite.play("attack1")
+					$FrameCounters/AttackCooldown.setFrame(15)
+			2:
+					$AttackArea/AttackSprite.set_frame(0)
+					attackArea = $AttackArea
+					$AttackArea/AttackSprite.play("attack2")
+					$FrameCounters/AttackCooldown.start()
+			_:
+				return
+				
+	curAttackInChain += 1
+		
 	if hook != null:
-		hook.setDead()
+		hook.setDead()	
 		
 	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
-	for body in $AttackArea.get_overlapping_bodies():
+	var bodiesAttacked = attackArea.get_overlapping_bodies()
+	if lastHooked != null and !bodiesAttacked.has(lastHooked):
+		bodiesAttacked.append(lastHooked)
+		
+	for body in bodiesAttacked:
 		if body == self:
 			continue
 		if body is Living:
@@ -422,16 +458,17 @@ func swingSword() -> void:
 			
 		if body.is_in_group("attackable"):
 			body.onAttacked(damage)
-			
-		if isDownSwing and hitSomething:
-			swordPogo()
-			
+	if hitSomething or hitSomethingLastAttack:
+		if !onGround:
+			motion.y = min(-700, motion.y)
+			if lastHooked != null:
+				swordDash(1200*motion.normalized())
+			elif !onGround:
+				swordDash(1000*(get_global_mouse_position() - position).normalized())
+	hitSomethingLastAttack = hitSomething
 
-func swordPogo():
-	if $FrameCounters/Dash.active():
-		dashPogo = true
-	else:
-		motion.y = min(-SWORD_POGO_VELOCITY, motion.y)
+func swordDash(direction : Vector2):
+	motion = direction
 
 func hurt(damage : Damage) -> bool:
 	if hurtFrames:
@@ -457,6 +494,7 @@ func hurt(damage : Damage) -> bool:
 	
 func onKill(living : Living) -> void:
 	combo += 1
+	curAttackInChain = 1
 	$FrameCounters/ComboTimer.start()
 	
 	refreshDash()
@@ -483,6 +521,8 @@ func setDead() -> void:
 	get_tree().reload_current_scene()
 	
 func onLeaveGround() -> void:
+	curAttackInChain = 1
+	
 	for rc in $LedgeGrab.get_children():
 		rc.set_enabled(true)
 	
@@ -499,6 +539,15 @@ func onLand() -> void:
 	if $AnimatedSprite.animation == "fall":
 		$AnimatedSprite.stop()
 
+func _input(event):
+	if event is InputEventMouseMotion:
+		if !$FrameCounters/AttackCooldown.active():
+			var rot = get_global_mouse_position().angle_to_point(global_position)
+			if facing == Direction.LEFT:
+				rot*=-1
+				rot+=PI
+			$AttackArea.rotation = rot
+			$AttackAreaLong.rotation = rot
 
 func onAnimationFinished() -> void:
 	var anim = $AnimatedSprite.animation
@@ -510,7 +559,3 @@ func _on_Slide_finished():
 	$AnimatedSprite.play("run")
 	$Hitbox.set_deferred("disabled", false)
 	$CrouchHitbox.set_deferred("disabled", true)
-		
-func _input(event):
-	if event is InputEventMouseMotion:
-		$AttackArea.rotation = get_global_mouse_position().angle_to_point(global_position)

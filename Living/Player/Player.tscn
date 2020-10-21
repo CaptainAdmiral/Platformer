@@ -196,12 +196,12 @@ points = PoolVector2Array( -20, -50, 150, -80, 200, 0, 150, 80, -20, 50, -40, 0 
 animations = [ {
 "frames": [ ExtResource( 12 ), ExtResource( 14 ), ExtResource( 14 ), ExtResource( 14 ), ExtResource( 12 ) ],
 "loop": false,
-"name": "Attack1",
+"name": "attack1",
 "speed": 60.0
 }, {
 "frames": [ ExtResource( 12 ), ExtResource( 13 ), ExtResource( 13 ), ExtResource( 13 ), ExtResource( 12 ) ],
 "loop": false,
-"name": "Attack2",
+"name": "attack2",
 "speed": 60.0
 } ]
 
@@ -212,7 +212,7 @@ points = PoolVector2Array( -20, -35, 170, -35, 270, 0, 170, 35, -20, 35, -70, 0 
 animations = [ {
 "frames": [ ExtResource( 12 ), ExtResource( 11 ), ExtResource( 11 ), ExtResource( 11 ), ExtResource( 11 ), ExtResource( 11 ), ExtResource( 11 ), ExtResource( 12 ) ],
 "loop": false,
-"name": "AttackLong",
+"name": "long attack",
 "speed": 60.0
 } ]
 
@@ -270,7 +270,7 @@ shape = SubResource( 37 )
 position = Vector2( 98.3977, 0.868629 )
 scale = Vector2( 2.33239, 1.98604 )
 frames = SubResource( 38 )
-animation = "Attack1"
+animation = "attack2"
 
 [node name="AttackAreaLong" type="Area2D" parent="."]
 collision_layer = 0
@@ -283,7 +283,7 @@ shape = SubResource( 39 )
 position = Vector2( 102.546, -0.943375 )
 scale = Vector2( 2.29416, 2.22944 )
 frames = SubResource( 42 )
-animation = "AttackLong"
+animation = "long attack"
 
 [node name="WallJump" type="Area2D" parent="."]
 visible = false
@@ -359,5 +359,9 @@ activeFrames = 60
 [node name="LedgeJump" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 60
+
+[node name="HookAttack" type="Node" parent="FrameCounters"]
+script = ExtResource( 8 )
+activeFrames = 10
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="onAnimationFinished"]
 [connection signal="finished" from="FrameCounters/Slide" to="." method="_on_Slide_finished"]
