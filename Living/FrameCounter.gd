@@ -33,6 +33,13 @@ func start():
 func stop():
 	frame = 0
 	
+func pause():
+	set_physics_process(false)
+	
+func resume():
+	if frame != 0:
+		set_physics_process(true)
+	
 func setFinished():
 	if frame == 0:
 		return

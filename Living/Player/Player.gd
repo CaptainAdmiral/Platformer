@@ -52,6 +52,7 @@ var storedWallJumpMotion : float = 0
 var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
+var isMouseDash = false
 
 var checkpointScene : Node
 var checkpoint : Node
@@ -254,15 +255,33 @@ func _physics_process(_delta):
 	if $FrameCounters/WallJump.active():
 		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
 			wallJump(getOppositeDirection(facing))
-		
-	if Input.is_action_just_pressed("dash") and dashCharges > 0:
-		dash(getDirectionFromInput())	
 
 	#Dash
+	if Input.is_action_just_pressed("dash") and dashCharges > 0:
+		dash()
+		Engine.set_time_scale(0.02)
+		for fc in $FrameCounters.get_children():
+			if fc != $FrameCounters/DashSlowmo:
+				fc.pause()
+		$FrameCounters/DashSlowmo.start()
+		
+	if Input.is_action_just_released("dash") or $FrameCounters/DashSlowmo.justFinished:
+		isMouseDash = $FrameCounters/DashSlowmo.activeFrames - $FrameCounters/DashSlowmo.frame > 10
+		$FrameCounters/DashSlowmo.stop()
+		for fc in $FrameCounters.get_children():
+			if fc != $FrameCounters/DashSlowmo :
+				fc.resume()
+		Engine.set_time_scale(1)
+	
 	if $FrameCounters/DashFreeze.active():
 		motion = Vector2(0,0)		
 	elif $FrameCounters/DashFreeze.justFinished:
+		if isMouseDash:
+			dashDirection = (get_global_mouse_position() - position).normalized()
+		else:
+			dashDirection = getDirectionFromInput()
 		$FrameCounters/Dash.start()
+		isMouseDash = false
 			
 	if $FrameCounters/Dash.active():
 		motion = dashDirection * DASH_SPEED
@@ -282,7 +301,7 @@ func getDirectionFromInput() -> Vector2:
 	if Input.is_action_pressed("right"):
 		x+=1
 												#Baked value for 1/sqrt2
-	return Vector2(x, y) if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y)
+	return Vector2(x, y).normalized() if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y).normalized()
 	
 func getInputFromDirection(direction) -> String:
 	if direction == Direction.LEFT:
@@ -377,19 +396,23 @@ func wallJump(direction) -> void:
 	$FrameCounters/DashFreeze.stop()
 	$FrameCounters/Dash.stop()
 
-func dash(direction : Vector2) -> void:
+func dash() -> void:
 	if isChargingHeal:
 		return
-	if $FrameCounters/Slide.active() or direction == Vector2(0,0):
+	if dashCharges == 0 or $FrameCounters/Slide.active():
 		return
-	dashCharges -= 1
+	
 	if hook != null and hook.isDashing:
 		hook.setDead()
-	if hook != null and hook.attachedTo != null and direction != Vector2(0,0):
+	elif hook != null and hook.attachedTo != null:
+		var direction = getDirectionFromInput()
+		if direction == Vector2(0,0):
+			return
 		motion += direction * DASH_SPEED * 0.5
 	else:
-		dashDirection = direction
 		$FrameCounters/DashFreeze.start()
+		
+	dashCharges -= 1
 		
 		
 func throwHook() -> void:
