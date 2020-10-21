@@ -8,7 +8,6 @@ var startPos : Vector2
 var motion = Vector2()
 var length = 0
 var attachedTo = null
-var lastAttached = null
 var offset = Vector2()
 
 var isDashing=false
@@ -16,16 +15,11 @@ var dashBufferFrames=10
 
 onready var links = $Links
 
-signal dead
-signal collided(lastAttached)
-
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	startPos = global_position
 	if shooter != null:
 		add_collision_exception_with(shooter)
-	self.connect("collided", get_node("/root/Node2D/Player"), "_on_Hook_collided")
-	self.connect("dead", get_node("/root/Node2D/Player"), "_on_Hook_dead")
 	
 func _physics_process(delta):
 	if shooter == null:
@@ -49,7 +43,7 @@ func _physics_process(delta):
 			return
 		
 	else:
-		global_position = attachedTo.global_position - offset # ERROR when killing enemy then immediately hitting grapple on it
+		global_position = attachedTo.global_position - offset
 		
 		##### draw links and adjust size according to length
 		links.rotation = self.position.angle_to_point(shooter.global_position) + deg2rad(90)
@@ -57,9 +51,6 @@ func _physics_process(delta):
 		links.region_rect.size.y = length * 2
 		
 	if attachedTo != null:
-
-		lastAttached = attachedTo
-		emit_signal("collided", lastAttached)
 		if isDashing:
 			if attachedTo != null and shooter != null:
 				if length <= 0 or shooter.position.distance_to(position) < DASH_SPEED*delta*2:
@@ -113,7 +104,4 @@ func onCollision(body_id, body, body_shape, area_shape):
 func setDead():
 	attachedTo = null
 	shooter.hook = null
-	emit_signal("dead")
 	queue_free()
-
-	

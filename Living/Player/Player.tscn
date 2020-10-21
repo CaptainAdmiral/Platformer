@@ -257,7 +257,6 @@ position = Vector2( 0, -2.5 )
 scale = Vector2( 2, 2 )
 frames = SubResource( 36 )
 animation = "idle"
-frame = 2
 playing = true
 
 [node name="AttackArea" type="Area2D" parent="."]
@@ -356,14 +355,6 @@ activeFrames = 40
 [node name="DashSlowmo" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 60
-
-[node name="OnHook" type="Node" parent="FrameCounters"]
-script = ExtResource( 8 )
-activeFrames = 30
-
-[node name="OnHookDeath" type="Node" parent="FrameCounters"]
-script = ExtResource( 8 )
-activeFrames = 40
 
 [node name="LedgeJump" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
