@@ -180,22 +180,24 @@ func _physics_process(_delta):
 				
 			if Input.is_action_pressed("left"):
 				run(Direction.LEFT)
-				
-		if isChargingHeal or !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")) and !$FrameCounters/Slide.active():
-			motion.x *= GROUND_FRICTION
+		if !$FrameCounters/Slide.active():
+			if !(motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
+				motion.x *= GROUND_FRICTION
+			elif isChargingHeal or isDodging:
+				motion.x *= GROUND_FRICTION
 			
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.99
 			
-		if Input.is_action_pressed("down") and !$FrameCounters/Slide.active():
-			if abs(motion.x) >= RUN_SPEED:
+		if Input.is_action_pressed("down")  and !$FrameCounters/Slide.active() \
+		and abs(motion.x) >= 100 and (motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
 				motion.x += getSignForDirection()*2*RUN_SPEED
 				$FrameCounters/Slide.start()
 				$AnimatedSprite.play("slide")
 				$Hitbox.set_deferred("disabled", true)
 				$CrouchHitbox.set_deferred("disabled", false)
-			elif !$FrameCounters/Slide.active():
-				isChargingHeal = true
+		elif !$FrameCounters/Slide.active():
+			isChargingHeal = true
 				
 		if $FrameCounters/Slide.active():
 			slide()
@@ -211,8 +213,11 @@ func _physics_process(_delta):
 			if Input.is_action_pressed("up"):
 				motion.y-=JUMP_BOOST_SPEED
 			
-		if hook != null and hook.isTense():
-			$FrameCounters/Slide.setFinished()
+		if $FrameCounters/Slide.active() and hook != null and hook.isTense():
+			if canStand():
+				$FrameCounters/Slide.setFinished()
+			else:
+				hook.setDead()
 			
 		for body in $WallJump.get_overlapping_bodies():
 			if body is StaticBody or body is TileMap:
@@ -236,7 +241,7 @@ func _physics_process(_delta):
 			$LedgeGrab/LedgeSpace.set_position($LedgeGrab.to_local(collisionPos))
 			$LedgeGrab/LedgeSpace.force_raycast_update()
 			if !$LedgeGrab/LedgeSpace.is_colliding():
-				if Input.is_action_just_pressed("up") and !$FrameCounters/LedgeJump.active():
+				if inputBuffer.hasAction("up", false, 10) and !$FrameCounters/LedgeJump.active():
 					position = collisionPos
 					position.y-=$Hitbox.shape.extents.y
 					motion.y = 0
@@ -335,6 +340,13 @@ func getInputFromDirection(direction) -> String:
 func jump() -> void:
 	if $FrameCounters/JumpDisable.active():
 		return
+	
+	if $FrameCounters/Slide.active():
+		if canStand():
+			$FrameCounters/Slide.setFinished()
+		else:
+			return
+		
 	$FrameCounters/JumpGrace.stop()
 	isChargingHeal = false
 	
@@ -344,7 +356,6 @@ func jump() -> void:
 	else:
 		$FrameCounters/JumpBoost.setFrame($FrameCounters/JumpBoost.getActiveFrames()/2)
 	
-	$FrameCounters/Slide.setFinished()
 	if $AnimatedSprite.animation == "idle":
 		$AnimatedSprite.play("jump")
 	elif $AnimatedSprite.animation == "run start":
@@ -453,6 +464,20 @@ func throwHook() -> void:
 	get_parent().add_child(hook)
 	
 func swingSword() -> void:
+	if curAttackInChain > attacksInChain:
+		return
+	
+	if hook != null:
+		hook.setDead()	
+		
+	if isChargingHeal:
+		return
+	
+	if $FrameCounters/DodgeCooldown.active():
+		return
+	elif isDodging:
+		setDodging(false)
+	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5
 	var hitSomething = false
@@ -487,17 +512,6 @@ func swingSword() -> void:
 				return
 				
 	curAttackInChain += 1
-		
-	if hook != null:
-		hook.setDead()	
-		
-	if isChargingHeal:
-		return
-	
-	if $FrameCounters/DodgeCooldown.active():
-		return
-	elif isDodging:
-		setDodging(false)
 		
 	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
 	var bodiesAttacked = attackArea.get_overlapping_bodies()
