@@ -16,7 +16,7 @@ tile_data = PoolIntArray( -1638468, 0, 0, -1638467, 0, 0, -1638466, 0, 0, -16384
 [node name="ParallaxBackground" parent="." instance=ExtResource( 3 )]
 
 [node name="Player" parent="." instance=ExtResource( 1 )]
-position = Vector2( -5600, 32 )
+position = Vector2( -1024, 128 )
 
 [node name="Enemy" parent="." instance=ExtResource( 4 )]
 position = Vector2( -32, 64 )

@@ -54,6 +54,8 @@ var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
 var isMouseDash = false
 
+var isDodging = false
+
 var checkpointScene : Node
 var checkpoint : Node
 
@@ -130,10 +132,16 @@ func _physics_process(_delta):
 		
 	if Input.is_action_just_pressed("hook") and hookCharges > 0 and hook == null:
 		throwHook()
-	
-	if hook != null and hook.attachedTo is Living:
-		lastHooked = hook.attachedTo
-		$FrameCounters/HookAttack.start()
+		
+	if hook != null and hook.attachedTo != null:
+		if motion.x > 50:
+			setFacing(Direction.RIGHT)
+		elif motion.x < -50:
+			setFacing(Direction.LEFT)
+		
+		if hook.attachedTo is Living:
+			lastHooked = hook.attachedTo
+			$FrameCounters/HookAttack.start()
 		
 	if $FrameCounters/HookAttack.justFinished:
 		lastHooked = null
@@ -141,6 +149,16 @@ func _physics_process(_delta):
 	######################## ATTACK ##################################
 	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
 		swingSword()
+		
+	######################## Dodge ##################################
+	if Input.is_action_just_pressed("down") and !($FrameCounters/DodgeCooldown.active() or $FrameCounters/Dodge.active()):
+		setDodging(true)
+	
+	if onGround and isDodging and Input.is_action_pressed("down") and !inputBuffer.hasAction("down", false, 10):
+		setDodging(false)
+		
+	if $FrameCounters/Dodge.justFinished:
+		setDodging(false)
 	
 	######################## ON GROUND ##################################
 	if is_on_floor():	
@@ -300,8 +318,8 @@ func getDirectionFromInput() -> Vector2:
 		x-=1
 	if Input.is_action_pressed("right"):
 		x+=1
-												#Baked value for 1/sqrt2
-	return Vector2(x, y).normalized() if !(x!=0 and y!=0) else 0.70710678118*Vector2(x, y).normalized()
+												
+	return Vector2(x, y).normalized()
 	
 func getInputFromDirection(direction) -> String:
 	if direction == Direction.LEFT:
@@ -352,6 +370,8 @@ func canStand():
 			
 func run(direction) -> void:
 	if isChargingHeal:
+		return
+	if isDodging or $FrameCounters/DodgeCooldown.active():
 		return
 	
 	setFacing(direction)
@@ -411,9 +431,16 @@ func dash() -> void:
 		motion += direction * DASH_SPEED * 0.5
 	else:
 		$FrameCounters/DashFreeze.start()
-		
 	dashCharges -= 1
 		
+func setDodging(dodging : bool):
+	isDodging = dodging
+	if isDodging:
+		$FrameCounters/Dodge.start()
+		$AnimatedSprite.self_modulate = Color(0,1,0)
+	else:
+		$FrameCounters/DodgeCooldown.start()
+		$AnimatedSprite.self_modulate = Color(1,1,1)
 		
 func throwHook() -> void:
 	if isChargingHeal:
@@ -426,17 +453,13 @@ func throwHook() -> void:
 	get_parent().add_child(hook)
 	
 func swingSword() -> void:
-	if isChargingHeal:
-		return
-	$FrameCounters/AttackCooldown.start()
-	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5
 	var hitSomething = false
 		
 	var attackArea = null
 	
-	if lastHooked != null or curAttackInChain == 3:
+	if lastHooked != null:
 		$AttackAreaLong/AttackSprite.set_frame(0)
 		attackArea  = $AttackAreaLong
 		$AttackAreaLong/AttackSprite.play("long attack")
@@ -445,22 +468,36 @@ func swingSword() -> void:
 	else:
 		match curAttackInChain:
 			1:
-					$AttackArea/AttackSprite.set_frame(0)
-					attackArea = $AttackArea
-					$AttackArea/AttackSprite.play("attack1")
-					$FrameCounters/AttackCooldown.setFrame(15)
+				$AttackArea/AttackSprite.set_frame(0)
+				attackArea = $AttackArea
+				$AttackArea/AttackSprite.play("attack1")
+				$FrameCounters/AttackCooldown.setFrame(15)
 			2:
-					$AttackArea/AttackSprite.set_frame(0)
-					attackArea = $AttackArea
-					$AttackArea/AttackSprite.play("attack2")
-					$FrameCounters/AttackCooldown.start()
-			_:
+				$AttackArea/AttackSprite.set_frame(0)
+				attackArea = $AttackArea
+				$AttackArea/AttackSprite.play("attack2")
+				$FrameCounters/AttackCooldown.start()
+			3:
+				$AttackAreaLong/AttackSprite.set_frame(0)
+				attackArea  = $AttackAreaLong
+				$AttackAreaLong/AttackSprite.play("long attack")
+				$FrameCounters/AttackCooldown.setActiveFrames(30)
+				$FrameCounters/AttackCooldown.start()
+			_: 
 				return
 				
 	curAttackInChain += 1
 		
 	if hook != null:
 		hook.setDead()	
+		
+	if isChargingHeal:
+		return
+	
+	if $FrameCounters/DodgeCooldown.active():
+		return
+	elif isDodging:
+		setDodging(false)
 		
 	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
 	var bodiesAttacked = attackArea.get_overlapping_bodies()
@@ -483,7 +520,6 @@ func swingSword() -> void:
 			body.onAttacked(damage)
 	if hitSomething or hitSomethingLastAttack:
 		if !onGround:
-			motion.y = min(-700, motion.y)
 			if lastHooked != null:
 				swordDash(1200*motion.normalized())
 			elif !onGround:
@@ -492,9 +528,12 @@ func swingSword() -> void:
 
 func swordDash(direction : Vector2):
 	motion = direction
+	motion.y = min(-700, motion.y)
 
 func hurt(damage : Damage) -> bool:
 	if hurtFrames:
+		return false
+	if isDodging and !damage.ignoresDodging:
 		return false
 	$FrameCounters/DamageInvincibility.start()
 	$FrameCounters/AttackCooldown.start()
@@ -565,9 +604,8 @@ func onLand() -> void:
 func _input(event):
 	if event is InputEventMouseMotion:
 		if !$FrameCounters/AttackCooldown.active():
-			var rot = get_global_mouse_position().angle_to_point(global_position)
+			var rot = getSignForDirection()*get_global_mouse_position().angle_to_point(global_position)
 			if facing == Direction.LEFT:
-				rot*=-1
 				rot+=PI
 			$AttackArea.rotation = rot
 			$AttackAreaLong.rotation = rot
