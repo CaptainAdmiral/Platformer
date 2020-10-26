@@ -1,11 +1,9 @@
-extends KinematicBody2D
+extends Projectile
 
 const DASH_SPEED = 2000
 const MAX_LENGTH = 800
 
-var shooter
 var startPos : Vector2
-var motion = Vector2()
 var length = 0
 var attachedTo = null
 var offset = Vector2()

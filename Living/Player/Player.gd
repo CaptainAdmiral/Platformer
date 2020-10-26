@@ -35,6 +35,7 @@ var combo : int = 1
 var curAttackInChain : int = 1
 var attacksInChain = 3
 var hitSomethingLastAttack = false
+var attackNextFrame : bool = false #Area2D only polls at start of physics process
 
 var hurtFrames : int = 0
 
@@ -147,8 +148,17 @@ func _physics_process(_delta):
 		lastHooked = null
 		
 	######################## ATTACK ##################################
-	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
+	if attackNextFrame:
 		swingSword()
+		attackNextFrame = false
+	
+	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
+		var rot = getSignForDirection()*get_global_mouse_position().angle_to_point(global_position)
+		if facing == Direction.LEFT:
+			rot+=PI
+		$AttackArea.rotation = rot
+		$AttackAreaLong.rotation = rot
+		attackNextFrame = true
 		
 	######################## Dodge ##################################
 	if Input.is_action_just_pressed("down") and !($FrameCounters/DodgeCooldown.active() or $FrameCounters/Dodge.active()):
@@ -189,15 +199,15 @@ func _physics_process(_delta):
 		if abs(motion.x) > RUN_SPEED:
 			motion.x*=0.99
 			
-		if Input.is_action_pressed("down")  and !$FrameCounters/Slide.active() \
-		and abs(motion.x) >= 100 and (motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
+		if Input.is_action_pressed("down")  and !$FrameCounters/Slide.active():
+			if abs(motion.x) >= 100 and (motion.x > 0 and Input.is_action_pressed("right") or motion.x < 0 and Input.is_action_pressed("left")):
 				motion.x += getSignForDirection()*2*RUN_SPEED
 				$FrameCounters/Slide.start()
 				$AnimatedSprite.play("slide")
 				$Hitbox.set_deferred("disabled", true)
 				$CrouchHitbox.set_deferred("disabled", false)
-		elif !$FrameCounters/Slide.active():
-			isChargingHeal = true
+			elif !$FrameCounters/Slide.active():
+				isChargingHeal = true
 				
 		if $FrameCounters/Slide.active():
 			slide()
@@ -303,6 +313,12 @@ func _physics_process(_delta):
 			dashDirection = (get_global_mouse_position() - position).normalized()
 		else:
 			dashDirection = getDirectionFromInput()
+		
+		if dashDirection.x > 0:
+			setFacing(Direction.RIGHT)
+		elif dashDirection.x < 0:
+			setFacing(Direction.LEFT)
+			
 		$FrameCounters/Dash.start()
 		isMouseDash = false
 			
@@ -439,7 +455,12 @@ func dash() -> void:
 		var direction = getDirectionFromInput()
 		if direction == Vector2(0,0):
 			return
+		if direction.x > 0:
+			setFacing(Direction.RIGHT)
+		elif direction.x < 0:
+			setFacing(Direction.LEFT)
 		motion += direction * DASH_SPEED * 0.5
+		
 	else:
 		$FrameCounters/DashFreeze.start()
 	dashCharges -= 1
@@ -477,6 +498,7 @@ func swingSword() -> void:
 		return
 	elif isDodging:
 		setDodging(false)
+		$FrameCounters/Parry.start()
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5
@@ -529,6 +551,12 @@ func swingSword() -> void:
 			if body.hurt(damage):
 				body.addKnockback(knockback, true)
 				hitSomething = true
+				
+		if $FrameCounters/Parry.active():
+			if body is Projectile:
+				var mag = body.motion.length()
+				body.motion = Vector2(mag*cos(rot), mag*sin(rot))
+				body.shooter = self
 			
 		if body.is_in_group("attackable"):
 			body.onAttacked(damage)
@@ -614,15 +642,6 @@ func onLand() -> void:
 		
 	if $AnimatedSprite.animation == "fall":
 		$AnimatedSprite.stop()
-
-func _input(event):
-	if event is InputEventMouseMotion:
-		if !$FrameCounters/AttackCooldown.active():
-			var rot = getSignForDirection()*get_global_mouse_position().angle_to_point(global_position)
-			if facing == Direction.LEFT:
-				rot+=PI
-			$AttackArea.rotation = rot
-			$AttackAreaLong.rotation = rot
 
 func onAnimationFinished() -> void:
 	var anim = $AnimatedSprite.animation

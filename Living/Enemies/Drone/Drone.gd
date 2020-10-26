@@ -123,7 +123,12 @@ func _physics_process(delta):
 			if collision:
 				var player = collision.collider
 				var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
-				if player.hurt(damage):
+				if player.get_node("FrameCounters/Parry").active():
+					collision = get_world_2d().direct_space_state.intersect_ray(global_position, 30000*player.position.direction_to(get_global_mouse_position()), [player], 4)
+					if collision and collision.collider is Living:
+						if collision.collider.hurt(damage):
+							collision.collider.addKnockback(player.global_position.direction_to(collision.collider.global_position)*600, true)
+				elif player.hurt(damage):
 					player.addKnockback(global_position.direction_to(player.global_position)*600, true)
 			
 		

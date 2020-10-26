@@ -38,6 +38,11 @@ _global_script_classes=[ {
 "class": "Living",
 "language": "GDScript",
 "path": "res://Living/Living.gd"
+}, {
+"base": "KinematicBody2D",
+"class": "Projectile",
+"language": "GDScript",
+"path": "res://Projectile/Projectile.gd"
 } ]
 _global_script_class_icons={
 "Damage": "",
@@ -45,7 +50,8 @@ _global_script_class_icons={
 "GaussianRandom": "",
 "GitAPI": "",
 "InputBuffer": "",
-"Living": ""
+"Living": "",
+"Projectile": ""
 }
 
 [application]
