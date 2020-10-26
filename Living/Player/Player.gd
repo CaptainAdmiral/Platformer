@@ -56,6 +56,7 @@ var dashDirection = Vector2()
 var isMouseDash = false
 
 var isDodging = false
+var isParrying = false
 
 var checkpointScene : Node
 var checkpoint : Node
@@ -169,6 +170,9 @@ func _physics_process(_delta):
 		
 	if $FrameCounters/Dodge.justFinished:
 		setDodging(false)
+		
+	if $FrameCounters/Parry.justFinished:
+		isParrying = false
 	
 	######################## ON GROUND ##################################
 	if is_on_floor():	
@@ -499,6 +503,7 @@ func swingSword() -> void:
 	elif isDodging:
 		setDodging(false)
 		$FrameCounters/Parry.start()
+		isParrying = true
 	
 	var rot = get_global_mouse_position().angle_to_point(global_position)
 	var isDownSwing = rot > PI/5 and rot < 4*PI/5
@@ -567,6 +572,12 @@ func swingSword() -> void:
 			elif !onGround:
 				swordDash(1000*(get_global_mouse_position() - position).normalized())
 	hitSomethingLastAttack = hitSomething
+	
+func getDirectionToMouse() -> Vector2:
+	return global_position.direction_to(get_global_mouse_position())
+	
+func getParryDirection() -> Vector2:
+	return getDirectionToMouse()
 
 func swordDash(direction : Vector2):
 	motion = direction
@@ -575,7 +586,9 @@ func swordDash(direction : Vector2):
 func hurt(damage : Damage) -> bool:
 	if hurtFrames:
 		return false
-	if isDodging and !damage.ignoresDodging:
+	if isDodging and damage.canDodge:
+		return false
+	if isParrying and damage.canParry:
 		return false
 	$FrameCounters/DamageInvincibility.start()
 	$FrameCounters/AttackCooldown.start()

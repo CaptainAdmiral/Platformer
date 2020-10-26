@@ -375,6 +375,6 @@ activeFrames = 15
 
 [node name="Parry" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
-activeFrames = 30
+activeFrames = 60
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="onAnimationFinished"]
 [connection signal="finished" from="FrameCounters/Slide" to="." method="_on_Slide_finished"]

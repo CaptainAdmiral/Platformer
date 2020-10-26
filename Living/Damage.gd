@@ -1,4 +1,4 @@
-extends Reference
+extends Object
 
 class_name Damage
 
@@ -7,7 +7,8 @@ enum TYPE {DIRECT, PHYSICAL, MAGIC, FIRE, ICE, GLITCH}
 var source : Node
 var amount : int
 var type
-var ignoresDodging : bool = false
+var canDodge : bool = true
+var canParry : bool = true
 
 func _init(source, amount, type):
 	self.source = source

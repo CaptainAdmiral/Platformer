@@ -202,7 +202,6 @@ cast_to = Vector2( 0, 300 )
 scale = Vector2( 3, 3 )
 frames = SubResource( 38 )
 animation = "idle"
-frame = 1
 playing = true
 
 [node name="FrameCounter" type="Node" parent="."]

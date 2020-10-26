@@ -4,11 +4,13 @@ class_name Projectile
 
 var motion : Vector2
 var shooter = null
+var canParry = false
+var canDodge = true
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass # Replace with function body.
+	add_to_group("attacks")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -16,6 +16,8 @@ var attackPosition : Vector2 = Vector2()
 var isCurAttacker = false
 var targetOffset = Vector2(0, 0)
 
+var RayCastAttack = load("res://Living/Attacks/RayCastAttack.gd")
+
 var rng = RandomNumberGenerator.new()
 
 
@@ -100,7 +102,7 @@ func _physics_process(delta):
 		if $FrameCounter/ChargeAttack.justFinished:
 			end_attack()
 
-		if isCurAttacker and !$FrameCounter/ChargeAttack.active() and !$FrameCounter/AttackTargeting.active():
+		if isCurAttacker and false and !$FrameCounter/ChargeAttack.active() and !$FrameCounter/AttackTargeting.active():
 			begin_attack()
 			
 		if $FrameCounter/Attack.justFinished:
@@ -119,18 +121,17 @@ func _physics_process(delta):
 				attackPosition = global_position.direction_to(target.global_position)*30000
 				
 		if $FrameCounter/Attack.justFinished:
-			var collision = get_world_2d().direct_space_state.intersect_ray(global_position, attackPosition, [self], 2)
-			if collision:
-				var player = collision.collider
-				var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
-				if player.get_node("FrameCounters/Parry").active():
-					collision = get_world_2d().direct_space_state.intersect_ray(global_position, 30000*player.position.direction_to(get_global_mouse_position()), [player], 4)
-					if collision and collision.collider is Living:
-						if collision.collider.hurt(damage):
-							collision.collider.addKnockback(player.global_position.direction_to(collision.collider.global_position)*600, true)
-				elif player.hurt(damage):
-					player.addKnockback(global_position.direction_to(player.global_position)*600, true)
-			
+			var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
+			var collisions = RayCastAttack.makeAttackRayCast(self, global_position, attackPosition, [self], 2, damage)
+			if !collisions.empty():
+				var lastCollision = collisions[collisions.size()-1]
+				var originForKnockback = global_position
+				if collisions.size() >= 2:
+					originForKnockback = collisions[collisions.size()-2].position
+				if lastCollision and lastCollision.collider is Living:
+					if lastCollision.collider.hurt(damage):
+						lastCollision.collider.addKnockback(originForKnockback.direction_to(lastCollision.collider.global_position)*600, true)
+				
 		
 
 func end_attack():
@@ -183,7 +184,14 @@ func _draw():
 		elif $FrameCounter/Attack.active():	
 			draw_line(Vector2(0,0), attackPosition - global_position, Color(255, 255, 0), 4)
 		elif $FrameCounter/Attack.justFinished:
-			draw_line(Vector2(0,0), attackPosition - global_position, Color(255, 0, 50), 20)
+			var damage = Damage.new(self, 0, Damage.TYPE.PHYSICAL)
+			var collisions = RayCastAttack.makeAttackRayCast(self, global_position, attackPosition, [self], 2, damage)
+			var lastCollisionPos = Vector2(0,0)
+			for collision in collisions:
+				if !collision:
+					break
+				draw_line(lastCollisionPos, collision.position - global_position, Color(255, 0, 50), 20)
+				lastCollisionPos = collision.position - global_position
 			
 func setDead() -> void:
 	if isCurAttacker:
