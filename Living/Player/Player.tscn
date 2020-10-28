@@ -80,76 +80,76 @@ atlas = ExtResource( 7 )
 region = Rect2( 128, 118, 64, 59 )
 
 [sub_resource type="AtlasTexture" id=18]
-atlas = ExtResource( 4 )
-region = Rect2( 64, 0, 64, 59 )
+atlas = ExtResource( 5 )
+region = Rect2( 0, 0, 64, 59 )
 
 [sub_resource type="AtlasTexture" id=19]
-atlas = ExtResource( 4 )
-region = Rect2( 128, 0, 64, 59 )
+atlas = ExtResource( 5 )
+region = Rect2( 64, 0, 64, 59 )
 
 [sub_resource type="AtlasTexture" id=20]
+atlas = ExtResource( 5 )
+region = Rect2( 128, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=21]
+atlas = ExtResource( 4 )
+region = Rect2( 64, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=22]
+atlas = ExtResource( 4 )
+region = Rect2( 128, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=23]
 atlas = ExtResource( 4 )
 region = Rect2( 192, 0, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=21]
-atlas = ExtResource( 5 )
-region = Rect2( 0, 0, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=22]
-atlas = ExtResource( 5 )
-region = Rect2( 64, 0, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=23]
-atlas = ExtResource( 5 )
-region = Rect2( 128, 0, 64, 59 )
-
 [sub_resource type="AtlasTexture" id=24]
-atlas = ExtResource( 6 )
-region = Rect2( 0, 0, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=25]
-atlas = ExtResource( 6 )
-region = Rect2( 64, 0, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=26]
-atlas = ExtResource( 6 )
-region = Rect2( 128, 0, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=27]
-atlas = ExtResource( 6 )
-region = Rect2( 192, 0, 64, 59 )
-
-[sub_resource type="AtlasTexture" id=28]
 atlas = ExtResource( 4 )
 region = Rect2( 0, 59, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=29]
+[sub_resource type="AtlasTexture" id=25]
 atlas = ExtResource( 4 )
 region = Rect2( 64, 59, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=30]
+[sub_resource type="AtlasTexture" id=26]
 atlas = ExtResource( 4 )
 region = Rect2( 128, 59, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=31]
+[sub_resource type="AtlasTexture" id=27]
 atlas = ExtResource( 4 )
 region = Rect2( 192, 59, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=32]
+[sub_resource type="AtlasTexture" id=28]
 atlas = ExtResource( 4 )
 region = Rect2( 0, 118, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=33]
+[sub_resource type="AtlasTexture" id=29]
 atlas = ExtResource( 4 )
 region = Rect2( 64, 118, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=34]
+[sub_resource type="AtlasTexture" id=30]
 atlas = ExtResource( 4 )
 region = Rect2( 128, 118, 64, 59 )
 
-[sub_resource type="AtlasTexture" id=35]
+[sub_resource type="AtlasTexture" id=31]
 atlas = ExtResource( 4 )
 region = Rect2( 192, 118, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=32]
+atlas = ExtResource( 6 )
+region = Rect2( 0, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=33]
+atlas = ExtResource( 6 )
+region = Rect2( 64, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=34]
+atlas = ExtResource( 6 )
+region = Rect2( 128, 0, 64, 59 )
+
+[sub_resource type="AtlasTexture" id=35]
+atlas = ExtResource( 6 )
+region = Rect2( 192, 0, 64, 59 )
 
 [sub_resource type="SpriteFrames" id=36]
 animations = [ {
@@ -170,22 +170,22 @@ animations = [ {
 }, {
 "frames": [ SubResource( 18 ), SubResource( 19 ), SubResource( 20 ) ],
 "loop": false,
-"name": "run jump",
+"name": "run start",
 "speed": 10.0
 }, {
 "frames": [ SubResource( 21 ), SubResource( 22 ), SubResource( 23 ) ],
 "loop": false,
-"name": "run start",
+"name": "run jump",
 "speed": 10.0
 }, {
-"frames": [ SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ) ],
-"loop": false,
-"name": "jump",
-"speed": 10.0
-}, {
-"frames": [ SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ), SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ) ],
+"frames": [ SubResource( 24 ), SubResource( 25 ), SubResource( 26 ), SubResource( 27 ), SubResource( 28 ), SubResource( 29 ), SubResource( 30 ), SubResource( 31 ) ],
 "loop": true,
 "name": "run",
+"speed": 10.0
+}, {
+"frames": [ SubResource( 32 ), SubResource( 33 ), SubResource( 34 ), SubResource( 35 ) ],
+"loop": false,
+"name": "jump",
 "speed": 10.0
 } ]
 
@@ -375,5 +375,11 @@ activeFrames = 15
 [node name="Parry" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
 activeFrames = 10
+
+[node name="VFX" type="Node2D" parent="."]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="VFX"]
+
+[node name="Dash" type="Node2D" parent="VFX"]
 [connection signal="animation_finished" from="AnimatedSprite" to="." method="onAnimationFinished"]
 [connection signal="finished" from="FrameCounters/Slide" to="." method="_on_Slide_finished"]

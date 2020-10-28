@@ -28,6 +28,8 @@ const AIR_ACCELERATION = AIR_SPEED / AIR_ACCELERATION_FRAMES
 const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
 
 onready var inputBuffer = $InputBuffer
+var ScreenTools = load("res://Util/ScreenTools.gd")
+var Shockwave = load("res://VFX/Scenes/Shockwave/Shockwave.tscn")
 
 var attackDamage : float  = 1
 var maxCombo : int = 3
@@ -468,6 +470,9 @@ func dash() -> void:
 	else:
 		$FrameCounters/DashFreeze.start()
 	dashCharges -= 1
+	var shockwave = Shockwave.instance()
+	shockwave.set_global_position(get_global_position())
+	get_parent().add_child(shockwave)
 		
 func setDodging(dodging : bool):
 	isDodging = dodging

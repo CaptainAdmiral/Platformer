@@ -150,7 +150,7 @@ func begin_attack():
 	$FrameCounter/ChargeAttack.start()		
 		
 func selectNewAttacker() -> void:
-	assert(target != null and isCurAttacker)
+	assert(isCurAttacker)
 	isCurAttacker = false
 	var agro = get_tree().get_nodes_in_group("agro")
 	if agro.empty():
