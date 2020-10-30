@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/drone_laser void anchor trap.wav-672213e3ac7261e4a2a2efc6ededb04b.sample"
+
+[deps]
+
+source_file="res://Living/Enemies/Drone/Assets/SFX/drone laser/drone_laser void anchor trap.wav"
+dest_files=[ "res://.import/drone_laser void anchor trap.wav-672213e3ac7261e4a2a2efc6ededb04b.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

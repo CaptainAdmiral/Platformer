@@ -20,6 +20,7 @@ var RayCastAttack = load("res://Living/Attacks/RayCastAttack.gd")
 
 var rng = RandomNumberGenerator.new()
 
+var deathFlag = false
 
 
 # Called when the node enters the scene tree for the first time.
@@ -41,6 +42,9 @@ func _process(delta):
 
 
 func _physics_process(delta):
+	if deathFlag == true && !$FrameCounter/Death.active():
+		.setDead()
+	
 	if motion.length() > driftSpeed:
 		motion *= 0.9
 		
@@ -133,7 +137,14 @@ func _physics_process(delta):
 						lastCollision.collider.addKnockback(originForKnockback.direction_to(lastCollision.collider.global_position)*600, true)
 				
 		
-
+func hurt(damage : Damage) -> bool:
+	damage(damage.amount)
+	if isDead and damage.source != null and damage.source.is_in_group("players"):
+		damage.source.onKill(self)
+	else:
+		$sfx.play("drone hurt " + str(randi()%5+1))
+	return true
+	
 func end_attack():
 	for body in $AttackArea.get_overlapping_bodies():
 		var player = body
@@ -194,9 +205,12 @@ func _draw():
 				lastCollisionPos = collision.position - global_position
 			
 func setDead() -> void:
+	$AnimatedSprite.hide()
+	$FrameCounter/Death.start()
+	deathFlag = true
+	$sfx.play("drone death " + str(randi()%13+1))
 	if isCurAttacker:
 		selectNewAttacker()
-	.setDead()
 		
 func _on_DetectionArea_body_entered(body):
 	if target != null:

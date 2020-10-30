@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/drone death doom 1.wav-4d7dcc25ce9432faa2ebdac7cdb6ec84.sample"
+
+[deps]
+
+source_file="res://Living/Enemies/Drone/Assets/SFX/drone death/drone death doom 1.wav"
+dest_files=[ "res://.import/drone death doom 1.wav-4d7dcc25ce9432faa2ebdac7cdb6ec84.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
