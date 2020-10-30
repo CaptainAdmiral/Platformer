@@ -131,6 +131,7 @@ func _physics_process(_delta):
 	if Input.is_action_just_released("hook") and hook != null:
 		if hook.attachedTo!=null and !hook.dashBufferFrames:
 			hook.setDead()
+			$sfx.play("grapple_hit_release")
 		if hook != null and hook.dashBufferFrames:
 			hook.setDashing()
 		
@@ -387,6 +388,8 @@ func jump() -> void:
 	else:
 		$AnimatedSprite.play("run jump")
 	
+	$sfx.play("grunt_" + str(randi()%3+1))
+	
 func slide() -> void:
 	motion.x *= SLIDE_SLOWDOWN
 	
@@ -492,6 +495,7 @@ func throwHook() -> void:
 	hook.position = position
 	hook.motion = (get_global_mouse_position() - position).normalized()*HOOK_SPEED
 	get_parent().add_child(hook)
+	$sfx.play("grapple_miss_" + str(randi()%3+1))
 	
 func swingSword() -> void:
 	if curAttackInChain > attacksInChain:
@@ -576,6 +580,12 @@ func swingSword() -> void:
 				swordDash(1200*motion.normalized())
 			elif !onGround:
 				swordDash(1000*(get_global_mouse_position() - position).normalized())
+	
+	if hitSomething == true:
+		$sfx.play("sword_hit_" + str(randi()%2+1))
+	else:
+		$sfx.play("sword_miss_" + str(randi()%3+1))
+	
 	hitSomethingLastAttack = hitSomething
 	
 func getDirectionToMouse() -> Vector2:
@@ -611,7 +621,9 @@ func hurt(damage : Damage) -> bool:
 	print(health)
 	print(mana)
 	print("\n")
-		
+	
+	$sfx.play("playerhurt")
+	
 	return .hurt(damage)
 	
 func onKill(living : Living) -> void:
@@ -660,6 +672,8 @@ func onLand() -> void:
 		
 	if $AnimatedSprite.animation == "fall":
 		$AnimatedSprite.stop()
+	
+	$sfx.play("landing")
 
 func onAnimationFinished() -> void:
 	var anim = $AnimatedSprite.animation
