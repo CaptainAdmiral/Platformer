@@ -194,14 +194,14 @@ points = PoolVector2Array( -20, -50, 150, -80, 200, 0, 150, 80, -20, 50, -40, 0 
 
 [sub_resource type="SpriteFrames" id=38]
 animations = [ {
-"frames": [ ExtResource( 12 ), ExtResource( 13 ), ExtResource( 13 ), ExtResource( 13 ), ExtResource( 12 ) ],
-"loop": false,
-"name": "attack2",
-"speed": 60.0
-}, {
 "frames": [ ExtResource( 12 ), ExtResource( 14 ), ExtResource( 14 ), ExtResource( 14 ), ExtResource( 12 ) ],
 "loop": false,
 "name": "attack1",
+"speed": 60.0
+}, {
+"frames": [ ExtResource( 12 ), ExtResource( 13 ), ExtResource( 13 ), ExtResource( 13 ), ExtResource( 12 ) ],
+"loop": false,
+"name": "attack2",
 "speed": 60.0
 } ]
 
@@ -257,6 +257,7 @@ position = Vector2( 0, -2.5 )
 scale = Vector2( 2, 2 )
 frames = SubResource( 36 )
 animation = "idle"
+frame = 3
 playing = true
 
 [node name="AttackArea" type="Area2D" parent="."]
@@ -326,7 +327,7 @@ activeFrames = 300
 
 [node name="Dash" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )
-activeFrames = 5
+activeFrames = 10
 
 [node name="DashFreeze" type="Node" parent="FrameCounters"]
 script = ExtResource( 8 )

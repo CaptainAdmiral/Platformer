@@ -180,9 +180,9 @@ func setTarget(tgt) -> void:
 func _draw():
 	if target != null:
 		if $FrameCounter/AttackTargeting.active():
-			draw_line(Vector2(0,0), target.global_position - global_position, Color(255, 0, 0), 4)
+			draw_line(Vector2(0,0), target.global_position - global_position, Color(1, 0, 0), 4)
 		elif $FrameCounter/Attack.active():	
-			draw_line(Vector2(0,0), attackPosition - global_position, Color(255, 255, 0), 4)
+			draw_line(Vector2(0,0), attackPosition - global_position, Color(1, 1, 0), 4)
 		elif $FrameCounter/Attack.justFinished:
 			var damage = Damage.new(self, 0, Damage.TYPE.PHYSICAL)
 			var collisions = RayCastAttack.makeAttackRayCast(self, global_position, attackPosition, [self], 2, damage)
@@ -190,7 +190,7 @@ func _draw():
 			for collision in collisions:
 				if !collision:
 					break
-				draw_line(lastCollisionPos, collision.position - global_position, Color(255, 0, 50), 20)
+				draw_line(lastCollisionPos, collision.position - global_position, Color(1, 0, 0.3), 20)
 				lastCollisionPos = collision.position - global_position
 			
 func setDead() -> void:
