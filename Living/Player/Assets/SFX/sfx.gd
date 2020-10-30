@@ -4,7 +4,8 @@ func _ready():
 	pass # Replace with function body.
 
 func play(sfx):
-	get_node(sfx).play()
+	if !get_node(sfx).is_playing():
+		get_node(sfx).play()
 	
 func stop(sfx):
 	get_node(sfx).stop()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://Living/Player/Assets/SFX/grapple_hit_init.wav" type="AudioStream" id=1]
 [ext_resource path="res://Living/Player/Assets/SFX/grunt2FX.wav" type="AudioStream" id=2]
@@ -17,6 +17,10 @@
 [ext_resource path="res://Living/Player/Assets/SFX/grunt1FX.wav" type="AudioStream" id=15]
 [ext_resource path="res://Living/Player/Assets/SFX/landingFX.wav" type="AudioStream" id=16]
 [ext_resource path="res://Living/Player/Assets/SFX/sfx.gd" type="Script" id=17]
+[ext_resource path="res://Living/Player/Assets/SFX/BuildUp1 End.wav" type="AudioStream" id=18]
+[ext_resource path="res://Living/Player/Assets/SFX/BuildUp1 Start.wav" type="AudioStream" id=19]
+[ext_resource path="res://Living/Player/Assets/SFX/told you my stealth drive would work.wav" type="AudioStream" id=20]
+[ext_resource path="res://Living/Player/Assets/SFX/shaxx SEVENTH COLUMN.wav" type="AudioStream" id=21]
 
 [node name="sfx" type="Node2D"]
 script = ExtResource( 17 )
@@ -69,3 +73,15 @@ stream = ExtResource( 13 )
 
 [node name="sword_miss_3" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 11 )
+
+[node name="dash_begin" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 19 )
+
+[node name="dash_end" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 18 )
+
+[node name="stealth_worked" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 20 )
+
+[node name="7th column" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 21 )

@@ -117,6 +117,7 @@ func _physics_process(delta):
 			$FrameCounter/AttackTargeting.start()
 			
 		if $FrameCounter/AttackTargeting.justFinished:
+			$sfx.play("drone laser " + str(randi()%5+1))
 			$FrameCounter/Attack.start()
 			var collision = get_world_2d().direct_space_state.intersect_ray(global_position, global_position + global_position.direction_to(target.global_position)*30000, [self, target], 3)
 			if collision:

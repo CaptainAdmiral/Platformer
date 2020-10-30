@@ -56,6 +56,7 @@ var maxDashCharges : int = 1
 var dashCharges : int = maxDashCharges
 var dashDirection = Vector2()
 var isMouseDash = false
+var finalDash = false
 
 var isDodging = false
 var isParrying = false
@@ -300,9 +301,11 @@ func _physics_process(_delta):
 	if Input.is_action_just_pressed("dash") and dashCharges > 0:
 		dash()
 		Engine.set_time_scale(0.02)
+		$sfx.play("dash_begin")
 		for fc in $FrameCounters.get_children():
 			if fc != $FrameCounters/DashSlowmo:
 				fc.pause()
+		finalDash = true
 		$FrameCounters/DashSlowmo.start()
 		
 	if Input.is_action_just_released("dash") or $FrameCounters/DashSlowmo.justFinished:
@@ -311,6 +314,12 @@ func _physics_process(_delta):
 		for fc in $FrameCounters.get_children():
 			if fc != $FrameCounters/DashSlowmo :
 				fc.resume()
+		if finalDash == true:
+			$sfx.stop("dash_begin")
+			$sfx.play("dash_end")
+			finalDash = false
+			if randi()%10 == 0:
+				$sfx.play("stealth_worked")
 		Engine.set_time_scale(1)
 	
 	if $FrameCounters/DashFreeze.active():
@@ -565,6 +574,8 @@ func swingSword() -> void:
 			if body.hurt(damage):
 				body.addKnockback(knockback, true)
 				hitSomething = true
+				if body.health == 0 && combo == 7:
+					$sfx.play("7th column")
 				
 		if $FrameCounters/Parry.active():
 			if body is Projectile:
@@ -574,12 +585,14 @@ func swingSword() -> void:
 			
 		if body.is_in_group("attackable"):
 			body.onAttacked(damage)
+
 	if hitSomething or hitSomethingLastAttack:
 		if !onGround:
 			if lastHooked != null:
 				swordDash(1200*motion.normalized())
 			elif !onGround:
 				swordDash(1000*(get_global_mouse_position() - position).normalized())
+
 	
 	if hitSomething == true:
 		$sfx.play("sword_hit_" + str(randi()%2+1))
