@@ -19,5 +19,4 @@ void fragment() {
 	} else {
 		COLOR = texture(SCREEN_TEXTURE, SCREEN_UV-disp);
 	}
-//	COLOR.rgb = vec3(mask);
 } 

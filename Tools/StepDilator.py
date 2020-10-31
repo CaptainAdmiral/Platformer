@@ -28,13 +28,13 @@ while flag:
             if img[j+1,i]>value+STEP_SIZE:
                 value=img[j+1, i]-STEP_SIZE
                 flag = True
-            elif img[j-1,i]>value+STEP_SIZE:
+            if img[j-1,i]>value+STEP_SIZE:
                 value=img[j-1, i]-STEP_SIZE
                 flag = True
-            elif img[j,i+1]>value+STEP_SIZE:
+            if img[j,i+1]>value+STEP_SIZE:
                 value=img[j, i+1]-STEP_SIZE
                 flag = True
-            elif img[j,i-1]>value+STEP_SIZE:
+            if img[j,i-1]>value+STEP_SIZE:
                 value=img[j, i-1]-STEP_SIZE
                 flag = True
             dilatedImg[j,i] = value

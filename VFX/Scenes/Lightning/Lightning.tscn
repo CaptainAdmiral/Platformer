@@ -5,10 +5,10 @@
 
 [sub_resource type="ShaderMaterial" id=1]
 shader = ExtResource( 2 )
-shader_param/color = Color( 0.282353, 0.286275, 0.333333, 1 )
+shader_param/color = Color( 0.396078, 0.4, 0.482353, 1 )
 shader_param/thickness = 0.1
 shader_param/verticalThinning = 0.92
-shader_param/glow = Color( 0.0703125, 1, 0.979877, 1 )
+shader_param/glow = Color( 0.0705882, 1, 0.980392, 1 )
 shader_param/sampleLength = 0.69
 shader_param/sampleOffset = 0.72
 shader_param/distortion = true
