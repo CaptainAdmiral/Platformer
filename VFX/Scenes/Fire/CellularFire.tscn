@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://VFX/Scenes/Fire/Assets/Fire.png" type="Texture" id=1]
+[ext_resource path="res://VFX/Shaders/CellularFire.shader" type="Shader" id=2]
+
+[sub_resource type="OpenSimplexNoise" id=1]
+seed = 2
+
+[sub_resource type="NoiseTexture" id=2]
+seamless = true
+noise = SubResource( 1 )
+
+[sub_resource type="ShaderMaterial" id=3]
+shader = ExtResource( 2 )
+shader_param/color = Color( 0.48, 0.48, 0.48, 1 )
+shader_param/glow = Color( 1, 0.39, 0, 1 )
+shader_param/brightness = 1.0
+shader_param/alphaMultiplier = 1.0
+shader_param/simplexScrollSpeed = 1.0
+shader_param/simplexDistortion = 0.7
+shader_param/scaleDistiortionWithY = true
+shader_param/doubleSampleSimplex = false
+shader_param/cellularNoiseTiling = 5.0
+shader_param/cellularNoiseExponent = 3.0
+shader_param/cellularScrollSpeed = 0.5
+shader_param/simplexNoise = SubResource( 2 )
+
+[node name="CellularFIre" type="Node2D"]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+material = SubResource( 3 )
+margin_right = 40.0
+margin_bottom = 40.0
+rect_scale = Vector2( 0.999623, 0.984786 )
+texture = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
