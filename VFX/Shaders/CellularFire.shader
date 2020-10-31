@@ -10,7 +10,7 @@ uniform float simplexDistortion: hint_range(0, 2, 0.1) = 0.7;
 uniform bool scaleDistiortionWithY = false;
 uniform bool doubleSampleSimplex = false;
 uniform float cellularNoiseTiling : hint_range(1, 10, 1) = 3;
-uniform float cellularNoiseExponent: hint_range(0.1, 6, 0.1) = 0.4;
+uniform float cellularNoiseExponent: hint_range(0.1, 6, 0.1) = 1;
 uniform float cellularScrollSpeed : hint_range(0, 4, 0.1) = 0.5;
 
 vec2 random2(vec2 p) {

@@ -1,10 +1,10 @@
 shader_type canvas_item;
 
 uniform sampler2D mask;
-uniform vec4 color : hint_color;
+uniform vec4 color : hint_color = vec4(0.4,0.4,0.48,1.0);
 uniform float thickness : hint_range(0, 0.99, 0.01) = 0.1;
 uniform float verticalThinning : hint_range(0, 3, 0.005) = 0.01;
-uniform vec4 glow : hint_color;
+uniform vec4 glow : hint_color = vec4(0.07, 1.0, 0.98, 1.0);
 uniform float brightness : hint_range(0, 5, 0.1) = 1;
 uniform float sampleLength : hint_range(0.0, 1.0, 0.01) = 0.1;
 uniform float sampleOffset : hint_range(0.0, 1.0, 0.01) = 0.1;

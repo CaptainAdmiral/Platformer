@@ -9,7 +9,7 @@ const AIR_FRICTION = 0.95
 const JUMP_VELOCITY = 500
 const JUMP_BOOST_SPEED = 30
 
-const DASH_SPEED = 2200
+const DASH_SPEED = 4000
 
 const CROUCH_SLOWDOWN = 0.875
 const SLIDE_SLOWDOWN = 0.96
@@ -28,8 +28,8 @@ const AIR_ACCELERATION = AIR_SPEED / AIR_ACCELERATION_FRAMES
 const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
 
 onready var inputBuffer = $InputBuffer
-var ScreenTools = load("res://Util/ScreenTools.gd")
 var Shockwave = load("res://VFX/Scenes/Shockwave/Shockwave.tscn")
+var DashLightning = load("res://VFX/Scenes/Lightning/DashLightning.tscn")
 
 var attackDamage : float  = 1
 var maxCombo : int = 3
@@ -325,49 +325,12 @@ func _physics_process(_delta):
 	if $FrameCounters/DashFreeze.active():
 		motion = Vector2(0,0)		
 	elif $FrameCounters/DashFreeze.justFinished:
-		if isMouseDash:
-			dashDirection = (get_global_mouse_position() - position).normalized()
-		else:
-			dashDirection = getDirectionFromInput()
-		
-		if dashDirection.x > 0:
-			setFacing(Direction.RIGHT)
-		elif dashDirection.x < 0:
-			setFacing(Direction.LEFT)
-			
-		$FrameCounters/Dash.start()
-		isMouseDash = false
+		startDash()
 			
 	if $FrameCounters/Dash.active():
 		motion = dashDirection * DASH_SPEED
 	elif $FrameCounters/Dash.justFinished:
 		motion = dashDirection * AIR_SPEED * 1.3
-
-func getDirectionFromInput() -> Vector2:
-	var x = 0
-	var y = 0
-	
-	if Input.is_action_pressed("up"):
-		y-=1
-	if Input.is_action_pressed("down"):
-		y+=1
-	if Input.is_action_pressed("left"):
-		x-=1
-	if Input.is_action_pressed("right"):
-		x+=1
-												
-	return Vector2(x, y).normalized()
-	
-func getInputFromDirection(direction) -> String:
-	if direction == Direction.LEFT:
-		return "left"
-	elif direction == Direction.RIGHT:
-		return "right"
-	elif direction == Direction.UP:
-		return "up"
-	elif direction == Direction.DOWN:
-		return "down"
-	return "err"
 	
 func jump() -> void:
 	if $FrameCounters/JumpDisable.active():
@@ -461,6 +424,35 @@ func wallJump(direction) -> void:
 	$FrameCounters/DashFreeze.stop()
 	$FrameCounters/Dash.stop()
 
+func startDash():
+	if isMouseDash:
+			dashDirection = (get_global_mouse_position() - position).normalized()
+	else:
+		dashDirection = getDirectionFromInput()
+	
+	if dashDirection.x > 0:
+		setFacing(Direction.RIGHT)
+	elif dashDirection.x < 0:
+		setFacing(Direction.LEFT)
+		
+	$FrameCounters/Dash.start()
+	isMouseDash = false
+	var rot = dashDirection.angle()+0.5*PI;
+	if facing == Direction.LEFT:
+		rot*=-1;
+	$VFX/Dash.set_rotation(rot)
+	$VFX/AnimationPlayer.stop()
+	$VFX/AnimationPlayer.play("dash")
+	
+	var shockwave = Shockwave.instance()
+	shockwave.set_global_position(get_global_position())
+	get_parent().add_child(shockwave)
+	
+	var lightning = DashLightning.instance()
+	lightning.set_global_position(get_global_position())
+	lightning.set_rotation(dashDirection.angle()+0.5*PI)
+	get_parent().add_child(lightning)
+
 func dash() -> void:
 	if isChargingHeal:
 		return
@@ -482,9 +474,6 @@ func dash() -> void:
 	else:
 		$FrameCounters/DashFreeze.start()
 	dashCharges -= 1
-	var shockwave = Shockwave.instance()
-	shockwave.set_global_position(get_global_position())
-	get_parent().add_child(shockwave)
 		
 func setDodging(dodging : bool):
 	isDodging = dodging
@@ -698,3 +687,29 @@ func _on_Slide_finished():
 	$AnimatedSprite.play("run")
 	$Hitbox.set_deferred("disabled", false)
 	$CrouchHitbox.set_deferred("disabled", true)
+	
+func getDirectionFromInput() -> Vector2:
+	var x = 0
+	var y = 0
+	
+	if Input.is_action_pressed("up"):
+		y-=1
+	if Input.is_action_pressed("down"):
+		y+=1
+	if Input.is_action_pressed("left"):
+		x-=1
+	if Input.is_action_pressed("right"):
+		x+=1
+												
+	return Vector2(x, y).normalized()
+	
+func getInputFromDirection(direction) -> String:
+	if direction == Direction.LEFT:
+		return "left"
+	elif direction == Direction.RIGHT:
+		return "right"
+	elif direction == Direction.UP:
+		return "up"
+	elif direction == Direction.DOWN:
+		return "down"
+	return "err"
