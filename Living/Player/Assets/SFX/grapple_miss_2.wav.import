@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/grapple_miss_2.wav-77f53d1fbca559b570cb487e3eadd0e0.sample"
+
+[deps]
+
+source_file="res://Living/Player/Assets/SFX/grapple_miss_2.wav"
+dest_files=[ "res://.import/grapple_miss_2.wav-77f53d1fbca559b570cb487e3eadd0e0.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

@@ -1,0 +1,87 @@
+[gd_scene load_steps=22 format=2]
+
+[ext_resource path="res://Living/Player/Assets/SFX/grapple_hit_init.wav" type="AudioStream" id=1]
+[ext_resource path="res://Living/Player/Assets/SFX/grunt2FX.wav" type="AudioStream" id=2]
+[ext_resource path="res://Living/Player/Assets/SFX/grapple_miss_2.wav" type="AudioStream" id=3]
+[ext_resource path="res://Living/Player/Assets/SFX/sword_hit_2.wav" type="AudioStream" id=4]
+[ext_resource path="res://Living/Player/Assets/SFX/sword_miss_1.wav" type="AudioStream" id=5]
+[ext_resource path="res://Living/Player/Assets/SFX/grunt3FX.wav" type="AudioStream" id=6]
+[ext_resource path="res://Living/Player/Assets/SFX/grapple_miss_3.wav" type="AudioStream" id=7]
+[ext_resource path="res://Living/Player/Assets/SFX/sword_hit_1.wav" type="AudioStream" id=8]
+[ext_resource path="res://Living/Player/Assets/SFX/grapple_hit_release.wav" type="AudioStream" id=9]
+[ext_resource path="res://Living/Player/Assets/SFX/grapple_hit_reel.wav" type="AudioStream" id=10]
+[ext_resource path="res://Living/Player/Assets/SFX/sword_miss_3.wav" type="AudioStream" id=11]
+[ext_resource path="res://Living/Player/Assets/SFX/oof.wav" type="AudioStream" id=12]
+[ext_resource path="res://Living/Player/Assets/SFX/sword_miss_2.wav" type="AudioStream" id=13]
+[ext_resource path="res://Living/Player/Assets/SFX/grapple_miss_1.wav" type="AudioStream" id=14]
+[ext_resource path="res://Living/Player/Assets/SFX/grunt1FX.wav" type="AudioStream" id=15]
+[ext_resource path="res://Living/Player/Assets/SFX/landingFX.wav" type="AudioStream" id=16]
+[ext_resource path="res://Living/Player/Assets/SFX/sfx.gd" type="Script" id=17]
+[ext_resource path="res://Living/Player/Assets/SFX/BuildUp1 End.wav" type="AudioStream" id=18]
+[ext_resource path="res://Living/Player/Assets/SFX/BuildUp1 Start.wav" type="AudioStream" id=19]
+[ext_resource path="res://Living/Player/Assets/SFX/told you my stealth drive would work.wav" type="AudioStream" id=20]
+[ext_resource path="res://Living/Player/Assets/SFX/shaxx SEVENTH COLUMN.wav" type="AudioStream" id=21]
+
+[node name="sfx" type="Node2D"]
+script = ExtResource( 17 )
+
+[node name="grapple_hit_init" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 1 )
+
+[node name="grapple_hit_reel" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 10 )
+
+[node name="grapple_hit_release" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 9 )
+
+[node name="grapple_miss_1" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 14 )
+
+[node name="grapple_miss_2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 3 )
+
+[node name="grapple_miss_3" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 7 )
+
+[node name="grunt_1" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 15 )
+
+[node name="grunt_2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 2 )
+
+[node name="grunt_3" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 6 )
+
+[node name="landing" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 16 )
+
+[node name="playerhurt" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 12 )
+volume_db = -5.0
+
+[node name="sword_hit_1" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 8 )
+
+[node name="sword_hit_2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 4 )
+
+[node name="sword_miss_1" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 5 )
+
+[node name="sword_miss_2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 13 )
+
+[node name="sword_miss_3" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 11 )
+
+[node name="dash_begin" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 19 )
+
+[node name="dash_end" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 18 )
+
+[node name="stealth_worked" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 20 )
+
+[node name="7th column" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 21 )

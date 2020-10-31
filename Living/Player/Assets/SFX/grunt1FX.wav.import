@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/grunt1FX.wav-a460f61728a021b68c55cbf4b6f4d006.sample"
+
+[deps]
+
+source_file="res://Living/Player/Assets/SFX/grunt1FX.wav"
+dest_files=[ "res://.import/grunt1FX.wav-a460f61728a021b68c55cbf4b6f4d006.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/drone_laser telesto.wav-70a11be961f5f58d64dd4713bea6b27d.sample"
+
+[deps]
+
+source_file="res://Living/Enemies/Drone/Assets/SFX/drone laser/drone_laser telesto.wav"
+dest_files=[ "res://.import/drone_laser telesto.wav-70a11be961f5f58d64dd4713bea6b27d.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

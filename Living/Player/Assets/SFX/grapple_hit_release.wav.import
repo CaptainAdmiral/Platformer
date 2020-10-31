@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/grapple_hit_release.wav-1508075f9ee38b17e7b3e2e22aae0609.sample"
+
+[deps]
+
+source_file="res://Living/Player/Assets/SFX/grapple_hit_release.wav"
+dest_files=[ "res://.import/grapple_hit_release.wav-1508075f9ee38b17e7b3e2e22aae0609.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

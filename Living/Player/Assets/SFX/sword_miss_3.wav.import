@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/sword_miss_3.wav-bb8a03ca992d311144c5ed11c97172aa.sample"
+
+[deps]
+
+source_file="res://Living/Player/Assets/SFX/sword_miss_3.wav"
+dest_files=[ "res://.import/sword_miss_3.wav-bb8a03ca992d311144c5ed11c97172aa.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0
