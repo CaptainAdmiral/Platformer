@@ -203,7 +203,7 @@ cast_to = Vector2( 0, 300 )
 scale = Vector2( 3, 3 )
 frames = SubResource( 38 )
 animation = "idle"
-frame = 3
+frame = 1
 playing = true
 
 [node name="FrameCounter" type="Node" parent="."]
@@ -223,10 +223,6 @@ activeFrames = 120
 [node name="ChargeAttack" type="Node" parent="FrameCounter"]
 script = ExtResource( 5 )
 activeFrames = 60
-
-[node name="Death" type="Node" parent="FrameCounter"]
-script = ExtResource( 5 )
-activeFrames = 120
 
 [node name="sfx" parent="." instance=ExtResource( 6 )]
 
