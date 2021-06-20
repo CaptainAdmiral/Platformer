@@ -34,6 +34,8 @@ func _physics_process(delta):
 			attachedTo = collision.collider
 			if attachedTo is TileMap:
 				offset = attachedTo.global_position - collision.position
+			elif attachedTo is Living:
+				attachedTo.connect("died", self, "setDead")
 			set_collision_mask(0)
 
 		if global_position.distance_to(startPos) > MAX_LENGTH:
@@ -79,10 +81,7 @@ func _physics_process(delta):
 				var perpComp = mag*sin(motionAng - ang)
 				
 				var perpMotion = Vector2(-perpComp*sin(ang), perpComp*cos(ang))
-				shooter.motion = perpMotion
-			
-
-			
+				shooter.motion = perpMotion		
 
 func isTense():
 	return global_position.distance_to(shooter.global_position) >= length*0.99
@@ -92,12 +91,6 @@ func setShooter(shooter):
 
 func setDashing():
 	isDashing=true
-
-func onCollision(body_id, body, body_shape, area_shape):
-	if body != shooter:
-		length = global_position.distance_to(shooter.global_position)
-		attachedTo = body
-		offset = body.position - position
 		
 func setDead():
 	attachedTo = null

@@ -18,6 +18,8 @@ export(Globals.Direction) var facing = Globals.Direction.RIGHT
 var onGround = false
 var prevOnGround = false
 
+signal died #Emitted when any living is set dead before queue_free()
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	health = maxHealth
@@ -119,5 +121,6 @@ func addKnockback(knockback : Vector2, overwriteMotion : bool = false) -> void:
 #Marks the entity to be freed and handles death logic
 func setDead() -> void:
 	isDead = true
+	emit_signal("died")
 	queue_free()
 
