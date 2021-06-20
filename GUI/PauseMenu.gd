@@ -11,7 +11,12 @@ func _input(event):
 		toggle_pause()
 
 func toggle_pause():
-	get_tree().paused = !get_tree().paused
+	Globals.paused = !Globals.paused
+	get_tree().paused = Globals.paused
+	if Globals.paused:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	else:
+		Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
 	$Menu.visible = get_tree().paused
 
 func _on_Continue_pressed():

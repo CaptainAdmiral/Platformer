@@ -4,7 +4,6 @@ class_name InputBuffer
 
 var size
 var buffer=[]
-var mouseLocked = true
 
 func _ready():
 	#Todo move to game node that parents level nodes
@@ -16,14 +15,7 @@ func _physics_process(_delta):
 func _input(event:InputEvent) -> void:
 	if(event is InputEventKey):
 		add(event)
-	if(event.is_action_pressed("pause")):
-		mouseLocked = !mouseLocked
-		if mouseLocked:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		
-
 func _init(frames = 10):
 	size = frames
 	for _i in range(frames):

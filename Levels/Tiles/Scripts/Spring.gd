@@ -20,7 +20,7 @@ func _ready():
 
 
 func onCollision(body):
-	if body == Globals.player:
+	if body is Living:
 		
 		
 		if direction == DIRECTION.up:
