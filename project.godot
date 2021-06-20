@@ -58,6 +58,7 @@ config/icon="res://icon.png"
 
 Globals="*res://Globals.gd"
 GlobalWorldEnvironment="*res://VFX/Post Processing/WorldEnvironment.tscn"
+PauseMenu="*res://GUI/PauseMenu.tscn"
 
 [display]
 
