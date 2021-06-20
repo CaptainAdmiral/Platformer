@@ -8,4 +8,15 @@ func _ready():
 
 func _input(event):
 	if event.is_action_pressed("pause"):
-		get_tree().paused = !get_tree().paused
+		toggle_pause()
+
+func toggle_pause():
+	get_tree().paused = !get_tree().paused
+	$Menu.visible = get_tree().paused
+
+func _on_Continue_pressed():
+	toggle_pause()
+
+
+func _on_Save_pressed():
+	get_tree().quit()
