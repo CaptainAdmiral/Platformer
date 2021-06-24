@@ -17,6 +17,8 @@ var Direction = Globals.Direction
 export(Globals.Direction) var facing = Globals.Direction.RIGHT
 var onGround = false
 var prevOnGround = false
+var state = null
+var persistent_behaviours = []
 
 signal died #Emitted when any living is set dead before queue_free()
 
@@ -25,6 +27,15 @@ func _ready():
 	health = maxHealth
 		
 func _physics_process(_delta):
+	if state != null:
+		state.update()
+		
+	for i in range(len(persistent_behaviours), 0, -1):
+		if persistent_behaviours[i].isFinished:
+			remove_persistent_behaviour_at_index(i)
+		else:
+			persistent_behaviours[i].update()
+	
 	prevOnGround = onGround
 	onGround = is_on_floor()
 	
@@ -39,7 +50,26 @@ func _physics_process(_delta):
 		
 	if freezeFrames:
 		freezeFrames -= 1
-		
+
+#Returns the default state the entity should return to if a state ends with no specified transition to another state
+func get_default_state():
+	return state
+
+#Adds a persistent behaviour to be updated each frame
+func add_persistent_behaviour(pb) :
+	persistent_behaviours.append(pb)
+	pb.on_start()
+	
+#Removes a persistent behaviour from the entity
+func remove_persistent_behaviour(pb):
+	var i = persistent_behaviours.find(pb)
+	remove_persistent_behaviour_at_index(i)
+
+#Removes a persistent behaviour from the entity	
+func remove_persistent_behaviour_at_index(i : int):
+	persistent_behaviours[i].on_finish()
+	persistent_behaviours.earse(i)
+	
 #Sets the direction the entity is facing
 #You should override this if inverting the scale is not desired such as
 #When you have a node that should always be on the left/right side
