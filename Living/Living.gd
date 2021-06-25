@@ -1,6 +1,8 @@
 extends KinematicBody2D
 class_name Living
 
+signal died #Emitted when any living is set dead, before queue_free()
+
 var maxHealth : int = 1 setget setMaxHealth
 var health : int
 var isDead = false
@@ -16,15 +18,16 @@ var handleOwnMovement : bool = false
 var Direction = Globals.Direction
 export(Globals.Direction) var facing = Globals.Direction.RIGHT
 var onGround = false
-var prevOnGround = false
+var prevOnGround = false # Has whatever value onGround had last frame
 var state = null
 var persistent_behaviours = []
-
-signal died #Emitted when any living is set dead before queue_free()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	health = maxHealth
+	if get_default_state() != null:
+		state = get_default_state()
+		state.on_start()
 		
 func _physics_process(_delta):
 	if state != null:
@@ -53,7 +56,7 @@ func _physics_process(_delta):
 
 #Returns the default state the entity should return to if a state ends with no specified transition to another state
 func get_default_state():
-	return state
+	return null
 
 #Adds a persistent behaviour to be updated each frame
 func add_persistent_behaviour(pb) :

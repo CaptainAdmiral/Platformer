@@ -6,8 +6,7 @@ var size
 var buffer=[]
 
 func _ready():
-	#Todo move to game node that parents level nodes
-	Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
+	pass
 	
 func _physics_process(_delta):
 	nextFrame()

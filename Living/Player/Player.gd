@@ -81,6 +81,7 @@ func _ready():
 
 func _physics_process(_delta):
 	######################## ANIMATIONS ##################################
+	
 	if ($AnimatedSprite.animation == "run" or $AnimatedSprite.animation == "run start") and abs(motion.x) < 50:
 		$AnimatedSprite.stop()
 	
@@ -116,10 +117,6 @@ func _physics_process(_delta):
 			if manaUntilNextHeal <= 0:
 				heal(1)
 				manaUntilNextHeal += manaPerHealth
-				
-				print(health)
-				print(mana)
-				print("\n")
 		else:
 			isHealing = false
 			mana = 0
@@ -300,27 +297,6 @@ func _physics_process(_delta):
 	#Dash
 	if Input.is_action_just_pressed("dash") and dashCharges > 0:
 		dash()
-		Engine.set_time_scale(0.02)
-		$sfx.play("dash_begin")
-		for fc in $FrameCounters.get_children():
-			if fc != $FrameCounters/DashSlowmo:
-				fc.pause()
-		finalDash = true
-		$FrameCounters/DashSlowmo.start()
-		
-	if Input.is_action_just_released("dash") or $FrameCounters/DashSlowmo.justFinished:
-		isMouseDash = $FrameCounters/DashSlowmo.activeFrames - $FrameCounters/DashSlowmo.frame > 10
-		$FrameCounters/DashSlowmo.stop()
-		for fc in $FrameCounters.get_children():
-			if fc != $FrameCounters/DashSlowmo :
-				fc.resume()
-		if finalDash == true:
-			$sfx.stop("dash_begin")
-			$sfx.play("dash_end")
-			finalDash = false
-			if randi()%10 == 0:
-				$sfx.play("stealth_worked")
-		Engine.set_time_scale(1)
 	
 	if $FrameCounters/DashFreeze.active():
 		motion = Vector2(0,0)		
@@ -331,6 +307,9 @@ func _physics_process(_delta):
 		motion = dashDirection * DASH_SPEED
 	elif $FrameCounters/Dash.justFinished:
 		motion = dashDirection * AIR_SPEED * 1.3
+
+func get_default_state():
+	return LivingState.new(self, $AnimatedSprite, "idle", "idle")
 	
 func jump() -> void:
 	if $FrameCounters/JumpDisable.active():
@@ -461,6 +440,7 @@ func dash() -> void:
 	
 	if hook != null and hook.isDashing:
 		hook.setDead()
+		$FrameCounters/DashFreeze.start()
 	elif hook != null and hook.attachedTo != null:
 		var direction = getDirectionFromInput()
 		if direction == Vector2(0,0):
@@ -498,9 +478,6 @@ func throwHook() -> void:
 func swingSword() -> void:
 	if curAttackInChain > attacksInChain:
 		return
-	
-	if hook != null:
-		hook.setDead()	
 		
 	if isChargingHeal:
 		return
