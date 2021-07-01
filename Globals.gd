@@ -1,8 +1,9 @@
 extends Node
 
+var debug = true
+var paused = false
 
 enum Direction {UP, DOWN, LEFT, RIGHT}
-var paused = false
 
 func _ready():
 	pass
