@@ -1,7 +1,7 @@
 extends Projectile
 
 const DASH_SPEED = 2000
-const MAX_LENGTH = 800
+const MAX_LENGTH = 600
 
 var startPos : Vector2
 var length = 0
@@ -84,7 +84,7 @@ func _physics_process(delta):
 				shooter.motion = perpMotion		
 
 func isTense():
-	return global_position.distance_to(shooter.global_position) >= length*0.99
+	return attachedTo != null and global_position.distance_to(shooter.global_position) >= length*0.99
 
 func setShooter(shooter):
 	self.shooter = shooter
