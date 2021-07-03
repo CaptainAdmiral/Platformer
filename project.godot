@@ -9,10 +9,10 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Reference",
+"base": "Resource",
 "class": "Damage",
 "language": "GDScript",
-"path": "res://Living/Damage.gd"
+"path": "res://Damage/Damage.gd"
 }, {
 "base": "Node",
 "class": "FrameCounter",
@@ -23,6 +23,11 @@ _global_script_classes=[ {
 "class": "GitAPI",
 "language": "NativeScript",
 "path": "res://git_api.gdns"
+}, {
+"base": "Area2D",
+"class": "Hitbox",
+"language": "GDScript",
+"path": "res://Damage/Hitbox/Hitbox.gd"
 }, {
 "base": "Node",
 "class": "InputBuffer",
@@ -128,6 +133,7 @@ _global_script_class_icons={
 "Damage": "",
 "FrameCounter": "",
 "GitAPI": "",
+"Hitbox": "",
 "InputBuffer": "",
 "Living": "",
 "LivingState": "",
