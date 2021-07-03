@@ -184,6 +184,7 @@ func heal(amount : int) -> void:
 func hurt(damage : Damage) -> bool:
 	emit_signal("hurt", damage)
 	damage(damage.amount)
+	addKnockback(damage.knockback, true)
 	if isDead and damage.source != null and damage.source.is_in_group("players"):
 		damage.source.onKill(self)
 	return true
