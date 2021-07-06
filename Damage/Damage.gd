@@ -11,7 +11,7 @@ export(TYPE) var type = TYPE.PHYSICAL
 export var canDodge : bool = true
 export var canParry : bool = true
 
-func _init(source, amount, type):
+func _init(source=null, amount=0, type=TYPE.PHYSICAL):
 	self.source = source
 	self.amount = amount
 	self.type = type

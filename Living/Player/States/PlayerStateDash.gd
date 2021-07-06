@@ -22,19 +22,26 @@ func priority():
 func on_start():
 	.on_start()
 	player.dashCharges -= 1
-	player.startDash()
+	
 	
 	if player.onGround:
 		dashDirection = player.get_vector_for_direction(player.facing) # TODO input is whatever left/right was pressed last
 																	   # TODO this will be a function in input manager
 	else:
 		dashDirection = player.getDirectionToMouse()
-	if player.onGround and abs(fmod(abs(dashDirection.angle())+0.5*PI,PI)-0.5*PI) < 0.2:
-		dashDirection.y = 0
+#	if player.onGround and abs(fmod(abs(dashDirection.angle())+0.5*PI,PI)-0.5*PI) < 0.2:
+#		dashDirection.y = 0
 	if dashDirection.x > 0:
 		player.setFacing(player.Direction.RIGHT)
 	elif dashDirection.x < 0:
 		player.setFacing(player.Direction.LEFT)
+		
+	var rot = dashDirection.angle()+0.5*PI;
+	if player.facing == player.Direction.LEFT:
+		rot*=-1;
+	player.get_node("VFX/Dash").set_rotation(rot)
+	player.get_node("VFX/AnimationPlayer").stop()
+	player.get_node("VFX/AnimationPlayer").play("dash")	
 		
 	if player.is_hook_attached():
 		var dashBoost = dashDirection*DASH_FINISH_SPEED*0.5

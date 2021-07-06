@@ -1,7 +1,7 @@
 extends Projectile
 
 const DASH_SPEED = 2000
-const MAX_LENGTH = 600
+const MAX_LENGTH = 500 # Starting length. Increase by 100 each upgrade?
 
 var startPos : Vector2
 var length = 0

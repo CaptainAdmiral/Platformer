@@ -8,6 +8,7 @@ var charge = 0
 
 func _init(player).(player, "heal",""):
 	self.ground_only = true
+	self.disable_sword = true
 
 func priority():
 	return 2 if charge < 20 else 4

@@ -29,7 +29,8 @@ onready var inputBuffer = $InputBuffer
 var attackDamage : float  = 1
 var maxCombo : int = 3
 var combo : int = 1
-var attackNextFrame : bool = false #Area2D only polls at start of physics process
+var already_sword_dashed = false
+var hit_something_last_attack = false
 
 export(String, FILE, "*.tscn") var HookPath
 onready var Hook = load(HookPath)
@@ -63,7 +64,10 @@ var manaOvercapDecay = 0.025
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	fallSpeed = FALL_SPEED
+	hook_drag = 1
 	setMaxHealth(6)
+	$AttackArea.add_exception(self)
+	$AttackArea.damage.source = self
 
 func _physics_process(_delta):
 	######################## WALL RUN ##################################
@@ -102,25 +106,20 @@ func _physics_process(_delta):
 		lastHooked = null
 		
 	######################## ATTACK ##################################
-	if attackNextFrame:
+	if $FrameCounters/AttackStartup.justFinished:
 		swingSword()
-		attackNextFrame = false
-	
-	if Input.is_action_just_pressed("attack") and !$FrameCounters/AttackCooldown.active():
+		
+	if $FrameCounters/AttackStartup.frame == 1:
 		var rot = getSignForDirection()*get_global_mouse_position().angle_to_point(global_position)
-		if facing == Direction.LEFT:
-			rot+=PI
 		$AttackArea.rotation = rot
-		$AttackAreaLong.rotation = rot
-		attackNextFrame = true
-	
+
 	######################## ON GROUND ##################################
 	if is_on_floor():	
 		refreshHook()
 		if state.name != "dash" or state.frame > PlayerStateDash.FREEZE_FRAMES+1:
 			refreshDash()
 			
-		if state.name != "run" and state.name != "slide":
+		if state.name != "run" and state.name != "slide" and !is_hook_attached():
 			motion.x *= GROUND_FRICTION
 			
 		if abs(motion.x) > RUN_SPEED:
@@ -156,12 +155,16 @@ func _input(event:InputEvent) -> void:
 	elif event.is_action_pressed("right"):
 		state.transition_to(PlayerStateRun.new(self, Direction.RIGHT))
 	elif event.is_action_pressed("down"):
-		if !$FrameCounters/Dodge.active() and !$FrameCounters/DodgeCooldown.active() :
+		if !$FrameCounters/Dodge.active() and !$FrameCounters/DodgeCooldown.active():
 			state.transition_to(PlayerStateDodge.new(self))
 			$FrameCounters/Dodge.start()
 			setDodging(true)
+			$FrameCounters/AttackCooldown.stop()
 	elif event.is_action_pressed("dash"):
 		state.transition_to(PlayerStateDash.new(self))
+	elif event.is_action_pressed("attack") and !$FrameCounters/AttackCooldown.active() and !$FrameCounters/AttackStartup.active():
+		$FrameCounters/AttackStartup.start()
+		already_sword_dashed = false
 		
 func on_state_change():
 	if Globals.debug:
@@ -174,7 +177,6 @@ func on_state_change_finished():
 		else:
 			state.transition_to(PlayerStateWallSlide.new(self))
 		
-
 func get_default_state():
 	if onGround:
 		if !(Input.is_action_pressed("left") and Input.is_action_pressed("right")):
@@ -185,9 +187,15 @@ func get_default_state():
 	else:
 		return PlayerStateAirDrift.new(self)
 		
-	var idleState = LivingState.new(self, "idle", $AnimatedSprite, "idle", -1)
+	var idleState = PlayerState.new(self, "idle", "idle", -1)
 	idleState.ground_only = true
 	return idleState
+	
+func setFacing(direction):
+	if facing == direction:
+		return
+	$AttackArea.scale.x*=-1
+	.setFacing(direction)
 	
 func jump() -> void:
 	$FrameCounters/JumpGrace.stop()
@@ -230,16 +238,6 @@ func wallJump(direction) -> void:
 	$FrameCounters/WallJump.stop()
 	add_persistent_behaviour(PlayerPBJumpBoost.new(self, JUMP_BOOST_FRAMES))
 
-
-func startDash():
-	isMouseDash = false
-	var rot = dashDirection.angle()+0.5*PI;
-	if facing == Direction.LEFT:
-		rot*=-1;
-	$VFX/Dash.set_rotation(rot)
-	$VFX/AnimationPlayer.stop()
-	$VFX/AnimationPlayer.play("dash")
-
 func is_swinging() -> bool:
 	return hook != null and hook.isTense()
 	
@@ -248,7 +246,7 @@ func is_hook_dashing():
 	
 func is_hook_attached() -> bool:
 	return hook != null and hook.attachedTo != null
-		
+	
 func setDodging(dodging : bool):
 	isDodging = dodging
 	if isDodging:
@@ -272,7 +270,7 @@ func throwHook() -> void:
 	$sfx.play("grapple_miss_" + str(randi()%3+1))
 	
 func swingSword() -> void:
-	if state.name=="heal":
+	if state.disable_sword:
 		return
 
 	if isDodging:
@@ -280,82 +278,43 @@ func swingSword() -> void:
 		$FrameCounters/Parry.start()
 		isParrying = true
 	
-	var rot = get_global_mouse_position().angle_to_point(global_position)
-	var hitSomething = false
-		
-	var attackArea = null
-	
-	if lastHooked != null:
-		$AttackAreaLong/AttackSprite.set_frame(0)
-		attackArea  = $AttackAreaLong
-		$AttackAreaLong/AttackSprite.play("long attack")
-		$FrameCounters/AttackCooldown.setActiveFrames(30)
-		$FrameCounters/AttackCooldown.start()
-	else:
-		match randi()%2:
-			0:
-				$AttackArea/AttackSprite.set_frame(0)
-				attackArea = $AttackArea
-				$AttackArea/AttackSprite.play("attack1")
-				$FrameCounters/AttackCooldown.setFrame(15)
-			1:
-				$AttackArea/AttackSprite.set_frame(0)
-				attackArea = $AttackArea
-				$AttackArea/AttackSprite.play("attack2")
-				$FrameCounters/AttackCooldown.start()
-				
-		
-	var damage : Damage = Damage.new(self, 1*combo, Damage.TYPE.PHYSICAL)	
-	var bodiesAttacked = attackArea.get_overlapping_bodies()
-	if lastHooked != null and !bodiesAttacked.has(lastHooked):
-		bodiesAttacked.append(lastHooked)
-		
-	for body in bodiesAttacked:
-		if body == self:
-			continue
-		if body is Living:
-			var knockback = global_position.direction_to(body.global_position)*ATTACK_KNOCKBACK
-			if body.is_on_floor():
-				knockback.y = min(-300, knockback.y)
+	match randi()%2:
+		0:
+			$AttackArea/AttackSprite.set_frame(0)
+			$AttackArea/AttackSprite.play("attack1")
+		1:
+			$AttackArea/AttackSprite.set_frame(0)
+			$AttackArea/AttackSprite.play("attack2")
 			
-			if body.hurt(damage):
-				body.addKnockback(knockback, true)
-				hitSomething = true
-				if body.health == 0 && combo == 7:
-					$sfx.play("7th column")
-				
-		if $FrameCounters/Parry.active():
-			if body is Projectile:
-				var mag = body.motion.length()
-				body.motion = Vector2(mag*cos(rot), mag*sin(rot))
-				body.shooter = self
-			
-		if body.is_in_group("attackable"):
-			body.onAttacked(damage)
-
-	if hitSomething:
+	$AttackArea.damage.amount = 1*combo
+	$AttackArea.damage.knockback = 600*getDirectionToMouse().normalized()
+	$AttackArea.hit_overlapping()
+	$FrameCounters/AttackCooldown.start()
+		
+	if !hit_something_last_attack:	
+		$sfx.play("sword_miss_" + str(randi()%3+1))
+		
+		
+func _on_hit_with_sword(hit):
+	hit_something_last_attack = true
+	$sfx.play("sword_hit_" + str(randi()%2+1))
+	if !already_sword_dashed:
 		if !onGround:
 			if lastHooked != null:
 				swordDash(1200*motion.normalized())
-			elif !onGround:
-				swordDash(1000*(get_global_mouse_position() - position).normalized())
+			else:
+				swordDash(700*(get_global_mouse_position() - position).normalized())
+		already_sword_dashed = true
 
-	
-	if hitSomething == true:
-		$sfx.play("sword_hit_" + str(randi()%2+1))
-	else:
-		$sfx.play("sword_miss_" + str(randi()%3+1))
-	
+func swordDash(direction : Vector2):
+	motion = direction
+	motion.y = min(-700, motion.y)	
 	
 func getDirectionToMouse() -> Vector2:
 	return global_position.direction_to(get_global_mouse_position())
 	
 func getParryDirection() -> Vector2:
 	return getDirectionToMouse()
-
-func swordDash(direction : Vector2):
-	motion = direction
-	motion.y = min(-700, motion.y)
 
 func hurt(damage : Damage) -> bool:
 	if isDodging and damage.canDodge:
@@ -460,4 +419,3 @@ func get_vector_for_direction(direction):
 	elif direction == Direction.DOWN:
 		return Vector2(0, 1)
 	return Vector2(0, 0)
-	
