@@ -17,7 +17,7 @@ _global_script_classes=[ {
 "base": "Node",
 "class": "FrameCounter",
 "language": "GDScript",
-"path": "res://Living/FrameCounter.gd"
+"path": "res://Util/FrameCounter.gd"
 }, {
 "base": "EditorVCSInterface",
 "class": "GitAPI",
@@ -28,11 +28,6 @@ _global_script_classes=[ {
 "class": "Hitbox",
 "language": "GDScript",
 "path": "res://Damage/Hitbox/Hitbox.gd"
-}, {
-"base": "Node",
-"class": "InputBuffer",
-"language": "GDScript",
-"path": "res://Living/Player/InputBuffer.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Living",
@@ -134,7 +129,6 @@ _global_script_class_icons={
 "FrameCounter": "",
 "GitAPI": "",
 "Hitbox": "",
-"InputBuffer": "",
 "Living": "",
 "LivingState": "",
 "PersistentBehaviour": "",
@@ -167,6 +161,7 @@ config/icon="res://icon.png"
 Globals="*res://Globals.gd"
 GlobalWorldEnvironment="*res://VFX/Post Processing/WorldEnvironment.tscn"
 PauseMenu="*res://GUI/PauseMenu.tscn"
+InputBuffer="*res://Input/InputBuffer.gd"
 
 [display]
 

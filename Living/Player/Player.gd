@@ -24,8 +24,6 @@ const AIR_SPEED = RUN_SPEED
 const AIR_ACCELERATION = AIR_SPEED / AIR_ACCELERATION_FRAMES
 const RUN_ACCELERATION = RUN_SPEED / RUN_ACCELERATION_FRAMES
 
-onready var inputBuffer = $InputBuffer
-
 var attackDamage : float  = 1
 var maxCombo : int = 3
 var combo : int = 1
@@ -79,18 +77,7 @@ func _physics_process(_delta):
 	if mana > maxMana:
 		mana -= manaOvercapDecay
 	
-	######################## GRAPPLING HOOK ##################################
-	
-	if Input.is_action_just_released("hook") and hook != null:
-		if hook.attachedTo!=null and !hook.dashBufferFrames:
-			hook.setDead()
-			$sfx.play("grapple_hit_release")
-		if hook != null and hook.dashBufferFrames:
-			hook.setDashing()
-		
-	if Input.is_action_just_pressed("hook") and hookCharges > 0 and hook == null:
-		throwHook()
-		
+	######################## GRAPPLING HOOK ##################################		
 	if hook != null and hook.attachedTo != null:
 		if motion.x > 50:
 			setFacing(Direction.RIGHT)
@@ -133,12 +120,12 @@ func _physics_process(_delta):
 				$FrameCounters/WallJump.start()
 	#Jump
 	if $FrameCounters/JumpGrace.active():
-		if inputBuffer.hasAction("up", false, 10) and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
+		if InputBuffer.hasAction("up", false, 10) and state.priority() < 4 and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
 			jump()
 	
 	#Wall Jump Movement
 	if $FrameCounters/WallJump.active():
-		if inputBuffer.hasAction("up", false, 6) and inputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
+		if InputBuffer.hasAction("up", false, 6) and InputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
 			wallJump(getOppositeDirection(facing))
 			
 	######################## ON WALL ##################################
@@ -164,6 +151,14 @@ func _input(event:InputEvent) -> void:
 	elif event.is_action_pressed("attack") and !$FrameCounters/AttackCooldown.active() and !$FrameCounters/AttackStartup.active():
 		$FrameCounters/AttackStartup.start()
 		already_sword_dashed = false
+	elif event.is_action_released("hook") and hook != null:
+		if hook.attachedTo!=null and !hook.dashBufferFrames:
+			hook.setDead()
+			$sfx.play("grapple_hit_release")
+		if hook != null and hook.dashBufferFrames:
+			hook.setDashing()	
+	elif event.is_action_pressed("hook") and hookCharges > 0 and hook == null:
+		throwHook()
 		
 func on_state_change():
 	if Globals.debug:
