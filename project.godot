@@ -162,6 +162,7 @@ Globals="*res://Globals.gd"
 GlobalWorldEnvironment="*res://VFX/Post Processing/WorldEnvironment.tscn"
 PauseMenu="*res://GUI/PauseMenu.tscn"
 InputBuffer="*res://Input/InputBuffer.gd"
+Direction="*res://Util/Direction.gd"
 
 [display]
 

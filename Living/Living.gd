@@ -18,8 +18,7 @@ var motion : Vector2 = Vector2()
 var prevMotion : Vector2 = Vector2()
 var freezeFrames : int
 var handleOwnMovement : bool = false
-var Direction = Globals.Direction
-export(Globals.Direction) var facing = Globals.Direction.RIGHT
+export(Direction.DIRECTION_X) var facing = Direction.RIGHT
 var onGround = false
 var prevOnGround = false # Has whatever value onGround had last frame
 var last_on_ground : int = 0
@@ -135,27 +134,6 @@ func turnAround():
 		setFacing(Direction.LEFT)
 	elif facing == Direction.LEFT:
 		setFacing(Direction.RIGHT)
-
-#Looking right because you left me
-#Looking left because you ain’t treat me right
-#Looking up because you let me down
-#Looking down because you fucked me up
-func getOppositeDirection(direction = facing):
-	if direction == Direction.RIGHT:
-		return Direction.LEFT
-	elif direction == Direction.LEFT:
-		return Direction.RIGHT
-	elif direction == Direction.UP:
-		return Direction.DOWN
-	elif direction == Direction.DOWN:
-		return Direction.UP
-		
-#Returns 1 if the direction coresponds to a positive change along the axis, else -1
-func getSignForDirection(direction = facing) -> int:
-	if direction == Direction.RIGHT or direction == Direction.DOWN:
-		return 1
-	else:
-		return -1
 	
 func setMaxHealth(amount : int) -> void:
 	maxHealth = amount

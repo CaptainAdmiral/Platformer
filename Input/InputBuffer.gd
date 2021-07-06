@@ -7,19 +7,19 @@ func _ready():
 	pass
 	
 func _physics_process(_delta):
-	nextFrame()
+	next_frame()
 	
 func _input(event:InputEvent) -> void:
 	if(event is InputEventKey):
 		add(event)
 		
-func _init(frames = 10):
+func _init(frames = 20):
 	size = frames
 	for _i in range(frames):
 		buffer.append([])
 		
 #Advances the buffer by one frame
-func nextFrame():
+func next_frame():
 	buffer.pop_back()
 	buffer.push_front([])
 		
@@ -37,7 +37,7 @@ func add(input:InputEvent):
 	return true
 	
 #Returns true if the input was pressed within the specified number of frames
-func hasAction(action:String, release:bool = false, frames:int = size):
+func has_action(action:String, release:bool = false, frames:int = size):
 # warning-ignore:narrowing_conversion
 	frames = min(frames, size)
 	

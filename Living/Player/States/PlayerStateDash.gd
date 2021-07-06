@@ -26,19 +26,19 @@ func on_start():
 	player.get_node("FrameCounters/SlideCooldown").stop()
 	
 	if player.onGround:
-		dashDirection = player.get_vector_for_direction(player.facing) # TODO input is whatever left/right was pressed last
+		dashDirection = Direction.get_vector_for_direction(player.facing) # TODO input is whatever left/right was pressed last
 																	   # TODO this will be a function in input manager
 	else:
-		dashDirection = player.getDirectionToMouse()
+		dashDirection = Direction.getDirectionToMouse(player)
 #	if player.onGround and abs(fmod(abs(dashDirection.angle())+0.5*PI,PI)-0.5*PI) < 0.2:
 #		dashDirection.y = 0
 	if dashDirection.x > 0:
-		player.setFacing(player.Direction.RIGHT)
+		player.setFacing(Direction.RIGHT)
 	elif dashDirection.x < 0:
-		player.setFacing(player.Direction.LEFT)
+		player.setFacing(Direction.LEFT)
 		
 	var rot = dashDirection.angle()+0.5*PI;
-	if player.facing == player.Direction.LEFT:
+	if player.facing == Direction.LEFT:
 		rot*=-1;
 	player.get_node("VFX/Dash").set_rotation(rot)
 	player.get_node("VFX/AnimationPlayer").stop()

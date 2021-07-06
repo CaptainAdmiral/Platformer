@@ -96,7 +96,7 @@ func _physics_process(_delta):
 		swingSword()
 		
 	if $FrameCounters/AttackStartup.frame == 1:
-		var rot = getSignForDirection()*get_global_mouse_position().angle_to_point(global_position)
+		var rot = Direction.getSignForDirection(facing)*get_global_mouse_position().angle_to_point(global_position)
 		$AttackArea.rotation = rot
 
 	######################## ON GROUND ##################################
@@ -120,13 +120,13 @@ func _physics_process(_delta):
 				$FrameCounters/WallJump.start()
 	#Jump
 	if $FrameCounters/JumpGrace.active():
-		if InputBuffer.hasAction("up", false, 10) and state.priority() < 4 and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
+		if InputBuffer.has_action("up", false, 10) and state.priority() < 4 and $FrameCounters/DamageInvincibility.getFrame() < $FrameCounters/DamageInvincibility.getActiveFrames() - 5:
 			jump()
 	
 	#Wall Jump Movement
 	if $FrameCounters/WallJump.active():
-		if InputBuffer.hasAction("up", false, 6) and InputBuffer.hasAction(getInputFromDirection(getOppositeDirection(facing)), false, 6):
-			wallJump(getOppositeDirection(facing))
+		if InputBuffer.has_action("up", false, 6) and InputBuffer.has_action(Direction.getInputFromDirection(Direction.getOppositeDirection(facing)), false, 6):
+			wallJump(Direction.getOppositeDirection(facing))
 			
 	######################## ON WALL ##################################
 	prev_on_wall = on_wall
@@ -227,7 +227,7 @@ func on_collide_with_wall():
 func wallJump(direction) -> void:
 	turnAround()
 	motion.y=-WALL_JUMP_VELOCITY.y
-	motion.x = getSignForDirection()*WALL_JUMP_VELOCITY.x
+	motion.x = Direction.getSignForDirection(facing)*WALL_JUMP_VELOCITY.x
 		
 	$FrameCounters/WallJump.stop()
 	add_persistent_behaviour(PlayerPBJumpBoost.new(self, JUMP_BOOST_FRAMES))
@@ -281,7 +281,7 @@ func swingSword() -> void:
 			$AttackArea/AttackSprite.play("attack2")
 			
 	$AttackArea.damage.amount = 1*combo
-	$AttackArea.damage.knockback = 600*getDirectionToMouse().normalized()
+	$AttackArea.damage.knockback = 600*Direction.getDirectionToMouse(self).normalized()
 	$AttackArea.hit_overlapping()
 	$FrameCounters/AttackCooldown.start()
 		
@@ -303,12 +303,6 @@ func _on_hit_with_sword(hit):
 func swordDash(direction : Vector2):
 	motion = direction
 	motion.y = min(-700, motion.y)	
-	
-func getDirectionToMouse() -> Vector2:
-	return global_position.direction_to(get_global_mouse_position())
-	
-func getParryDirection() -> Vector2:
-	return getDirectionToMouse()
 
 func hurt(damage : Damage) -> bool:
 	if isDodging and damage.canDodge:
@@ -379,40 +373,4 @@ func set_crouch(flag):
 	else:
 		$Hitbox.set_deferred("disabled", false)
 		$CrouchHitbox.set_deferred("disabled", true)
-	
-func getDirectionFromInput() -> Vector2:
-	var x = 0
-	var y = 0
-	
-	if Input.is_action_pressed("up"):
-		y-=1
-	if Input.is_action_pressed("down"):
-		y+=1
-	if Input.is_action_pressed("left"):
-		x-=1
-	if Input.is_action_pressed("right"):
-		x+=1
-												
-	return Vector2(x, y).normalized()
-	
-func getInputFromDirection(direction) -> String:
-	if direction == Direction.LEFT:
-		return "left"
-	elif direction == Direction.RIGHT:
-		return "right"
-	elif direction == Direction.UP:
-		return "up"
-	elif direction == Direction.DOWN:
-		return "down"
-	return "err"
-	
-func get_vector_for_direction(direction):
-	if direction == Direction.LEFT:
-		return Vector2(-1, 0)
-	elif direction == Direction.RIGHT:
-		return Vector2(1, 0)
-	elif direction == Direction.UP:
-		return Vector2(0, -1)
-	elif direction == Direction.DOWN:
-		return Vector2(0, 1)
-	return Vector2(0, 0)
+
