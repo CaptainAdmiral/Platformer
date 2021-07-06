@@ -22,7 +22,8 @@ func priority():
 func on_start():
 	.on_start()
 	player.dashCharges -= 1
-	
+	player.reset_attack_timer()
+	player.get_node("FrameCounters/SlideCooldown").stop()
 	
 	if player.onGround:
 		dashDirection = player.get_vector_for_direction(player.facing) # TODO input is whatever left/right was pressed last

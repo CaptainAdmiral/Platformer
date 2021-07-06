@@ -19,6 +19,7 @@ func on_start():
 func on_finish():
 	.on_finish()
 	player.set_crouch(false)
+	player.get_node("FrameCounters/SlideCooldown").start()
 	
 func is_valid():
 	if !player.canStand():
@@ -29,7 +30,12 @@ func priority():
 	return 3
 	
 func is_transition_to_valid(newState : LivingState, ignorePriority = false):
-	return player.canStand() and .is_transition_to_valid(newState, ignorePriority)
+	if !player.canStand():
+		return false
+	return .is_transition_to_valid(newState, ignorePriority)
+	
+func is_transition_from_valid(oldState):
+	return !player.get_node("FrameCounters/SlideCooldown").active()
 
 func update():
 	# No friction if the player would slide into a hole they can't stand up in

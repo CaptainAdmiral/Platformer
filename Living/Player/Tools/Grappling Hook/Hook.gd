@@ -1,7 +1,7 @@
 extends Projectile
 
 const DASH_SPEED = 2000
-const MAX_LENGTH = 500 # Starting length. Increase by 100 each upgrade?
+const MAX_LENGTH = 600 # Starting length. Increase by 100 each upgrade?
 
 var startPos : Vector2
 var length = 0
@@ -81,7 +81,7 @@ func _physics_process(delta):
 				var perpComp = mag*sin(motionAng - ang)
 				
 				var perpMotion = Vector2(-perpComp*sin(ang), perpComp*cos(ang))
-				shooter.motion = perpMotion		
+				shooter.motion = perpMotion
 
 func isTense():
 	return attachedTo != null and global_position.distance_to(shooter.global_position) >= length*0.99

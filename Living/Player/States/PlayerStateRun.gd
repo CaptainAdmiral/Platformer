@@ -39,7 +39,7 @@ func update():
 		if -player.motion.x < player.RUN_SPEED:
 			player.motion.x = max(player.motion.x - player.RUN_ACCELERATION, -player.RUN_SPEED)
 			
-	if (frame >= 15 or abs(player.motion.x) >= player.RUN_SPEED*0.75) and Input.is_action_pressed("down"): #TODO input buffer down
+	if (frame >= 15 or abs(player.motion.x) >= player.RUN_SPEED*0.75) and Input.is_action_pressed("down"): # TODO input buffer down
 		transition_to(PlayerStateSlide.new(player))
 		
 	.update()

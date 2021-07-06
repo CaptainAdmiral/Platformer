@@ -64,7 +64,6 @@ var manaOvercapDecay = 0.025
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	fallSpeed = FALL_SPEED
-	hook_drag = 1
 	setMaxHealth(6)
 	$AttackArea.add_exception(self)
 	$AttackArea.damage.source = self
@@ -357,6 +356,9 @@ func refreshDash():
 	
 func refreshHook():
 	hookCharges = maxHookCharges
+	
+func reset_attack_timer():
+	$FrameCounters/AttackCooldown.stop()
 	
 func setDead() -> void:
 # warning-ignore:return_value_discarded
