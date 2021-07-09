@@ -14,7 +14,7 @@ func _init(player).(player, "slide","slide"):
 func on_start():
 	.on_start()
 	player.set_crouch(true)
-	player.motion.x += Direction.getSignForDirection(player.facing)*SLIDE_START_SPEED
+	player.motion.x += Direction.get_sign_for_direction(player.facing)*SLIDE_START_SPEED
 	
 func on_finish():
 	.on_finish()
@@ -22,7 +22,7 @@ func on_finish():
 	player.get_node("FrameCounters/SlideCooldown").start()
 	
 func is_valid():
-	if !player.canStand():
+	if !player.can_stand():
 		return true
 	return .is_valid()
 	
@@ -30,7 +30,7 @@ func priority():
 	return 3
 	
 func is_transition_to_valid(newState : LivingState, ignorePriority = false):
-	if !player.canStand():
+	if !player.can_stand():
 		return false
 	return .is_transition_to_valid(newState, ignorePriority)
 	
@@ -42,19 +42,19 @@ func update():
 	var space_state = player.get_world_2d().direct_space_state
 	var collision = space_state.intersect_ray( \
 			Vector2(player.position.x, player.position.y-player.get_node("Hitbox").shape.extents.y), \
-			player.position + Vector2(Direction.getSignForDirection(player.facing)*SLIDE_BOOST*(duration-frame)/duration, 0), \
+			player.position + Vector2(Direction.get_sign_for_direction(player.facing)*SLIDE_BOOST*(duration-frame)/duration, 0), \
 			[player],1)
 	
 	if !collision:
 		player.motion.x *= SLIDE_SLOWDOWN
-		player.motion.x = Direction.getSignForDirection(player.facing)*max(SLIDE_MIN_SPEED, abs(player.motion.x))
+		player.motion.x = Direction.get_sign_for_direction(player.facing)*max(SLIDE_MIN_SPEED, abs(player.motion.x))
 	else:
-		player.motion.x = Direction.getSignForDirection(player.facing)*max(SLIDE_START_SPEED, abs(player.motion.x))
+		player.motion.x = Direction.get_sign_for_direction(player.facing)*max(SLIDE_START_SPEED, abs(player.motion.x))
 	
 	if player.is_swinging():
 		stop()
 		if is_current_state():
-			player.hook.setDead()
+			player.hook.set_dead()
 		else:
 			return
 			

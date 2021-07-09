@@ -7,20 +7,20 @@ signal state_changed # Emitted whenever the state changes
 signal landed # Emitted on the first frame the entity touches the ground
 signal left_ground # Emitted on the first frame the entity leaves the ground
 
-var maxHealth : int = 1 setget setMaxHealth
+var max_health : int = 1 setget set_max_health
 var health : int
-var isDead = false
-var countsAsKill : bool = true
-var fallSpeed : int = 30
-var knockbackMultiplier : float = 1 # A higher knockback multiplier will result in more knockback taken
-var manaOnKill : int = 0
+var is_dead = false
+var counts_as_kill : bool = true
+var fall_speed : int = 30
+var knockback_multiplier : float = 1 # A higher knockback multiplier will result in more knockback taken
+var mana_on_kill : int = 0
 var motion : Vector2 = Vector2()
-var prevMotion : Vector2 = Vector2()
-var freezeFrames : int
-var handleOwnMovement : bool = false
+var prev_motion : Vector2 = Vector2()
+var freeze_frames : int
+var handle_own_movement : bool = false
 export(Direction.DIRECTION_X) var facing = Direction.RIGHT
-var onGround = false
-var prevOnGround = false # Has whatever value onGround had last frame
+var on_ground = false
+var prev_on_ground = false # Has whatever value onGround had last frame
 var last_on_ground : int = 0
 var last_in_air : int = 0
 var state = null setget set_state
@@ -28,7 +28,7 @@ var persistent_behaviours = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	health = maxHealth
+	health = max_health
 	if get_default_state() != null:
 		state = get_default_state()
 		state.on_start()
@@ -44,32 +44,32 @@ func _physics_process(_delta):
 		else:
 			persistent_behaviours[i].update()
 	
-	prevOnGround = onGround
-	onGround = is_on_floor()
+	prev_on_ground = on_ground
+	on_ground = is_on_floor()
 	
-	if onGround:
+	if on_ground:
 		last_in_air += 1
-		if !prevOnGround:
+		if !prev_on_ground:
 			on_land()
 			last_on_ground = 0
 	else:
 		last_on_ground += 1
-		if prevOnGround:
+		if prev_on_ground:
 			on_leave_ground()
 			last_in_air = 0
 			
 	
-	if !freezeFrames:
-		motion.y += fallSpeed
+	if !freeze_frames:
+		motion.y += fall_speed
 	
-	if(is_on_floor() and motion.y > fallSpeed):
-		motion.y = fallSpeed
-	if !handleOwnMovement and !freezeFrames:
-		prevMotion = motion
+	if(is_on_floor() and motion.y > fall_speed):
+		motion.y = fall_speed
+	if !handle_own_movement and !freeze_frames:
+		prev_motion = motion
 		motion = move_and_slide(motion, Vector2(0, -1))
 		
-	if freezeFrames:
-		freezeFrames -= 1
+	if freeze_frames:
+		freeze_frames -= 1
 		
 func set_state(st):
 	state = st
@@ -121,7 +121,7 @@ func remove_persistent_behaviour_at_index(i : int):
 #Sets the direction the entity is facing
 #You should override this if inverting the scale is not desired such as
 #When you have a node that should always be on the left/right side
-func setFacing(direction) -> void:
+func set_facing(direction) -> void:
 	assert(direction == Direction.LEFT or direction == Direction.RIGHT)
 	if facing == direction:
 		return
@@ -129,46 +129,46 @@ func setFacing(direction) -> void:
 	scale.x*=-1
 	facing = direction
 	
-func turnAround():
+func turn_around():
 	if facing == Direction.RIGHT:
-		setFacing(Direction.LEFT)
+		set_facing(Direction.LEFT)
 	elif facing == Direction.LEFT:
-		setFacing(Direction.RIGHT)
+		set_facing(Direction.RIGHT)
 	
-func setMaxHealth(amount : int) -> void:
-	maxHealth = amount
+func set_max_health(amount : int) -> void:
+	max_health = amount
 	health = amount
 		
 #Does not add freeze frames to the existing number of frames, instead updates to whichever number is higher
-func addFreezeFrames(frames : int):
+func add_freeze_frames(frames : int):
 # warning-ignore:narrowing_conversion
-	freezeFrames = max(frames, freezeFrames)
+	freeze_frames = max(frames, freeze_frames)
 
 #Directly decreases health by the given amount
 func damage(amount : int) -> void:
 	assert(amount >= 0)
 	health -= amount
 	if health <= 0:
-		setDead()
+		set_dead()
 
 #Directly increases health by the given amount
 func heal(amount : int) -> void:
 	assert(amount >= 0)
 # warning-ignore:narrowing_conversion
-	health = min(maxHealth, health + amount)
+	health = min(max_health, health + amount)
 	
 #Called as a result of being damaged to allow entities to handle their own
 #being hurt logic
 func hurt(damage : Damage) -> bool:
 	emit_signal("hurt", damage)
 	damage(damage.amount)
-	addKnockback(damage.knockback, true)
-	if isDead and damage.source != null and damage.source.is_in_group("players"):
-		damage.source.onKill(self)
+	add_knockback(damage.knockback, true)
+	if is_dead and damage.source != null and damage.source.is_in_group("players"):
+		damage.source.on_kill(self)
 	return true
 	
 #Called when hit if entitiy is part of "attackable" group
-func onAttacked(_damage : Damage) -> void:
+func on_attacked(_damage : Damage) -> void:
 	pass
 
 # Called on the first frame the entity touches the ground
@@ -180,14 +180,14 @@ func on_leave_ground():
 	emit_signal("left_ground")
 
 #Adds a knockback vector to the players motion. If overwrite motion is true sets player motion instead
-func addKnockback(knockback : Vector2, overwriteMotion : bool = false) -> void:
+func add_knockback(knockback : Vector2, overwriteMotion : bool = false) -> void:
 	if overwriteMotion:
 		motion = Vector2(0,0)
-	motion += knockback*knockbackMultiplier
+	motion += knockback*knockback_multiplier
 	
 #Marks the entity to be freed and handles death logic
-func setDead() -> void:
-	isDead = true
+func set_dead() -> void:
+	is_dead = true
 	emit_signal("died")
 	queue_free()
 

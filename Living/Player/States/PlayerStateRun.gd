@@ -9,9 +9,9 @@ func _init(player, direction).(player, "run","run"):
 	self.ground_only = true
 	
 func on_start():
-	if lastState == "idle":
+	if last_state == "idle":
 		transition_animation = "run start"
-	player.setFacing(direction)
+	player.set_facing(direction)
 	.on_start()
 	
 func priority():
@@ -23,7 +23,7 @@ func is_transition_to_valid(newState : LivingState, ignorePriority = false):
 	return .is_transition_to_valid(newState, ignorePriority)
 	
 func is_valid():
-	return living.onGround and Input.is_action_pressed(Direction.getInputFromDirection(direction)) and .is_valid()
+	return Input.is_action_pressed(Direction.get_input_from_direction(direction)) and .is_valid()
 
 func update():
 	if direction == Direction.RIGHT:

@@ -46,7 +46,7 @@ func update():
 		pass #Spawn hitbox
 	elif frame == STARTUP_FRAMES + ACTIVE_FRAMES and !hit_something:
 		player.get_node("sfx").play("sword_miss_" + str(randi()%3+1))
-	player.motion = player.prevMotion
+	player.motion = player.prev_motion
 	.update()
 	
 func on_hit(hit):

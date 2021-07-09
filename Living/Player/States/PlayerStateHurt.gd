@@ -8,8 +8,5 @@ func _init(player).(player, "hurt",""):
 func priority():
 	return 5
 	
-func is_valid():
-	return Input.is_action_pressed("down") and .is_valid()
-	
 func update():
 	.update()

@@ -9,7 +9,7 @@ enum {UP, DOWN, LEFT, RIGHT}
 func _ready():
 	pass 
 
-static func getDirectionFromInput() -> Vector2:
+static func get_direction_from_input() -> Vector2:
 	var x = 0
 	var y = 0
 	
@@ -24,7 +24,7 @@ static func getDirectionFromInput() -> Vector2:
 												
 	return Vector2(x, y).normalized()
 	
-static func getInputFromDirection(direction) -> String:
+static func get_input_from_direction(direction) -> String:
 	if direction == Direction.LEFT:
 		return "left"
 	elif direction == Direction.RIGHT:
@@ -35,7 +35,7 @@ static func getInputFromDirection(direction) -> String:
 		return "down"
 	return "err"
 	
-static func getDirectionToMouse(node : Node2D) -> Vector2:
+static func get_direction_to_mouse(node : Node2D) -> Vector2:
 	return node.global_position.direction_to(node.get_global_mouse_position())
 	
 static func get_vector_for_direction(direction):
@@ -53,7 +53,7 @@ static func get_vector_for_direction(direction):
 #Looking left because you ain’t treat me right
 #Looking up because you let me down
 #Looking down because you fucked me up
-static func getOppositeDirection(direction):
+static func get_opposite_direction(direction):
 	if direction == Direction.RIGHT:
 		return Direction.LEFT
 	elif direction == Direction.LEFT:
@@ -64,7 +64,7 @@ static func getOppositeDirection(direction):
 		return Direction.UP
 		
 #Returns 1 if the direction coresponds to a positive change along the axis, else -1
-static func getSignForDirection(direction) -> int:
+static func get_sign_for_direction(direction) -> int:
 	if direction == Direction.RIGHT or direction == Direction.DOWN:
 		return 1
 	else:

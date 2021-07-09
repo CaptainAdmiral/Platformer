@@ -10,7 +10,7 @@ var duration : int = 0 # How many frames before the state returns to frame 0. If
 var living : Living # The persistant thing that has the states; The state machine
 var sprite : AnimatedSprite
 var transition_animation : String = "" # The animation leading into the main state animation.
-var lastState : String  = "" # The name of whatever state came before this one
+var last_state : String  = "" # The name of whatever state came before this one
 var air_only : bool = false # If set to true state will not be considered valid on ground
 var ground_only : bool = false # If set to true state will not be considered valid in air
 var _priority : int = 1 setget ,priority
@@ -91,9 +91,9 @@ func is_transition_from_valid(oldState : LivingState) -> bool:
 	
 #Is the state still valid for the living
 func is_valid():
-	if ground_only and !living.onGround:
+	if ground_only and !living.on_ground:
 		return false
-	elif air_only and living.onGround:
+	elif air_only and living.on_ground:
 		return false
 	return true
 	
@@ -101,7 +101,7 @@ func transition_to(newState : LivingState, ignorePriority = false) -> bool:
 	if is_transition_to_valid(newState, ignorePriority) and newState.is_transition_from_valid(self):
 		on_finish()
 		living.state = newState
-		newState.lastState = name
+		newState.last_state = name
 		newState.on_start()
 		living.on_state_change_finished()
 		return true

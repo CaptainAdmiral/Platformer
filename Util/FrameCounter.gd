@@ -2,9 +2,9 @@ extends Node
 
 class_name FrameCounter
 
-var frame : int = 0 setget setFrame, getFrame
-var justFinished = false
-export(int) var activeFrames = 0 setget setActiveFrames, getActiveFrames
+var frame : int = 0 setget set_frame, get_frame
+var just_finished = false
+export(int) var activeFrames = 0 setget set_active_frames, get_active_frames
 
 signal finished
 
@@ -13,11 +13,11 @@ func _ready():
 	pass
 	
 func _physics_process(_delta):
-	justFinished = false
+	just_finished = false
 	if frame != 0:
 		frame -= 1
 		if frame == 0:
-			justFinished = true
+			just_finished = true
 			emit_signal("finished")
 	else:
 		set_physics_process(false)
@@ -40,36 +40,36 @@ func resume():
 	if frame != 0:
 		set_physics_process(true)
 	
-func setFinished():
+func set_finished():
 	if frame == 0:
 		return
 	frame = 0
-	justFinished = true
+	just_finished = true
 	emit_signal("finished")
 	
-func setFrame(f:int) -> void:
+func set_frame(f:int) -> void:
 	assert(f >= 0)
 	frame = f
 	if frame != 0:
 		set_physics_process(true)
 		
-func setMinFrame(f:int) -> void:
+func set_min_frame(f:int) -> void:
 	assert(f >= 0)
 	frame = max(frame, f)
 	if frame != 0:
 		set_physics_process(true)
 
-func getFrame() -> int:
+func get_frame() -> int:
 	return frame
 	
-func setActiveFrames(f : int) -> void:
+func set_active_frames(f : int) -> void:
 	assert(f>=0)
 	activeFrames = f
 	
-func getActiveFrames() -> int:
+func get_active_frames() -> int:
 	return activeFrames
 	
-func addFrames(f:int) -> void:
+func add_frames(f:int) -> void:
 	frame = max(0, frame+f)
 	if frame != 0:
 		set_physics_process(true)

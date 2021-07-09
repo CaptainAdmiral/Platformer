@@ -11,10 +11,10 @@ func on_start():
 		var norm = player.get_slide_collision(i).normal
 		
 		if norm == Vector2(1, 0) and Input.is_action_pressed("left"):
-			player.setFacing(Direction.LEFT)
+			player.set_facing(Direction.LEFT)
 			break
 		if norm == Vector2(-1, 0) and Input.is_action_pressed("right"):
-			player.setFacing(Direction.RIGHT)
+			player.set_facing(Direction.RIGHT)
 			break
 	
 func is_valid():

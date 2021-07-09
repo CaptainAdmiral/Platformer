@@ -8,7 +8,7 @@ const DASH_SPEED = 3000
 const DASH_FINISH_SPEED = 600
 const SWING_DASH_BOOST = 500
 
-var dashDirection : Vector2
+var dash_direction : Vector2
 
 var Shockwave = preload("res://VFX/Scenes/Shockwave/Shockwave.tscn")
 var DashLightning = preload("res://VFX/Scenes/Lightning/DashLightning.tscn")
@@ -21,23 +21,22 @@ func priority():
 	
 func on_start():
 	.on_start()
-	player.dashCharges -= 1
+	player.dash_charges -= 1
 	player.reset_attack_timer()
 	player.get_node("FrameCounters/SlideCooldown").stop()
 	
-	if player.onGround:
-		dashDirection = Direction.get_vector_for_direction(player.facing) # TODO input is whatever left/right was pressed last
+	if player.on_ground:
+		dash_direction = Direction.get_vector_for_direction(player.facing) # TODO input is whatever left/right was pressed last
 																	   # TODO this will be a function in input manager
 	else:
-		dashDirection = Direction.getDirectionToMouse(player)
-#	if player.onGround and abs(fmod(abs(dashDirection.angle())+0.5*PI,PI)-0.5*PI) < 0.2:
-#		dashDirection.y = 0
-	if dashDirection.x > 0:
-		player.setFacing(Direction.RIGHT)
-	elif dashDirection.x < 0:
-		player.setFacing(Direction.LEFT)
+		dash_direction = Direction.get_direction_to_mouse(player)
 		
-	var rot = dashDirection.angle()+0.5*PI;
+	if dash_direction.x > 0:
+		player.set_facing(Direction.RIGHT)
+	elif dash_direction.x < 0:
+		player.set_facing(Direction.LEFT)
+		
+	var rot = dash_direction.angle()+0.5*PI;
 	if player.facing == Direction.LEFT:
 		rot*=-1;
 	player.get_node("VFX/Dash").set_rotation(rot)
@@ -45,10 +44,10 @@ func on_start():
 	player.get_node("VFX/AnimationPlayer").play("dash")	
 		
 	if player.is_hook_attached():
-		var dashBoost = dashDirection*DASH_FINISH_SPEED*0.5
+		var dashBoost = dash_direction*DASH_FINISH_SPEED*0.5
 		if (player.motion + dashBoost).length() < player.motion.length() or \
-				(player.motion + dashBoost).length() < (dashDirection*DASH_FINISH_SPEED).length():
-			player.motion = dashDirection*DASH_FINISH_SPEED
+				(player.motion + dashBoost).length() < (dash_direction*DASH_FINISH_SPEED).length():
+			player.motion = dash_direction*DASH_FINISH_SPEED
 		else:
 			player.motion += dashBoost
 		duration -= FREEZE_FRAMES
@@ -56,10 +55,10 @@ func on_start():
 func on_finish():
 	.on_finish()
 	if !player.is_hook_attached():
-		player.motion = dashDirection*DASH_FINISH_SPEED
+		player.motion = dash_direction*DASH_FINISH_SPEED
 	
 func is_transition_from_valid(newState : LivingState):
-	return player.dashCharges > 0 and .is_transition_from_valid(newState)
+	return player.dash_charges > 0 and .is_transition_from_valid(newState)
 	
 func add_dash_vfx():
 	var shockwave = Shockwave.instance()
@@ -68,7 +67,7 @@ func add_dash_vfx():
 	
 	var lightning = DashLightning.instance()
 	lightning.set_global_position(player.get_global_position())
-	lightning.set_rotation(dashDirection.angle()+0.5*PI)
+	lightning.set_rotation(dash_direction.angle()+0.5*PI)
 	player.get_parent().add_child(lightning)
 	
 func update():
@@ -78,9 +77,9 @@ func update():
 		add_dash_vfx()
 	else:
 		if !player.is_hook_attached():
-			player.motion = dashDirection*DASH_SPEED
+			player.motion = dash_direction*DASH_SPEED
 		else:
-			dashDirection = player.motion.normalized()*dashDirection.length()
-			player.motion += dashDirection*(DASH_FINISH_SPEED)/DASH_FRAMES
+			dash_direction = player.motion.normalized()*dash_direction.length()
+			player.motion += dash_direction*(DASH_FINISH_SPEED)/DASH_FRAMES
 	
 	.update()

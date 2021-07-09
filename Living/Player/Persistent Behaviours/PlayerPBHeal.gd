@@ -4,7 +4,7 @@ class_name PlayerPBHeal
 
 const _MANA_PER_HEALTH : float = 25.0
 const _MANA_PER_FRAME: float = 0.15
-var _manaUntilNextHeal : float  = _MANA_PER_HEALTH
+var _mana_until_next_heal : float  = _MANA_PER_HEALTH
 
 func _init(player).(player, "heal", 0):
 	pass
@@ -18,14 +18,14 @@ func on_finish():
 	living.disconnect("hurt", self, "_on_player_hurt")
 
 func update():
-	if living.health == living.maxHealth:
+	if living.health == living.max_health:
 		set_finished()
 		
-	if living.useMana(_MANA_PER_FRAME):
-		_manaUntilNextHeal -= _MANA_PER_FRAME
-		if _manaUntilNextHeal <= 0:
+	if living.use_mana(_MANA_PER_FRAME):
+		_mana_until_next_heal -= _MANA_PER_FRAME
+		if _mana_until_next_heal <= 0:
 			living.heal(1)
-			_manaUntilNextHeal += _MANA_PER_HEALTH
+			_mana_until_next_heal += _MANA_PER_HEALTH
 	else:
 		set_finished()
 		living.mana = 0
