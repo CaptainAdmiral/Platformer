@@ -62,6 +62,7 @@ var mana_overcap_decay = 0.025
 func _ready():
 	fall_speed = FALL_SPEED
 	set_max_health(6)
+	snap_to_ground = true
 	$AttackArea.add_exception(self)
 	$AttackArea.damage.source = self
 
@@ -191,6 +192,7 @@ func set_facing(direction):
 	.set_facing(direction)
 	
 func jump() -> void:
+	snap_to_ground = false
 	$FrameCounters/JumpGrace.stop()
 	motion.y -= JUMP_VELOCITY
 	
@@ -351,6 +353,10 @@ func reset_attack_timer():
 func set_dead() -> void:
 # warning-ignore:return_value_discarded
 	get_tree().reload_current_scene()
+	
+func on_leave_ground():
+	.on_leave_ground()
+	snap_to_ground = true
 
 func on_land() -> void:
 	.on_land()

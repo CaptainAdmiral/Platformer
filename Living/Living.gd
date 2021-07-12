@@ -16,6 +16,7 @@ var knockback_multiplier : float = 1 # A higher knockback multiplier will result
 var mana_on_kill : int = 0
 var motion : Vector2 = Vector2()
 var prev_motion : Vector2 = Vector2()
+var snap_to_ground = false
 var freeze_frames : int
 var handle_own_movement : bool = false
 export(Direction.DIRECTION_X) var facing = Direction.RIGHT
@@ -57,16 +58,26 @@ func _physics_process(_delta):
 		if prev_on_ground:
 			on_leave_ground()
 			last_in_air = 0
-			
+	
+	if abs(motion.x) < 20:
+		motion.x = 0
 	
 	if !freeze_frames:
-		motion.y += fall_speed
+		if !on_ground:
+			motion.y += fall_speed
+		else:
+			motion.y += 1
+		
 	
 	if(is_on_floor() and motion.y > fall_speed):
 		motion.y = fall_speed
 	if !handle_own_movement and !freeze_frames:
 		prev_motion = motion
-		motion = move_and_slide(motion, Vector2(0, -1))
+		
+		if snap_to_ground:
+			motion = move_and_slide_with_snap(motion, Vector2(0, 100), Vector2(0, -1), true, 4, 0.79)
+		else:
+			motion = move_and_slide(motion, Vector2(0, -1), true)
 		
 	if freeze_frames:
 		freeze_frames -= 1
