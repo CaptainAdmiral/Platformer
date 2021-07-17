@@ -39,6 +39,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Living/LivingState.gd"
 }, {
+"base": "Node",
+"class": "Math",
+"language": "GDScript",
+"path": "res://Tools/Math.gd"
+}, {
 "base": "Reference",
 "class": "PersistentBehaviour",
 "language": "GDScript",
@@ -131,6 +136,7 @@ _global_script_class_icons={
 "Hitbox": "",
 "Living": "",
 "LivingState": "",
+"Math": "",
 "PersistentBehaviour": "",
 "Player": "",
 "PlayerPBHeal": "",
