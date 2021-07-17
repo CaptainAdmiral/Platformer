@@ -160,9 +160,10 @@ config/icon="res://icon.png"
 
 Globals="*res://Globals.gd"
 GlobalWorldEnvironment="*res://VFX/Post Processing/WorldEnvironment.tscn"
-PauseMenu="*res://GUI/PauseMenu.tscn"
+PauseMenu="*res://GUI/PauseMenu/PauseMenu.tscn"
 InputBuffer="*res://Input/InputBuffer.gd"
 Direction="*res://Util/Direction.gd"
+PlayerHud="*res://GUI/PlayerHUD/PlayerHUD.tscn"
 
 [display]
 

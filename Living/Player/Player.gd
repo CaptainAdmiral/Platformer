@@ -65,6 +65,7 @@ func _ready():
 	snap_to_ground = true
 	$AttackArea.add_exception(self)
 	$AttackArea.damage.source = self
+	Globals.client_player = self
 
 func _physics_process(_delta):
 	######################## WALL RUN ##################################

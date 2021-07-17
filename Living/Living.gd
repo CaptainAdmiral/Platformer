@@ -3,6 +3,7 @@ class_name Living
 
 signal died # Emitted when any living is set dead, before queue_free()
 signal hurt(damage) # Emitted when damaged by any source
+signal post_hurt(damage) # Emitted when damaged after hurt logic has completed
 signal state_changed # Emitted whenever the state changes
 signal landed # Emitted on the first frame the entity touches the ground
 signal left_ground # Emitted on the first frame the entity leaves the ground
@@ -176,6 +177,7 @@ func hurt(damage : Damage) -> bool:
 	add_knockback(damage.knockback, true)
 	if is_dead and damage.source != null and damage.source.is_in_group("players"):
 		damage.source.on_kill(self)
+	emit_signal("post_hurt", damage)
 	return true
 	
 #Called when hit if entitiy is part of "attackable" group
