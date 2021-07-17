@@ -307,12 +307,16 @@ func sword_dash(direction : Vector2):
 	motion.y = min(-700, motion.y)	
 
 func hurt(damage : Damage) -> bool:
+	if $FrameCounters/DamageInvincibility.active():
+		return false
 	if is_dodging and damage.can_dodge:
 		return false
 	if is_parrying and damage.can_parry:
 		return false
 	$FrameCounters/DamageInvincibility.start()
 	$FrameCounters/AttackCooldown.start()
+	
+	state.transition_to(PlayerStateHurt.new(self))
 	
 	if hook !=null:
 		hook.set_dead()
