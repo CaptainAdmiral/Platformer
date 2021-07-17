@@ -163,7 +163,7 @@ GlobalWorldEnvironment="*res://VFX/Post Processing/WorldEnvironment.tscn"
 PauseMenu="*res://GUI/PauseMenu/PauseMenu.tscn"
 InputBuffer="*res://Input/InputBuffer.gd"
 Direction="*res://Util/Direction.gd"
-PlayerHud="*res://GUI/PlayerHUD/PlayerHUD.tscn"
+UiHandler="*res://GUI/UIHandler.gd"
 
 [display]
 

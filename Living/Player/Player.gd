@@ -66,6 +66,7 @@ func _ready():
 	$AttackArea.add_exception(self)
 	$AttackArea.damage.source = self
 	Globals.client_player = self
+	Globals.emit_signal("player_joined_scene", self)
 
 func _physics_process(_delta):
 	######################## WALL RUN ##################################
