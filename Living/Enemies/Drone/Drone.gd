@@ -70,15 +70,6 @@ func _physics_process(delta):
 		motion += attack_acceleration*global_position.direction_to(target.global_position)
 		motion -= attack_acceleration*maxDist*global_position.direction_to(target.global_position)/dist
 		
-		if $FrameCounter/Attack.just_finished:
-			for body in $AttackArea.get_overlapping_bodies():
-				var player = body
-				var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
-				if player.hurt(damage):
-					player.addKnockback(global_position.direction_to(player.global_position)*1200, true)
-			$FrameCounter/AttackCooldown.start()
-			$FrameCounter/AttackCooldown.add_frames(randi()%420)
-		
 		if $FrameCounter/AttackCooldown.just_finished:
 			$FrameCounter/AttackTargeting.start()
 			
