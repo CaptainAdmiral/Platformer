@@ -42,7 +42,7 @@ _global_script_classes=[ {
 "base": "Node",
 "class": "Math",
 "language": "GDScript",
-"path": "res://Tools/Math.gd"
+"path": "res://Util/Math.gd"
 }, {
 "base": "Reference",
 "class": "PersistentBehaviour",
