@@ -1,20 +1,8 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=2 format=2]
 
 [ext_resource path="res://AttackProperties/Hitbox/Hitbox.gd" type="Script" id=1]
-[ext_resource path="res://AttackProperties/AttackProperties.gd" type="Script" id=2]
-
-
-
-[sub_resource type="Resource" id=1]
-script = ExtResource( 2 )
-amount = 0
-knockback = Vector2( 0, 0 )
-type = 1
-canDodge = true
-canParry = true
 
 [node name="Hitbox" type="Area2D"]
 collision_layer = 0
 collision_mask = 2
 script = ExtResource( 1 )
-damage = SubResource( 1 )

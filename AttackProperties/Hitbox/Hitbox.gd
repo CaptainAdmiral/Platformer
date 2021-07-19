@@ -23,6 +23,7 @@ var just_active = false
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_collision_mask(4)
+	set_collision_layer(4)
 	set_active(active)
 	if properties.source != null:
 		exceptions.append(properties.source)
@@ -31,7 +32,7 @@ func _ready():
 	
 	var parent = get_parent()
 	while parent != null:
-		if parent is Living:
+		if parent is PhysicsBody2D:
 			add_exception(parent)
 		parent = parent.get_parent()
 	
@@ -64,6 +65,8 @@ func hit_overlapping():
 		on_hit(area)
 	
 func on_hit(body: Node):
+	if body == properties.source:
+		return
 	if body in exceptions:
 		return
 	if trigger_type == TRIGGER.COLLISION:
@@ -71,6 +74,9 @@ func on_hit(body: Node):
 			return
 	elif trigger_type == TRIGGER.OTHER and repeat_rate != 0:
 		if body in already_hit:
+			return
+	if body is Player:
+		if body.is_dodging and properties.can_dodge:
 			return
 	emit_signal("hit", body)
 	if body is Living:

@@ -19,7 +19,7 @@ var motion : Vector2 = Vector2()
 var prev_motion : Vector2 = Vector2()
 var snap_to_ground = false
 var freeze_frames : int
-var handle_own_movement : bool = false
+var _handle_own_movement : bool = false
 export(Direction.DIRECTION_X) var facing = Direction.RIGHT
 var on_ground = false
 var prev_on_ground = false # Has whatever value onGround had last frame
@@ -72,7 +72,7 @@ func _physics_process(_delta):
 	
 	if(is_on_floor() and motion.y > fall_speed):
 		motion.y = fall_speed
-	if !handle_own_movement and !freeze_frames:
+	if !_handle_own_movement and !freeze_frames:
 		prev_motion = motion
 		
 		if snap_to_ground:

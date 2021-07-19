@@ -37,8 +37,8 @@ func _physics_process(delta):
 			attached_to = collision.collider
 			if attached_to is TileMap:
 				offset = attached_to.global_position - collision.position
-			elif attached_to is Living:
-				attached_to.connect("died", self, "set_dead", [], CONNECT_ONESHOT)
+				
+			attached_to.connect("tree_exited", self, "set_dead", [], CONNECT_ONESHOT)
 			set_collision_mask(0)
 
 		if global_position.distance_to(start_pos) > MAX_LENGTH:

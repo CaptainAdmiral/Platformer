@@ -50,5 +50,5 @@ activeFrames = 30
 
 [node name="ShootCooldown" type="Node" parent="."]
 script = ExtResource( 4 )
-activeFrames = 15
+activeFrames = 40
 [connection signal="body_entered" from="Range" to="." method="_on_range_entered"]

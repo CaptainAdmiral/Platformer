@@ -1,5 +1,7 @@
 extends Living
 
+onready var PlasmaProjectile = load("res://Projectile/PlasmaProjectile/PlasmaProjectile.tscn")
+
 const RANGE_DISPLAY_DIST = 1000
 
 var deagro_range = 0
@@ -12,7 +14,7 @@ func _ready():
 	fall_speed = 0
 	knockback_multiplier = 0.1
 	mana_on_kill = 10
-	deagro_range = $Range/CollisionShape2D.shape.radius + 100
+	deagro_range = $Range/CollisionShape2D.shape.radius + 300
 
 func _physics_process(delta):
 	motion *= 0.9
@@ -31,16 +33,25 @@ func _physics_process(delta):
 		if target == null:
 			$RangeIndicator.modulate.a = min(1 - abs(dist-500)/(RANGE_DISPLAY_DIST-500), 1)
 			$RangeIndicator.rotation = global_position.angle_to_point(nearestPlayer.global_position)-0.5*PI
-		elif !$ShootCooldown.active():
+	
+		if !(shoot_queue.empty() or $ShootCooldown.active()):
 			shoot()
 	else:
-		print($ChargeUp.frame)
 		$RangeIndicator.modulate.a = ($ChargeUp.frame+1)/$ChargeUp.activeFrames * 2
 		$RangeIndicator.scale *= 1.05
+		
+	if target != null and !$ShootCooldown.active():
+		shoot_queue.append(target.global_position)
+		$ShootCooldown.start()
+		
 
 func shoot():
-	$ShootCooldown.start()
-	print("pew")
+	var direction = global_position.direction_to(shoot_queue[0])
+	shoot_queue.remove(0)
+	
+	var projectile = PlasmaProjectile.instance()
+	projectile.add_to_scene(get_parent(), position, direction*100, self)
+	projectile.properties.knockback = projectile.motion.normalized()*600
 
 func _on_range_entered(body):
 	if target == null:

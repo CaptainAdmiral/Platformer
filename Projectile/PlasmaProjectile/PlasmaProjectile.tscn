@@ -1,0 +1,33 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://AttackProperties/Hitbox/Hitbox.gd" type="Script" id=1]
+[ext_resource path="res://Projectile/PlasmaProjectile/PlasmaProjectile.gd" type="Script" id=2]
+[ext_resource path="res://Placeholder.png" type="Texture" id=3]
+[ext_resource path="res://Projectile/PlasmaProjectile/PlasmaProjectileAP.tres" type="Resource" id=4]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 32.0
+
+[sub_resource type="CircleShape2D" id=2]
+radius = 34.4855
+
+[node name="PlasmaProjectile" type="KinematicBody2D"]
+collision_layer = 0
+script = ExtResource( 2 )
+
+[node name="Sprite" type="Sprite" parent="."]
+scale = Vector2( 0.282627, 0.282627 )
+texture = ExtResource( 3 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2( 0.433877, 0.426345 )
+shape = SubResource( 1 )
+
+[node name="Hitbox" type="Area2D" parent="."]
+script = ExtResource( 1 )
+properties = ExtResource( 4 )
+active = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+scale = Vector2( 0.511286, 0.517256 )
+shape = SubResource( 2 )

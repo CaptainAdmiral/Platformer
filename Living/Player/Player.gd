@@ -30,8 +30,7 @@ var combo : int = 1
 var already_sword_dashed = false
 var hit_something_last_attack = false
 
-export(String, FILE, "*.tscn") var hookPath
-onready var Hook = load(hookPath)
+var Hook = preload("res://Living/Player/Tools/Grappling Hook/Hook.tscn")
 var hook : KinematicBody2D = null
 
 var max_hook_charges: int = 1
