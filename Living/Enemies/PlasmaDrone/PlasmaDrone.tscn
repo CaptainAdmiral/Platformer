@@ -17,7 +17,7 @@ animations = [ {
 } ]
 
 [sub_resource type="CircleShape2D" id=3]
-radius = 512.0
+radius = 700.0
 
 [node name="Plasma_Drone" type="KinematicBody2D"]
 collision_layer = 12
@@ -41,7 +41,7 @@ shape = SubResource( 3 )
 [node name="RangeIndicator" type="Sprite" parent="."]
 modulate = Color( 1, 1, 1, 0.203922 )
 position = Vector2( 3.8147e-06, -3.43323e-05 )
-scale = Vector2( 2.56, 2.56 )
+scale = Vector2( 3.5, 3.5 )
 texture = ExtResource( 3 )
 
 [node name="ChargeUp" type="Node" parent="."]
