@@ -1,12 +1,15 @@
-extends Projectile
+extends KinematicBody2D
 
 const DASH_SPEED = 2000
 const MAX_LENGTH = 600 # Starting length. Increase by 100 each upgrade?
 
+var motion = Vector2()
 var start_pos : Vector2
 var length = 0
 var attached_to : Node2D = null
 var offset = Vector2()
+
+var shooter = null
 
 var is_dashing=false
 var dash_buffer_frames=10
