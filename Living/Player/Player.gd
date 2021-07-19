@@ -64,7 +64,7 @@ func _ready():
 	set_max_health(6)
 	snap_to_ground = true
 	$AttackArea.add_exception(self)
-	$AttackArea.damage.source = self
+	$AttackArea.properties.source = self
 	Globals.client_player = self
 	Globals.emit_signal("player_joined_scene", self)
 
@@ -283,8 +283,8 @@ func swing_sword() -> void:
 			$AttackArea/AttackSprite.set_frame(0)
 			$AttackArea/AttackSprite.play("attack2")
 			
-	$AttackArea.damage.amount = 1*combo
-	$AttackArea.damage.knockback = 600*Direction.get_direction_to_mouse(self).normalized()
+	$AttackArea.properties.damage = 1*combo
+	$AttackArea.properties.knockback = 600*Direction.get_direction_to_mouse(self).normalized()
 	$AttackArea.hit_overlapping()
 	$FrameCounters/AttackCooldown.start()
 		
@@ -307,12 +307,12 @@ func sword_dash(direction : Vector2):
 	motion = direction
 	motion.y = min(-700, motion.y)	
 
-func hurt(damage : Damage) -> bool:
+func hurt(ap : AttackProperties) -> bool:
 	if $FrameCounters/DamageInvincibility.active():
 		return false
-	if is_dodging and damage.can_dodge:
+	if is_dodging and ap.can_dodge:
 		return false
-	if is_parrying and damage.can_parry:
+	if is_parrying and ap.can_parry:
 		return false
 	$FrameCounters/DamageInvincibility.start()
 	$FrameCounters/AttackCooldown.start()
@@ -328,7 +328,7 @@ func hurt(damage : Damage) -> bool:
 	
 	$sfx.play("playerhurt")
 	
-	return .hurt(damage)
+	return .hurt(ap)
 	
 func on_kill(living : Living) -> void:
 	combo += 1

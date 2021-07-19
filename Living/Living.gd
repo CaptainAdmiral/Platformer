@@ -2,8 +2,8 @@ extends KinematicBody2D
 class_name Living
 
 signal died # Emitted when any living is set dead, before queue_free()
-signal hurt(damage) # Emitted when damaged by any source
-signal post_hurt(damage) # Emitted when damaged after hurt logic has completed
+signal hurt(attackProperties) # Emitted when damaged by any source
+signal post_hurt(attackProperties) # Emitted when damaged after hurt logic has completed
 signal state_changed # Emitted whenever the state changes
 signal landed # Emitted on the first frame the entity touches the ground
 signal left_ground # Emitted on the first frame the entity leaves the ground
@@ -78,7 +78,7 @@ func _physics_process(_delta):
 		if snap_to_ground:
 			motion = move_and_slide_with_snap(motion, Vector2(0, 100), Vector2(0, -1), true, 4, 0.79)
 		else:
-			motion = move_and_slide(motion, Vector2(0, -1), true)
+			motion = move_and_slide(motion, Vector2(0, -1))
 		
 	if freeze_frames:
 		freeze_frames -= 1
@@ -171,17 +171,17 @@ func heal(amount : int) -> void:
 	
 #Called as a result of being damaged to allow entities to handle their own
 #being hurt logic
-func hurt(damage : Damage) -> bool:
-	emit_signal("hurt", damage)
-	damage(damage.amount)
-	add_knockback(damage.knockback, true)
-	if is_dead and damage.source != null and damage.source.is_in_group("players"):
-		damage.source.on_kill(self)
-	emit_signal("post_hurt", damage)
+func hurt(ap : AttackProperties) -> bool:
+	emit_signal("hurt", ap)
+	damage(ap.damage)
+	add_knockback(ap.knockback, ap.knockback_overwrites_motion)
+	if is_dead and ap.source != null and ap.source.is_in_group("players"):
+		ap.source.on_kill(self)
+	emit_signal("post_hurt", ap)
 	return true
 	
 #Called when hit if entitiy is part of "attackable" group
-func on_attacked(_damage : Damage) -> void:
+func on_attacked(_ap : AttackProperties) -> void:
 	pass
 
 # Called on the first frame the entity touches the ground

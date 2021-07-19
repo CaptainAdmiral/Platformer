@@ -10,9 +10,9 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Resource",
-"class": "Damage",
+"class": "AttackProperties",
 "language": "GDScript",
-"path": "res://Damage/Damage.gd"
+"path": "res://AttackProperties/AttackProperties.gd"
 }, {
 "base": "Node",
 "class": "FrameCounter",
@@ -27,7 +27,7 @@ _global_script_classes=[ {
 "base": "Area2D",
 "class": "Hitbox",
 "language": "GDScript",
-"path": "res://Damage/Hitbox/Hitbox.gd"
+"path": "res://AttackProperties/Hitbox/Hitbox.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Living",
@@ -130,7 +130,7 @@ _global_script_classes=[ {
 "path": "res://Projectile/Projectile.gd"
 } ]
 _global_script_class_icons={
-"Damage": "",
+"AttackProperties": "",
 "FrameCounter": "",
 "GitAPI": "",
 "Hitbox": "",

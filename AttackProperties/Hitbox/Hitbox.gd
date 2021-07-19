@@ -7,7 +7,7 @@ signal hit(hit)
 
 enum TRIGGER {COLLISION, OTHER,}
 
-export(Resource) var damage setget set_damage, get_damage
+export(Resource) var properties setget set_properties, get_properties
 # Defers responsibily to owning class for calling on_hit if set to OTHER. 
 # Recommended to use hit_overlapping() in this case if desired behaviour.
 export(TRIGGER) var trigger_type = TRIGGER.COLLISION 
@@ -24,8 +24,8 @@ var just_active = false
 func _ready():
 	set_collision_mask(4)
 	set_active(active)
-	if damage.source != null:
-		exceptions.append(damage.source)
+	if properties.source != null:
+		exceptions.append(properties.source)
 	connect("body_entered", self, "on_collide_with_body")
 	connect("area_entered", self, "on_collide_with_area")
 	
@@ -51,11 +51,11 @@ func _physics_process(_delta):
 func add_exception(exc):
 	exceptions.append(exc)
 	
-func set_damage(dmg : Damage):
-	damage = dmg
+func set_properties(ap : AttackProperties):
+	properties = ap
 	
-func get_damage() -> Damage:
-	return damage
+func get_properties() -> AttackProperties:
+	return properties
 	
 func hit_overlapping():
 	for body in get_overlapping_bodies():
@@ -75,7 +75,7 @@ func on_hit(body: Node):
 	emit_signal("hit", body)
 	if body is Living:
 		emit_signal("hit_living", body)
-		if (body as Living).hurt(damage):
+		if (body as Living).hurt(properties):
 			if !(trigger_type == TRIGGER.OTHER and repeat_rate == 0):
 				already_hit.append(body)
 #	elif body is Area2D:

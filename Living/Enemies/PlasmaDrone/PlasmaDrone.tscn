@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Living/Enemies/Plasma_Drone/Plasma_Drone.gd" type="Script" id=1]
+[ext_resource path="res://Living/Enemies/PlasmaDrone/PlasmaDrone.gd" type="Script" id=1]
 [ext_resource path="res://Placeholder.png" type="Texture" id=2]
-[ext_resource path="res://Living/Enemies/Plasma_Drone/Assets/DroneRange.png" type="Texture" id=3]
+[ext_resource path="res://Living/Enemies/PlasmaDrone/Assets/DroneRange.png" type="Texture" id=3]
 [ext_resource path="res://Util/FrameCounter.gd" type="Script" id=4]
 
 [sub_resource type="CircleShape2D" id=1]
@@ -52,4 +52,3 @@ activeFrames = 30
 script = ExtResource( 4 )
 activeFrames = 15
 [connection signal="body_entered" from="Range" to="." method="_on_range_entered"]
-[connection signal="body_exited" from="Range" to="." method="_on_range_exited"]

@@ -69,9 +69,6 @@ func _physics_process(delta):
 		var dist = max(400, global_position.distance_to(target.global_position))
 		motion += attack_acceleration*global_position.direction_to(target.global_position)
 		motion -= attack_acceleration*maxDist*global_position.direction_to(target.global_position)/dist
-		
-		if $FrameCounter/AttackCooldown.just_finished:
-			$FrameCounter/AttackTargeting.start()
 			
 		if $FrameCounter/AttackTargeting.just_finished:
 			$AnimatedSprite.play("attack")
@@ -87,10 +84,13 @@ func _physics_process(delta):
 			var collision = get_world_2d().direct_space_state.intersect_ray(global_position, attack_position, [self], 2)
 			if collision:
 				var player = collision.collider
-				var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
-				if player.hurt(damage):
-					player.add_knockback(global_position.direction_to(player.global_position)*600, true)
-			
+				var ap = AttackProperties.new(self, 1, global_position.direction_to(player.global_position)*600)
+				player.hurt(ap)
+				$FrameCounter/AttackCooldown.start()
+				
+		if !($FrameCounter/AttackCooldown.active() or $FrameCounter/AttackTargeting.active() or $FrameCounter/Attack.active()):
+			$FrameCounter/AttackTargeting.start()
+				
 func _draw():
 	if target != null:
 		if $FrameCounter/AttackTargeting.active():

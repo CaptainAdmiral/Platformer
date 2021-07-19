@@ -7,7 +7,6 @@ var acceleration = 50
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	set_max_health(6)
-	
 	set_facing(facing)
 
 
@@ -29,6 +28,4 @@ func _physics_process(delta):
 
 
 func _on_AttackHitbox_body_entered(player):
-	var damage = Damage.new(self, 1, Damage.TYPE.PHYSICAL)
-	if player.hurt(damage):
-		player.add_knockback(Vector2(global_position.direction_to(player.global_position).x*600, -600), true)
+	var ap = AttackProperties.new(self, 1, AttackProperties.TYPE.PHYSICAL)

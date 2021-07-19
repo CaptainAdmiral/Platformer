@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/DroneRange.png-a242e52b7c190d83c86c9188795e3d60.stex"
+path="res://.import/DroneRange.png-b89355ca5a553b0220f09403e7cefe20.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Living/Enemies/Plasma_Drone/Assets/DroneRange.png"
-dest_files=[ "res://.import/DroneRange.png-a242e52b7c190d83c86c9188795e3d60.stex" ]
+source_file="res://Living/Enemies/PlasmaDrone/Assets/DroneRange.png"
+dest_files=[ "res://.import/DroneRange.png-b89355ca5a553b0220f09403e7cefe20.stex" ]
 
 [params]
 

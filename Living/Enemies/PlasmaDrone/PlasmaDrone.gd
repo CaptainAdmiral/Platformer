@@ -1,8 +1,10 @@
 extends Living
 
-const RANGE_DISPLAY_DIST = 800
+const RANGE_DISPLAY_DIST = 1000
 
-var target = null
+var deagro_range = 0
+
+var target : Node2D = null
 var shoot_queue = []
 
 func _ready():
@@ -10,9 +12,14 @@ func _ready():
 	fall_speed = 0
 	knockback_multiplier = 0.1
 	mana_on_kill = 10
+	deagro_range = $Range/CollisionShape2D.shape.radius + 100
 
 func _physics_process(delta):
 	motion *= 0.9
+	
+	if target != null:
+		if target.global_position.distance_to(global_position) > deagro_range:
+			target = null
 	
 	if !$ChargeUp.active():
 		if $ChargeUp.just_finished:
@@ -40,7 +47,3 @@ func _on_range_entered(body):
 		target = body
 		
 		$ChargeUp.start()
-
-func _on_range_exited(body):
-	if body == target:
-		target = null
