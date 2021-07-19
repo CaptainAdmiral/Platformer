@@ -202,7 +202,7 @@ type = 1
 can_dodge = true
 can_parry = true
 
-[sub_resource type="ConvexPolygonShape2D" id=37]
+[sub_resource type="ConvexPolygonShape2D" id=45]
 points = PoolVector2Array( -20, -50, 150, -80, 200, 0, 150, 80, -20, 50, -40, 0 )
 
 [sub_resource type="SpriteFrames" id=38]
@@ -315,7 +315,7 @@ anim_offset_random = 1.0
 ]]
 collision_layer = 14
 script = ExtResource( 2 )
-HookPath = "res://Living/Player/Tools/Grappling Hook/Hook.tscn"
+hookPath = "res://Living/Player/Tools/Grappling Hook/Hook.tscn"
 
 [node name="Hitbox" type="CollisionShape2D" parent="."]
 position = Vector2( 0, 12 )
@@ -357,7 +357,7 @@ trigger_type = 1
 active = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
-shape = SubResource( 37 )
+shape = SubResource( 45 )
 
 [node name="AttackSprite" type="AnimatedSprite" parent="AttackArea"]
 position = Vector2( 98.3977, 0.868629 )
