@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
-[ext_resource path="res://Living/Enemies/PlasmaDrone/PlasmaDrone.gd" type="Script" id=1]
+[ext_resource path="res://Living/Enemies/SawDrone/SawDrone.gd" type="Script" id=1]
 [ext_resource path="res://Placeholder.png" type="Texture" id=2]
-[ext_resource path="res://Living/Enemies/PlasmaDrone/Assets/DroneRange.png" type="Texture" id=3]
-[ext_resource path="res://Util/FrameCounter.gd" type="Script" id=4]
+[ext_resource path="res://Living/Enemies/SawDrone/Assets/DroneRange.png" type="Texture" id=3]
+[ext_resource path="res://AttackProperties/Hitbox/Hitbox.gd" type="Script" id=4]
+[ext_resource path="res://Living/Enemies/SawDrone/SawAP.tres" type="Resource" id=5]
 
 [sub_resource type="CircleShape2D" id=1]
 radius = 32.0
@@ -17,7 +18,10 @@ animations = [ {
 } ]
 
 [sub_resource type="CircleShape2D" id=3]
-radius = 700.0
+radius = 600.0
+
+[sub_resource type="CircleShape2D" id=4]
+radius = 32.0
 
 [node name="Plasma_Drone" type="KinematicBody2D"]
 collision_layer = 12
@@ -32,6 +36,7 @@ scale = Vector2( 0.710849, 0.727078 )
 frames = SubResource( 2 )
 
 [node name="Range" type="Area2D" parent="."]
+visible = false
 collision_layer = 0
 collision_mask = 2
 
@@ -41,14 +46,22 @@ shape = SubResource( 3 )
 [node name="RangeIndicator" type="Sprite" parent="."]
 modulate = Color( 1, 1, 1, 0.203922 )
 position = Vector2( 3.8147e-06, -3.43323e-05 )
-scale = Vector2( 3.5, 3.5 )
+scale = Vector2( 3, 3 )
 texture = ExtResource( 3 )
 
-[node name="ChargeUp" type="Node" parent="."]
-script = ExtResource( 4 )
-activeFrames = 30
+[node name="Spinning" type="Timer" parent="."]
+process_mode = 0
+wait_time = 30.0
+one_shot = true
+__meta__ = {
+"_editor_description_": ""
+}
 
-[node name="ShootCooldown" type="Node" parent="."]
+[node name="Hitbox" type="Area2D" parent="."]
 script = ExtResource( 4 )
-activeFrames = 40
+properties = ExtResource( 5 )
+repeat_rate = 30
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox"]
+shape = SubResource( 4 )
 [connection signal="body_entered" from="Range" to="." method="_on_range_entered"]

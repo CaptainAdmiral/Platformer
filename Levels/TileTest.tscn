@@ -5,7 +5,7 @@
 [ext_resource path="res://Levels/Backgrounds/City/CityBackground.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Living/Enemies/Spider/Spider.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Living/Enemies/Drone/Drone.tscn" type="PackedScene" id=5]
-[ext_resource path="res://Living/Enemies/PlasmaDrone/PlasmaDrone.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Living/Enemies/SawDrone/SawDrone.tscn" type="PackedScene" id=6]
 [ext_resource path="res://Living/Enemies/Turret/Turret.tscn" type="PackedScene" id=7]
 
 [node name="Node2D" type="Node2D"]

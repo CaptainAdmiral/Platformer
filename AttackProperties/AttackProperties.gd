@@ -5,7 +5,7 @@ class_name AttackProperties
 enum TYPE {DIRECT, PHYSICAL, MAGIC, FIRE, ICE, GLITCH}
 
 var source : Node = null
-export var damage : int
+export(int, 0, 20) var damage : int
 export var knockback : Vector2
 export var knockback_overwrites_motion = true
 export(TYPE) var type = TYPE.PHYSICAL

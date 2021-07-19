@@ -76,7 +76,7 @@ func _physics_process(_delta):
 		prev_motion = motion
 		
 		if snap_to_ground:
-			motion = move_and_slide_with_snap(motion, Vector2(0, 100), Vector2(0, -1), true, 4, 0.79)
+			motion = move_and_slide_with_snap(motion, Vector2(0, 10), Vector2(0, -1), true, 4, 0.79)
 		else:
 			motion = move_and_slide(motion, Vector2(0, -1))
 		
